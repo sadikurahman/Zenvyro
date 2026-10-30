@@ -150,7 +150,7 @@
   function body() {
     const premium = data.users.filter(isPremium);
     return `
-      <button class="btn alt" style="width:100%;margin-bottom:12px" onclick="showSection('account')">‹ &nbsp; Back</button>
+      <button class="btn alt" style="width:100%;margin-bottom:12px" onclick="closeModal();showSection('account')">‹ &nbsp; Back</button>
       <div class="modal-list">
         <div><strong>Total Referrals</strong><span>${data.referrals}</span></div>
         <div><strong>Premium Members</strong><span>${premium.length}</span></div>
@@ -229,6 +229,8 @@
     // শুধু ব্যাকএন্ড ছাড়া টেস্টের জন্য: Pending জমা করে (আসল সিস্টেমে সার্ভার করবে)
     window.ZenvyroReferral = {
       incomeCommission, purchaseBonus,
+      count: () => data.referrals,
+      refresh: () => fetchData(),
       addPendingForTest(zeny) {
         claim.pendingIncome += Math.max(0, +zeny || 0);
         saveClaim(); refreshModal(); tick();

@@ -26,14 +26,16 @@
   }
 
   function load() {
-    const base = { tier: "Free", balance: 0, sessionEnd: null };
+    const base = { tier: "Free", balance: 0, sessionEnd: null, totalMined: 0 };
     try {
       const s = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
       if (!s) return base;
       return {
         tier: normTier(window.ZENVYRO_TIER || s.tier),
         balance: Number.isFinite(+s.balance) && +s.balance >= 0 ? +s.balance : 0,
-        sessionEnd: Number.isFinite(+s.sessionEnd) && +s.sessionEnd > 0 ? +s.sessionEnd : null
+        sessionEnd: Number.isFinite(+s.sessionEnd) && +s.sessionEnd > 0 ? +s.sessionEnd : null,
+        totalMined: Number.isFinite(+s.totalMined) && +s.totalMined >= 0 ? +s.totalMined
+          : (Number.isFinite(+s.balance) && +s.balance > 0 ? +s.balance : 0)
       };
     } catch (e) { return base; }
   }
@@ -101,6 +103,7 @@
     } else {
       const reward = RATES[state.tier];
       state.balance = Math.round((state.balance + reward) * 1e8) / 1e8;
+      state.totalMined = Math.round(((state.totalMined || 0) + reward) * 1e8) / 1e8;
       state.sessionEnd = null;
       save(); render();
       say("+" + reward.toFixed(6) + " ZENY যোগ হয়েছে");
@@ -128,6 +131,7 @@
     window.ZenvyroMining = {
       setTier(t) { state.tier = normTier(t); save(); render(); },
       addZeny(n) { n = +n; if (n > 0) { state.balance = Math.round((state.balance + n) * 1e8) / 1e8; save(); render(); } },
+      spendZeny(n) { n = +n; if (!(n > 0) || n > state.balance + 1e-12) return false; state.balance = Math.max(0, Math.round((state.balance - n) * 1e8) / 1e8); save(); render(); return true; },
       getState() { return { ...state, status: status() }; }
     };
 

@@ -292,6 +292,7 @@
 
   function init() {
     Object.assign(window, {
+      zvwClose: closeWallet,
       zvwEye: () => { hidden = !hidden; render(); },
       zvwAll: () => { showAll = !showAll; render(); },
       zvwAsset: assetDetail,
