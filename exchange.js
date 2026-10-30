@@ -1,7 +1,8 @@
 /* Zenvyro — ধাপ ৩ক: Exchange (ZENY → USDT / BTC / TON / BNB / SOL)
    শুধু JavaScript; বিদ্যমান modal ডিজাইন ব্যবহার করা হয়েছে।
    মোট ১০% ফি কাটা হয় (Exchange 3% + Network 2% + Platform 5%) এবং কনভার্টের আগেই দেখানো হয়।
-   Wallet ব্যালেন্স এখন localStorage-এ (ডেমো)। আসল কনভার্ট/ব্যালেন্স ব্যাকএন্ডে হতে হবে। */
+   Exchange এখন Request: ZENY hold হয়, Admin Accept করলে (Accept-এর সময়ের রেটে) Wallet-এ জমা, Reject করলে ZENY ফেরত।
+   Wallet ব্যালেন্স ও রিকোয়েস্ট এখন localStorage-এ (ডেমো)। আসল কনভার্ট/ব্যালেন্স ব্যাকএন্ডে হতে হবে। */
 (() => {
   "use strict";
 
@@ -59,6 +60,57 @@
     return true;
   }
 
+  // ---- Exchange Requests (ডেমো) ----
+  const RKEY = "zenvyro_exreq_v1";
+  function loadReqs() {
+    try {
+      const a = JSON.parse(localStorage.getItem(RKEY) || "[]");
+      return Array.isArray(a) ? a.filter(r => r && r.id && asset(r.asset) && +r.zeny > 0 &&
+        ["pending", "approved", "rejected"].includes(r.status)) : [];
+    } catch (e) { return []; }
+  }
+  let reqs = loadReqs();
+  const saveReqs = () => { try { localStorage.setItem(RKEY, JSON.stringify(reqs.slice(0, 100))); } catch (e) {} };
+  const heldZeny = () => reqs.filter(r => r.status === "pending").reduce((a, r) => a + +r.zeny, 0);
+  const newId = () => "EX" + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1296).toString(36).toUpperCase();
+  const when = ts => new Date(ts).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+
+  // Admin Accept: রেট Accept-এর সময়ের (priceUsdt)। আসল সিস্টেমে এটা সার্ভারে হবে।
+  function approve(id, priceUsdt) {
+    const r = reqs.find(x => x.id === id && x.status === "pending");
+    if (!r) return false;
+    const a = asset(r.asset), p = r.asset === "USDT" ? 1 : +priceUsdt;
+    if (!(p > 0)) return false;
+    const net = r.zeny * ZENY_USDT * (1 - TOTAL_FEE / 100);
+    const receive = floorTo(net / p, a.dec);
+    if (!(receive > 0)) return false;
+    credit(r.asset, receive, net);
+    r.status = "approved"; r.receive = receive; r.rate = p; r.decided = Date.now();
+    saveReqs(); renderReqs(); update();
+    return true;
+  }
+  // Admin Reject: ZENY ফেরত
+  function reject(id) {
+    const r = reqs.find(x => x.id === id && x.status === "pending");
+    if (!r) return false;
+    if (window.ZenvyroMining) window.ZenvyroMining.addZeny(r.zeny);
+    r.status = "rejected"; r.decided = Date.now();
+    saveReqs(); renderReqs(); update();
+    return true;
+  }
+
+  function reqRows() {
+    if (!reqs.length) return '<div><strong>কোনো রিকোয়েস্ট নেই</strong><span>—</span></div>';
+    return reqs.slice(0, 20).map(r => {
+      const a = asset(r.asset);
+      const st = r.status === "pending" ? "⏳ Pending"
+        : r.status === "approved" ? "✓ " + (+r.receive).toFixed(a.dec) + " " + r.asset
+        : "✕ Rejected · ZENY ফেরত";
+      return `<div><strong>${(+r.zeny).toFixed(6)} ZENY → ${r.asset}<br><small style="color:#aeb9ff;font-weight:500">${when(r.created)} · ${r.id}</small></strong><span>${st}</span></div>`;
+    }).join("");
+  }
+  function renderReqs() { const el = $("exReqs"); if (el) el.innerHTML = reqRows(); }
+
   // ---- Prices (USDT-এ) ----
   let prices = { USDT: 1 }, priceState = "idle", priceTime = 0, sel = "USDT";
 
@@ -103,6 +155,7 @@
     if (!$("exAmount")) return;
     const c = calc(), bal = zenyBalance();
     $("exAvail").textContent = bal.toFixed(6) + " ZENY";
+    if ($("exHeld")) $("exHeld").textContent = heldZeny().toFixed(6) + " ZENY";
 
     let rate;
     if (sel === "USDT") rate = "1 ZENY = " + ZENY_USDT + " USDT (ফি কাটার আগে)";
@@ -134,7 +187,7 @@
     const tiles = ASSETS.map(a =>
       `<button id="exTile_${a.sym}" onclick="exSelect('${a.sym}')" style="border:1px solid #302864;background:#0b0a23;color:#fff;border-radius:16px;padding:12px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800;font-size:15px"><span style="font-size:24px;color:#b28aff;line-height:1">${a.icon}</span>${a.sym}<small style="color:#aeb9ff;font-weight:500;font-size:11px">${a.name}</small></button>`).join("");
     return `
-      <div class="modal-list"><div><strong>Mining Available Balance</strong><span id="exAvail">0.000000 ZENY</span></div></div>
+      <div class="modal-list"><div><strong>Mining Available Balance</strong><span id="exAvail">0.000000 ZENY</span></div><div><strong>On hold (Pending requests)</strong><span id="exHeld">0.000000 ZENY</span></div></div>
       <label class="modal-label" for="exAmount">From · ZENY (Mining Balance)</label>
       <input class="modal-field" id="exAmount" type="number" inputmode="decimal" step="any" min="0" placeholder="0.000000" oninput="exUpdate()">
       <button class="btn alt" style="width:100%;margin-top:8px;padding:10px" onclick="exMax()">Max</button>
@@ -146,8 +199,10 @@
       <div class="modal-list" id="exRows"></div>
       <label class="modal-label">You receive (estimated)</label>
       <div class="balance-num" style="font-size:30px;margin:0" id="exReceive">—</div>
-      <button class="btn" id="exConfirm" style="width:100%;margin-top:14px" onclick="exConfirm()">Confirm Exchange</button>
-      <div class="modal-note">ZENY রেট প্ল্যাটফর্ম-নির্ধারিত রেফারেন্স রেট। BTC/TON/BNB/SOL-এর পরিমাণ বাজারদর (≈USD) থেকে হিসাব করা, চূড়ান্ত রেট ও ব্যালেন্স ব্যাকএন্ডে যাচাই হবে। এখন Wallet-এ জমা ডেমো মোডে আছে।</div>`;
+      <button class="btn" id="exConfirm" style="width:100%;margin-top:14px" onclick="exConfirm()">Request Exchange</button>
+      <label class="modal-label">My Requests</label>
+      <div class="modal-list" id="exReqs">${reqRows()}</div>
+      <div class="modal-note">Request পাঠালে আপনার ZENY hold হয়ে যায়। Admin Accept করলে Accept-এর সময়ের বাজারদরে (ফি ১০% কেটে) Wallet-এ জমা হবে; Reject করলে ZENY ফেরত আসবে। এখানকার পরিমাণ আনুমানিক। ZENY রেট প্ল্যাটফর্ম-নির্ধারিত রেফারেন্স রেট। Request ও Wallet এখন ডেমো মোডে, আসল Accept সার্ভার/Admin প্যানেলে হবে।</div>`;
   }
 
   function openExchange() {
@@ -162,6 +217,8 @@
   function init() {
     renderHome();
     window.ZenvyroWallet = { credit, totalUsdt: () => wallet._val };
+    // শুধু ডেমো টেস্টের জন্য (Admin প্যানেল/ব্যাকএন্ড না থাকায)। আসল সিস্টেমে Accept/Reject সার্ভারে যাচাই হয়ে হবে।
+    window.ZenvyroExchange = { requests: () => reqs.slice(), approve, reject };
     window.exSelect = sym => { if (asset(sym)) { sel = sym; update(); } };
     window.exUpdate = update;
     window.exMax = () => { const el = $("exAmount"); if (el) { el.value = zenyBalance().toFixed(6); update(); } };
@@ -169,14 +226,16 @@
       const c = calc();
       if (!(c.amount > 0) || c.receive === null || c.receive <= 0) return;
       if (c.amount > zenyBalance() + 1e-12) { say("ব্যালেন্সে এতো ZENY নেই"); return; }
-      const msg = "Exchange " + c.amount.toFixed(6) + " ZENY → " + c.receive.toFixed(c.a.dec) + " " + sel +
-                  "\nTotal fees: " + TOTAL_FEE + "% (" + (c.gross - c.net).toFixed(2) + " USDT)\n\nConfirm?";
+      const msg = "Request: " + c.amount.toFixed(6) + " ZENY → " + sel +
+                  "\nআনুমানিক: " + c.receive.toFixed(c.a.dec) + " " + sel +
+                  "\nTotal fees: " + TOTAL_FEE + "%\nরেট Admin Accept-এর সময়ের হবে; ZENY এখন hold হবে।\n\nRequest পাঠাবেন?";
       if (!window.confirm(msg)) return;
-      if (!window.ZenvyroMining || !window.ZenvyroMining.spendZeny(c.amount)) { say("Exchange করা যায়নি"); return; }
-      credit(sel, c.receive, c.net);
+      if (!window.ZenvyroMining || !window.ZenvyroMining.spendZeny(c.amount)) { say("Request করা যায়নি"); return; }
+      reqs.unshift({ id: newId(), zeny: c.amount, asset: sel, status: "pending", estimate: c.receive, receive: 0, created: Date.now() });
+      saveReqs();
       $("exAmount").value = "";
-      update();
-      say("+" + c.receive.toFixed(c.a.dec) + " " + sel + " Wallet-এ যোগ হয়েছে");
+      renderReqs(); update();
+      say("Request পাঠানো হয়েছে — ZENY hold করা হয়েছে");
     };
 
     const orig = window.showSection;
