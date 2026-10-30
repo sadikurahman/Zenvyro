@@ -30,12 +30,19 @@
 
   // ---- Wallet store (ডেমো) ----
   function loadWallet() {
-    const w = { _val: 0 }; ASSETS.forEach(a => (w[a.sym] = 0));
+    const w = { _val: 0, _v: {} }; ASSETS.forEach(a => { w[a.sym] = 0; w._v[a.sym] = 0; });
     try {
       const s = JSON.parse(localStorage.getItem(WKEY) || "null");
       if (s && Number.isFinite(+s._val) && +s._val > 0) w._val = +s._val;
+      if (s && s._v) ASSETS.forEach(a => { if (Number.isFinite(+s._v[a.sym]) && +s._v[a.sym] > 0) w._v[a.sym] = +s._v[a.sym]; });
       if (s) ASSETS.forEach(a => { if (Number.isFinite(+s[a.sym]) && +s[a.sym] > 0) w[a.sym] = +s[a.sym]; });
     } catch (e) {}
+    const sumV = ASSETS.reduce((t, a) => t + w._v[a.sym], 0);
+    if (w._val > 0 && sumV === 0) { // পুরনো ডেমো ডেটা: মূল্য ভাগ করে নাও
+      w._v.USDT = Math.min(w.USDT, w._val);
+      const rest = w._val - w._v.USDT, others = ASSETS.filter(a => a.sym !== "USDT" && w[a.sym] > 0);
+      others.forEach(a => (w._v[a.sym] = rest / others.length));
+    }
     return w;
   }
   let wallet = loadWallet();
@@ -55,7 +62,20 @@
     if (!asset(sym) || !(amount > 0)) return false;
     const val = +usdtValue > 0 ? +usdtValue : (sym === "USDT" ? amount : 0);
     wallet[sym] = Math.round((wallet[sym] + amount) * 1e8) / 1e8;
+    wallet._v[sym] = Math.round((wallet._v[sym] + val) * 100) / 100;
     wallet._val = Math.round((wallet._val + val) * 100) / 100;
+    saveWallet(); renderHome();
+    return true;
+  }
+
+  // Wallet থেকে কমানো (Withdraw অনুমোদন / Transfer)
+  function debit(sym, amount) {
+    amount = +amount;
+    if (!asset(sym) || !(amount > 0) || amount > wallet[sym] + 1e-12) return false;
+    const out = wallet[sym] > 0 ? wallet._v[sym] * Math.min(1, amount / wallet[sym]) : 0;
+    wallet[sym] = Math.max(0, Math.round((wallet[sym] - amount) * 1e8) / 1e8);
+    wallet._v[sym] = Math.max(0, Math.round((wallet._v[sym] - out) * 100) / 100);
+    wallet._val = Math.max(0, Math.round((wallet._val - out) * 100) / 100);
     saveWallet(); renderHome();
     return true;
   }
@@ -86,6 +106,7 @@
     if (!(receive > 0)) return false;
     credit(r.asset, receive, net);
     r.status = "approved"; r.receive = receive; r.rate = p; r.decided = Date.now();
+    if (window.ZenvyroTx) window.ZenvyroTx.update(r.id, { status: "completed", amount: receive });
     saveReqs(); renderReqs(); update();
     return true;
   }
@@ -95,6 +116,7 @@
     if (!r) return false;
     if (window.ZenvyroMining) window.ZenvyroMining.addZeny(r.zeny);
     r.status = "rejected"; r.decided = Date.now();
+    if (window.ZenvyroTx) window.ZenvyroTx.update(r.id, { status: "rejected" });
     saveReqs(); renderReqs(); update();
     return true;
   }
@@ -216,7 +238,13 @@
 
   function init() {
     renderHome();
-    window.ZenvyroWallet = { credit, totalUsdt: () => wallet._val };
+    window.ZenvyroWallet = {
+      credit, debit, totalUsdt: () => wallet._val,
+      total: () => wallet._val,
+      balances: () => { const o = {}; ASSETS.forEach(a => (o[a.sym] = { amount: wallet[a.sym], value: wallet._v[a.sym] })); return o; },
+      prices: () => (priceState === "ok" ? Object.assign({}, prices) : {}),
+      ensurePrices: () => loadPrices()
+    };
     // শুধু ডেমো টেস্টের জন্য (Admin প্যানেল/ব্যাকএন্ড না থাকায)। আসল সিস্টেমে Accept/Reject সার্ভারে যাচাই হয়ে হবে।
     window.ZenvyroExchange = { requests: () => reqs.slice(), approve, reject };
     window.exSelect = sym => { if (asset(sym)) { sel = sym; update(); } };
@@ -233,6 +261,7 @@
       if (!window.ZenvyroMining || !window.ZenvyroMining.spendZeny(c.amount)) { say("Request করা যায়নি"); return; }
       reqs.unshift({ id: newId(), zeny: c.amount, asset: sel, status: "pending", estimate: c.receive, receive: 0, created: Date.now() });
       saveReqs();
+      if (window.ZenvyroTx) window.ZenvyroTx.log({ id: reqs[0].id, kind: "exchange", sym: sel, amount: c.receive, status: "pending", sub: "ZENY → " + sel });
       $("exAmount").value = "";
       renderReqs(); update();
       say("Request পাঠানো হয়েছে — ZENY hold করা হয়েছে");
