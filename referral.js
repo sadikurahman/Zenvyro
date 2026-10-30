@@ -101,7 +101,7 @@
       (hasPending() ? "পরবর্তী Claim: " : "জমা নেই · পরবর্তী Claim: ") + hms(nextSlot(now) - now) + " পরে (রাত ১০টা)";
   }
 
-  let data = { referrals: 0, incomeEarned: 0, bonusEarned: 0, history: [], loaded: false, error: false };
+  let data = { referrals: 0, users: [], incomeEarned: 0, bonusEarned: 0, history: [], loaded: false, error: false };
 
   async function fetchData() {
     const url = window.ZENVYRO_REFERRAL_ENDPOINT;
@@ -110,8 +110,14 @@
       const res = await fetch(url, { headers: { Accept: "application/json" }, cache: "no-store" });
       if (!res.ok) throw new Error("bad status");
       const j = await res.json();
+      const list = Array.isArray(j.referrals) ? j.referrals : (Array.isArray(j.referredUsers) ? j.referredUsers : []);
       data = {
-        referrals: Math.max(0, +j.referrals || 0),
+        referrals: Math.max(0, +j.referralCount || (typeof j.referrals === "number" ? j.referrals : 0) || list.length),
+        users: list.slice(0, 200).map(u => ({
+          name: String(u.name || "User"),
+          pack: String(u.pack || "Free").replace(/\s*pack$/i, ""),
+          joined: String(u.joined || "")
+        })),
         incomeEarned: Math.max(0, +j.incomeEarned || 0),
         bonusEarned: Math.max(0, +j.bonusEarned || 0),
         pendingIncome: Math.max(0, +j.pendingIncome || 0),
@@ -133,13 +139,22 @@
     }).join("");
   }
 
+  const isPremium = u => !/^free$/i.test(u.pack);
+
+  function userRows(list, emptyText) {
+    if (data.error) return '<div><strong>ডেটা লোড করা যায়নি</strong><span>পরে আবার চেষ্টা করুন</span></div>';
+    if (!list.length) return `<div><strong>${emptyText}</strong><span>—</span></div>`;
+    return list.map(u => `<div><strong>${esc(u.name)}${u.joined ? '<br><small style="color:#aeb9ff;font-weight:500">' + esc(u.joined) + "</small>" : ""}</strong><span>${esc(u.pack)}${isPremium(u) ? " ✦" : ""}</span></div>`).join("");
+  }
+
+  // Refer পেজ — কমিশন রেট এখানে দেখানো হয় না (রেট শুধু ভেতরের হিসাবে)
   function body() {
-    const tier = currentTier();
-    const rows = Object.keys(INCOME_COMMISSION).map(p =>
-      `<div><strong>${p}${p === tier ? " ✦" : ""}</strong><span>${INCOME_COMMISSION[p]}% income${PACK_PRICE[p] ? " · $" + (PACK_PRICE[p] * PURCHASE_BONUS_PCT / 100).toFixed(2) + " bonus" : ""}</span></div>`).join("");
+    const premium = data.users.filter(isPremium);
     return `
+      <button class="btn alt" style="width:100%;margin-bottom:12px" onclick="showSection('account')">‹ &nbsp; Back</button>
       <div class="modal-list">
         <div><strong>Total Referrals</strong><span>${data.referrals}</span></div>
+        <div><strong>Premium Members</strong><span>${premium.length}</span></div>
         <div><strong>Income Commission</strong><span>${data.incomeEarned.toFixed(6)} ZENY</span></div>
         <div><strong>Purchase Bonus</strong><span>${(data.bonusEarned + claim.claimedBonus).toFixed(2)} USDT</span></div>
         <div><strong>Pending (Claim বাকি)</strong><span>${claim.pendingIncome.toFixed(6)} ZENY · ${claim.pendingBonus.toFixed(2)} USDT</span></div>
@@ -155,11 +170,29 @@
         <button class="btn alt" onclick="copyReferral('link')">Copy link</button>
       </div>
       <button class="btn" style="width:100%;margin-top:10px" onclick="shareReferral()">Share</button>
-      <label class="modal-label">Commission rates (আপনার প্যাক: ${esc(tier)})</label>
-      <div class="modal-list">${rows}</div>
+      <label class="modal-label">আপনার রেফার করা ইউজার (${data.users.length})</label>
+      <div class="modal-list" id="refUsers">${userRows(data.users, "No referrals yet")}</div>
+      <label class="modal-label">Premium Pack কিনেছে (${premium.length})</label>
+      <div class="modal-list" id="refPremium">${userRows(premium, "এখনো কেউ Premium কেনেনি")}</div>
       <label class="modal-label">Commission history</label>
       <div class="modal-list" id="refHistory">${historyHtml()}</div>
-      <div class="modal-note">Income commission: রেফারি যোগ দেওয়ার সময়ের আপনার প্যাক অনুযায়ী % লক হয়, রেফারির ইনকাম থেকে কিছু কাটা যায় না। Purchase bonus: রেফারির প্রথম প্যাক কেনায় একবার ৫%। রেফারেল ইনকাম ও বোনাস প্রতি রাত ১০টায় (বাংলাদেশ সময়) একসাথে Claim করা যায়; Claim না করলে জমা থাকে। এগুলো প্রস্তাবিত সেটিং, নিশ্চিত আয় নয়; ব্যাকএন্ড যুক্ত না হওয়া পর্যন্ত কিছু বাস্তবে যোগ হয় না।</div>`;
+      <div class="modal-note">রেফারেল ইনকাম ও বোনাস প্রতি রাত ১০টায় (বাংলাদেশ সময়) একসাথে Claim করা যায়; Claim না করলে জমা থাকে। রেফারেল আয় নিশ্চিত নয়, এবং ব্যাকএন্ড যুক্ত না হওয়া পর্যন্ত কিছু বাস্তবে যোগ হয় না।</div>`;
+  }
+
+  // Account পেজ — Profile, Membership আর Refer অপশন
+  function accountBody() {
+    return `
+      <div class="modal-list">
+        <div><strong>Profile</strong><span>Sadiqur Rahman</span></div>
+        <div><strong>Membership</strong><span>${esc(currentTier())} Pack</span></div>
+      </div>
+      <button class="btn" style="width:100%;margin-top:14px" onclick="openReferral()">👥 &nbsp; Refer &amp; Earn &nbsp; ›</button>`;
+  }
+
+  function openReferral() {
+    window.openModal("Refer & Earn", body());
+    tick();
+    fetchData().then(() => { refreshModal(); tick(); });
   }
 
   async function copyText(text, okMsg) {
@@ -173,6 +206,7 @@
 
   function init() {
     window.claimReferral = doClaim;
+    window.openReferral = openReferral;
     setInterval(tick, 1000);
     window.copyReferral = kind =>
       kind === "link" ? copyText(myLink(), "Referral link copied")
@@ -187,9 +221,7 @@
     const orig = window.showSection;
     window.showSection = function (name) {
       if (name === "account" && typeof window.openModal === "function") {
-        window.openModal("Referral & Account", body());
-        tick();
-        fetchData().then(() => { refreshModal(); tick(); });
+        window.openModal("Account", accountBody());
         return;
       }
       return orig.apply(this, arguments);
