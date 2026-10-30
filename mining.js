@@ -127,6 +127,7 @@
     // ভবিষ্যতে পেমেন্ট/ব্যাকএন্ড যুক্ত হলে এখান দিয়ে tier সেট হবে
     window.ZenvyroMining = {
       setTier(t) { state.tier = normTier(t); save(); render(); },
+      addZeny(n) { n = +n; if (n > 0) { state.balance = Math.round((state.balance + n) * 1e8) / 1e8; save(); render(); } },
       getState() { return { ...state, status: status() }; }
     };
 

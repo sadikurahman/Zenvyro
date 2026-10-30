@@ -87,4 +87,5 @@ function walletAction(action){toast(action+' is not available until payment inte
 function copyReferral(){const code='ZENV-NEW-MEMBER';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>toast('Referral code copied')).catch(()=>toast('Referral code: '+code))}else{toast('Referral code: '+code)}}
 </script>  <script src="cooldown.js" defer></script>
 <script src="mining.js" defer></script>
+<script src="referral.js" defer></script>
 </body></html>
