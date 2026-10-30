@@ -56,7 +56,7 @@
     return slot;
   }
   const nextSlot = now => latestSlot(now) + DAY_MS;
-  const hasPending = () => claim.pendingIncome > 0 || claim.pendingBonus > 0;
+  const hasPending = () => claim.pendingIncome > 0; // শুধু Income Commission (ZENY); Purchase Bonus সরাসরি Wallet-এ যায়
   // জমা থাকলে এবং শেষ ক্লেইমের পর নতুন ১০টা পার হলে ক্লেইম করা যাবে
   const canClaim = () => hasPending() && claim.lastSlot < latestSlot(Date.now());
   const hms = ms => {
@@ -66,22 +66,21 @@
 
   async function doClaim() {
     if (!canClaim()) { say(hasPending() ? "পরবর্তী রাত ১০টায় Claim করা যাবে" : "Claim করার মতো কিছু নেই"); return; }
-    let inc = claim.pendingIncome, bon = claim.pendingBonus;
+    let inc = claim.pendingIncome;
     const url = window.ZENVYRO_REFERRAL_CLAIM_ENDPOINT;
     if (url) { // আসল সিস্টেমে সার্ভারই পরিমাণ ও সময় ঠিক করবে
       try {
         const res = await fetch(url, { method: "POST", headers: { Accept: "application/json" } });
         if (!res.ok) throw new Error("claim failed");
         const j = await res.json();
-        inc = Math.max(0, +j.income || 0); bon = Math.max(0, +j.bonus || 0);
+        inc = Math.max(0, +j.income || 0);
       } catch (e) { say("Claim করা যায়নি, পরে আবার চেষ্টা করুন"); return; }
     }
     if (window.ZenvyroMining && inc > 0) window.ZenvyroMining.addZeny(inc);
-    claim.claimedBonus = Math.round((claim.claimedBonus + bon) * 100) / 100;
-    claim.pendingIncome = 0; claim.pendingBonus = 0;
+    claim.pendingIncome = 0;
     claim.lastSlot = latestSlot(Date.now());
     saveClaim();
-    say("Claimed: +" + inc.toFixed(6) + " ZENY" + (bon > 0 ? " · +" + bon.toFixed(2) + " USDT" : ""));
+    say("+" + inc.toFixed(6) + " ZENY Exchange ব্যালেন্সে যোগ হয়েছে");
     refreshModal();
   }
 
@@ -125,7 +124,7 @@
         history: Array.isArray(j.history) ? j.history.slice(0, 50) : [],
         loaded: true, error: false
       };
-      claim.pendingIncome = data.pendingIncome; claim.pendingBonus = data.pendingBonus; saveClaim();
+      claim.pendingIncome = data.pendingIncome; saveClaim();
     } catch (e) { data.loaded = true; data.error = true; }
   }
 
@@ -135,7 +134,7 @@
     return data.history.map(h => {
       const isBonus = h.type === "bonus";
       const amt = (+h.amount || 0).toFixed(isBonus ? 2 : 6) + (isBonus ? " USDT" : " ZENY");
-      return `<div><strong>${isBonus ? "Purchase Bonus" : "Income Commission"}<br><small style="color:#aeb9ff;font-weight:500">${esc(h.from || "User")} · ${esc(h.date || "")}</small></strong><span>+${amt}</span></div>`;
+      return `<div><strong>${isBonus ? "Purchase Bonus · Wallet-এ জমা" : "Income Commission"}<br><small style="color:#aeb9ff;font-weight:500">${esc(h.from || "User")} · ${esc(h.date || "")}</small></strong><span>+${amt}</span></div>`;
     }).join("");
   }
 
@@ -156,8 +155,8 @@
         <div><strong>Total Referrals</strong><span>${data.referrals}</span></div>
         <div><strong>Premium Members</strong><span>${premium.length}</span></div>
         <div><strong>Income Commission</strong><span>${data.incomeEarned.toFixed(6)} ZENY</span></div>
-        <div><strong>Purchase Bonus</strong><span>${(data.bonusEarned + claim.claimedBonus).toFixed(2)} USDT</span></div>
-        <div><strong>Pending (Claim বাকি)</strong><span>${claim.pendingIncome.toFixed(6)} ZENY · ${claim.pendingBonus.toFixed(2)} USDT</span></div>
+        <div><strong>Purchase Bonus (Wallet-এ)</strong><span>${data.bonusEarned.toFixed(2)} USDT</span></div>
+        <div><strong>Pending (Claim বাকি)</strong><span>${claim.pendingIncome.toFixed(6)} ZENY</span></div>
       </div>
       <button class="btn" id="refClaimBtn" style="width:100%;margin-top:12px" onclick="claimReferral()">🎁 &nbsp; Claim Referral Income</button>
       <div class="modal-note" id="refClaimInfo" style="margin-top:8px"></div>
@@ -176,7 +175,7 @@
       <div class="modal-list" id="refPremium">${userRows(premium, "এখনো কেউ Premium কেনেনি")}</div>
       <label class="modal-label">Commission history</label>
       <div class="modal-list" id="refHistory">${historyHtml()}</div>
-      <div class="modal-note">রেফারেল ইনকাম ও বোনাস প্রতি রাত ১০টায় (বাংলাদেশ সময়) একসাথে Claim করা যায়; Claim না করলে জমা থাকে। রেফারেল আয় নিশ্চিত নয়, এবং ব্যাকএন্ড যুক্ত না হওয়া পর্যন্ত কিছু বাস্তবে যোগ হয় না।</div>`;
+      <div class="modal-note">রেফারেল Income Commission প্রতি রাত ১০টায় (বাংলাদেশ সময়) Claim করা যায় এবং ZENY হিসেবে Exchange ব্যালেন্সে যোগ হয়; Claim না করলে জমা থাকে। Purchase Bonus রেফারির প্রথম প্যাক কেনায় একবার সরাসরি Wallet-এ জমা হয়। রেফারেল আয় নিশ্চিত নয়, এবং ব্যাকএন্ড যুক্ত না হওয়া পর্যন্ত কিছু বাস্তবে যোগ হয় না।</div>`;
   }
 
   // Account পেজ — Profile, Membership আর Refer অপশন
@@ -230,9 +229,8 @@
     // শুধু ব্যাকএন্ড ছাড়া টেস্টের জন্য: Pending জমা করে (আসল সিস্টেমে সার্ভার করবে)
     window.ZenvyroReferral = {
       incomeCommission, purchaseBonus,
-      addPendingForTest(zeny, usdt) {
+      addPendingForTest(zeny) {
         claim.pendingIncome += Math.max(0, +zeny || 0);
-        claim.pendingBonus += Math.max(0, +usdt || 0);
         saveClaim(); refreshModal(); tick();
       }
     };
