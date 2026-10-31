@@ -1,7 +1,7 @@
-/* Zenvyro — ধাপ ১: Mining session (1 hour) + Claim Reward
-   শুধু JavaScript লজিক। HTML/CSS ডিজাইনে কোনো পরিবর্তন নেই।
-   ডেটা এখন localStorage-এ থাকে (ডেমো/টেস্ট)। এটা ব্রাউজারে সম্পাদনযোগ্য,
-   তাই রিয়েল ব্যালেন্স ও পেমেন্টের জন্য ব্যাকএন্ডে যাচাই করতে হবে। */
+/* Zenvyro — Step 1: Mining session (1 hour) + Claim Reward
+   JavaScript logic only. No changes to the HTML/CSS design.
+   Data is kept in localStorage for now (demo/testing). It is editable in the browser,
+   so real balances and payments must be verified on a backend. */
 (() => {
   "use strict";
 
@@ -14,7 +14,7 @@
   };
   const SESSION_MS = 60 * 60 * 1000;
   const STORE_KEY = "zenvyro_mining_v1";
-  const ZENY_TO_USDT = 3; // শুধু reference
+  const ZENY_TO_USDT = 3; // reference only
 
   const $ = id => document.getElementById(id);
 
@@ -80,13 +80,24 @@
     if (timeEl) timeEl.textContent = mmss(remaining);
     if ($("progressText")) $("progressText").textContent = Math.floor(pct) + "%";
     if ($("progressBar")) $("progressBar").style.width = pct + "%";
-    if ($("reward")) $("reward").textContent = (rate * 24).toFixed(4); // দৈনিক রেট (প্ল্যান অনুযায়ী)
+    if ($("reward")) $("reward").textContent = (rate * 24).toFixed(4); // daily rate (per plan)
 
     const bal = state.balance;
     if ($("coinBalance")) {
       $("coinBalance").textContent = bal.toFixed(6);
       const cap = $("coinBalance").parentElement.querySelector("small");
       if (cap) cap.textContent = "≈ " + (bal * ZENY_TO_USDT).toFixed(2) + " USDT · reference only";
+    }
+    // Home: big balance in ZENY, small dollar equivalent beside it
+    const hb = document.querySelector(".balance .balance-num");
+    if (hb) {
+      const h = bal.toFixed(6) + " <span>ZENY</span> <small style=\"font-size:15px;color:#b8c1ff;font-weight:500;letter-spacing:0\">≈ $" + (bal * ZENY_TO_USDT).toFixed(2) + "</small>";
+      if (hb.dataset.zv !== h) { hb.dataset.zv = h; hb.innerHTML = h; }
+    }
+    const hg = document.querySelector(".balance .gain");
+    if (hg) {
+      const g = "↗ " + (state.totalMined || 0).toFixed(6) + " ZENY <small>(Total mined)</small>";
+      if (hg.dataset.zv !== g) { hg.dataset.zv = g; hg.innerHTML = g; }
     }
     if ($("cdCurrentBalance")) $("cdCurrentBalance").textContent = bal.toFixed(6);
     if ($("walletZeny")) $("walletZeny").textContent = bal.toFixed(6) + " ZENY";
@@ -97,27 +108,27 @@
     if (st === "idle") {
       state.sessionEnd = Date.now() + SESSION_MS;
       save(); render();
-      say("১ ঘণ্টার মাইনিং সেশন শুরু হয়েছে");
+      say("1-hour mining session started");
     } else if (st === "running") {
-      say("সেশন চলছে — ১ ঘণ্টা শেষ হলে Claim করতে পারবেন");
+      say("Session in progress — you can claim after 1 hour");
     } else {
       const reward = RATES[state.tier];
       state.balance = Math.round((state.balance + reward) * 1e8) / 1e8;
       state.totalMined = Math.round(((state.totalMined || 0) + reward) * 1e8) / 1e8;
       state.sessionEnd = null;
       save(); render();
-      say("+" + reward.toFixed(6) + " ZENY যোগ হয়েছে");
+      say("+" + reward.toFixed(6) + " ZENY added");
     }
   }
 
   function init() {
-    window.toggleMining = handleButton; // Start/Claim বাটন
+    window.toggleMining = handleButton; // Start/Claim button
 
-    // "Pause" বাটন আগে toggleMining কল করত; ১ ঘণ্টার সেশনে pause নেই
+    // The "Pause" button used to call toggleMining; a 1-hour session has no pause
     const pause = document.querySelector(".mining-buttons .btn.alt");
-    if (pause) pause.onclick = () => say("১ ঘণ্টার সেশন মাঝপথে pause করা যায় না");
+    if (pause) pause.onclick = () => say("A 1-hour session can't be paused");
 
-    // Wallet modal খুললে ZENY ব্যালেন্স আপডেট
+    // Update the ZENY balance when the Wallet modal opens
     const origShow = window.showSection;
     if (typeof origShow === "function") {
       window.showSection = function (name) {
@@ -127,7 +138,7 @@
       };
     }
 
-    // ভবিষ্যতে পেমেন্ট/ব্যাকএন্ড যুক্ত হলে এখান দিয়ে tier সেট হবে
+    // Once payments/backend are connected, the tier is set from here
     window.ZenvyroMining = {
       setTier(t) { state.tier = normTier(t); save(); render(); },
       addZeny(n) { n = +n; if (n > 0) { state.balance = Math.round((state.balance + n) * 1e8) / 1e8; save(); render(); } },

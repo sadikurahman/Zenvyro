@@ -1,8 +1,8 @@
-/* Zenvyro — ধাপ ৩খ: Wallet পেজ (Deposit / Withdraw / Transfer / My Assets / Recent Transactions)
-   শুধু JavaScript; স্টাইল #zvWallet-এর ভেতরে সীমাবদ্ধ, বাকি পেজের CSS অপরিবর্তিত।
-   - Deposit ও Withdraw: Request হয়, Admin Accept/Reject করবে।
-   - Transfer: ইউজার থেকে ইউজারে সাথে সাথে, Admin-এর ভূমিকা নেই।
-   ডেটা এখন localStorage-এ (ডেমো)। আসল ব্যালেন্স/অনুমোদন/ট্রান্সফার সার্ভারে যাচাই হতে হবে। */
+/* Zenvyro — Step 3b: Wallet page (Deposit / Withdraw / Transfer / My Assets / Recent Transactions)
+   JavaScript only; styles are scoped to #zvWallet, the rest of the page CSS is unchanged.
+   - Deposit and Withdraw: requests that an admin accepts/rejects.
+   - Transfer: user to user, instant, no admin involvement.
+   Data is in localStorage for now (demo). Real balances/approvals/transfers must be verified on a server. */
 (() => {
   "use strict";
 
@@ -50,7 +50,7 @@
   }
   const zenyBal = () => (window.ZenvyroMining ? window.ZenvyroMining.getState().balance : 0);
 
-  // ---- CSS (শুধু #zvWallet-এর জন্য) ----
+  // ---- CSS (only for #zvWallet) ----
   const css = `
 #zvWallet{position:fixed;inset:0;z-index:4;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;padding:calc(14px + env(safe-area-inset-top,0px)) 14px 130px;background:radial-gradient(ellipse at 50% 0,#2b1475 0,#0b0824 46%,#050511 100%);color:#fff}
 #zvWallet.open{display:block}
@@ -110,7 +110,7 @@
   let hidden = false, showAll = false, root = null;
   const mask = t => (hidden ? "••••" : t);
 
-  // সর্বোচ্চ ৮/৬ দশমিক, শেষের শূন্য ছেঁটে (কমপক্ষে ২ ঘর)
+  // up to 8/6 decimals, trailing zeros trimmed (at least 2 places)
   const fmtAmt = (n, a) => { let x = (+n).toFixed(a.dec > 6 ? 8 : 6).replace(/0+$/, ""); const d = x.split(".")[1] || ""; return d.length < 2 ? (+n).toFixed(2) : x; };
 
   function txRow(t) {
@@ -156,7 +156,7 @@
         <button onclick="zvwTransferForm()"><span class="ai">⇄</span>Transfer<small>Move Funds</small></button></div>
       <div class="card"><div class="hd"><span class="hi">▦</span><h3>My Assets</h3><div class="tv">Total Value<b>${mask(usd(total))}</b></div></div>${assets}</div>
       <div class="card"><div class="hd"><span class="hi">🕒</span><h3>Recent Transactions</h3><a onclick="zvwAll()" style="cursor:pointer">${showAll ? "Show Less" : "View All"} ›</a></div>
-        ${list.length ? list.map(txRow).join("") : '<div class="empty">এখনো কোনো লেনদেন নেই</div>'}</div></div>`;
+        ${list.length ? list.map(txRow).join("") : '<div class="empty">No transactions yet</div>'}</div></div>`;
   }
 
   const navBtn = () => Array.from(document.querySelectorAll(".nav button")).find(b => /Wallet/.test(b.textContent));
@@ -169,7 +169,7 @@
   }
   function closeWallet() { if (root) root.classList.remove("open"); }
 
-  // ---- Forms (বিদ্যমান modal ডিজাইন) ----
+  // ---- Forms (existing modal design) ----
   const opts = sel => ASSETS.map(a => `<option value="${a.sym}" ${a.sym === sel ? "selected" : ""}>${a.sym} · ${a.name}</option>`).join("");
   const val = id => ($(id) ? $(id).value.trim() : "");
 
@@ -184,21 +184,21 @@
       <label class="modal-label" for="dpTx">Transaction ID (TXID)</label>
       <input class="modal-field" id="dpTx" type="text" placeholder="Blockchain transaction ID">
       <button class="btn" style="width:100%;margin-top:14px" onclick="zvwDeposit()">Submit Deposit Request</button>
-      <div class="modal-note">Admin যাচাই করে Accept করলে Wallet-এ জমা হবে; Reject হলে জমা হবে না। শুধু উপরে দেখানো ঠিকানায় ও নেটওয়ার্কে পাঠান।</div>`);
+      <div class="modal-note">Once an admin verifies and accepts, the amount is credited to your Wallet; if rejected, nothing is credited. Send only to the address and network shown above.</div>`);
     depositAddr();
   }
   function depositAddr() {
     const sym = val("dpAsset"), a = asset(sym), cfg = (window.ZENVYRO_DEPOSIT_ADDRESSES || {})[sym];
     $("dpAddr").innerHTML = cfg && cfg.address
       ? `<label class="modal-label">Network: ${esc(cfg.network || a.net)} · Deposit address</label><div class="ref-box">${esc(cfg.address)}</div><button class="btn alt" style="width:100%;margin-top:8px;padding:10px" onclick="zvwCopy()">Copy address</button>`
-      : `<div class="modal-note" style="margin-top:12px">⚠ Deposit address এখনো সেট করা হয়নি (ডেমো)। আসল ঠিকানা না আসা পর্যন্ত কোনো ফান্ড পাঠাবেন না।</div>`;
+      : `<div class="modal-note" style="margin-top:12px">⚠ The deposit address is not set yet (demo). Do not send any funds until a real address is shown.</div>`;
   }
   function submitDeposit() {
     const sym = val("dpAsset"), a = asset(sym), amount = parseFloat(val("dpAmt")), txid = val("dpTx");
-    if (!(amount > 0)) return say("সঠিক পরিমাণ দিন");
-    if (txid.length < 6) return say("TXID দিন");
+    if (!(amount > 0)) return say("Enter a valid amount");
+    if (txid.length < 6) return say("Enter the TXID");
     window.ZenvyroTx.log({ id: newId("DP"), kind: "deposit", sym, amount, status: "pending", sub: sym + " (" + a.net + ")", txid });
-    window.closeModal(); say("Deposit request পাঠানো হয়েছে");
+    window.closeModal(); say("Deposit request sent");
   }
 
   function withdrawForm(sel) {
@@ -208,12 +208,12 @@
       <select class="modal-field" id="wdAsset" onchange="zvwWdInfo()">${opts(sel)}</select>
       <div class="modal-note" id="wdInfo" style="margin-top:10px"></div>
       <label class="modal-label" for="wdAddr">Wallet address</label>
-      <input class="modal-field" id="wdAddr" type="text" placeholder="আপনার ওয়ালেট ঠিকানা" autocapitalize="off" autocorrect="off">
+      <input class="modal-field" id="wdAddr" type="text" placeholder="Your wallet address" autocapitalize="off" autocorrect="off">
       <label class="modal-label" for="wdAmt">Amount</label>
       <input class="modal-field" id="wdAmt" type="number" inputmode="decimal" step="any" min="0" placeholder="0.00">
       <button class="btn alt" style="width:100%;margin-top:8px;padding:10px" onclick="zvwWdMax()">Max</button>
       <button class="btn" style="width:100%;margin-top:12px" onclick="zvwWithdraw()">Submit Withdraw Request</button>
-      <div class="modal-note">Request পাঠালে ওই পরিমাণ লক হয়ে যায়। Admin Accept করলে পাঠানো হবে; Reject করলে লক খুলে যাবে। ঠিকানা ও নেটওয়ার্ক ভালো করে মিলিয়ে নিন, ভুল ঠিকানায় পাঠালে ফেরত পাওয়া যায় না।</div>`);
+      <div class="modal-note">When you send a request, that amount is locked. If an admin accepts, it is sent; if rejected, the lock is released. Double-check the address and network — funds sent to a wrong address cannot be recovered.</div>`);
     wdInfo();
   }
   function wdInfo() {
@@ -222,25 +222,25 @@
   }
   function submitWithdraw() {
     const sym = val("wdAsset"), a = asset(sym), addr = val("wdAddr"), amount = parseFloat(val("wdAmt"));
-    if (!/^[A-Za-z0-9:_-]{20,120}$/.test(addr)) return say("সঠিক ওয়ালেট ঠিকানা দিন");
-    if (!(amount > 0)) return say("সঠিক পরিমাণ দিন");
-    if (amount > availAmt(sym) + 1e-12) return say("Available ব্যালেন্সে এতো নেই");
+    if (!/^[A-Za-z0-9:_-]{20,120}$/.test(addr)) return say("Enter a valid wallet address");
+    if (!(amount > 0)) return say("Enter a valid amount");
+    if (amount > availAmt(sym) + 1e-12) return say("Not enough available balance");
     window.ZenvyroTx.log({ id: newId("WD"), kind: "withdraw", sym, amount, status: "pending", sub: sym + " (" + a.net + ")", addr });
-    window.closeModal(); say("Withdraw request পাঠানো হয়েছে");
+    window.closeModal(); say("Withdraw request sent");
   }
 
   function transferForm(sel) {
     sel = sel || "USDT";
     window.openModal("Transfer", `
-      <label class="modal-label" for="trAsset">Asset (Exchange করা ব্যালেন্স)</label>
+      <label class="modal-label" for="trAsset">Asset (exchanged balance)</label>
       <select class="modal-field" id="trAsset" onchange="zvwTrInfo()">${opts(sel)}</select>
       <div class="modal-note" id="trInfo" style="margin-top:10px"></div>
       <label class="modal-label" for="trTo">Recipient ID</label>
-      <input class="modal-field" id="trTo" type="text" placeholder="প্রাপকের ইউজার আইডি" autocapitalize="characters" autocorrect="off">
+      <input class="modal-field" id="trTo" type="text" placeholder="Recipient's user ID" autocapitalize="characters" autocorrect="off">
       <label class="modal-label" for="trAmt">Amount</label>
       <input class="modal-field" id="trAmt" type="number" inputmode="decimal" step="any" min="0" placeholder="0.00">
       <button class="btn" style="width:100%;margin-top:14px" onclick="zvwTransfer()">Send</button>
-      <div class="modal-note">Transfer সাথে সাথে হয় এবং Admin-এর মাধ্যমে যায় না, তাই পাঠানোর পর ফেরত নেওয়া যায় না। প্রাপকের আইডি দুইবার মিলিয়ে নিন। ডেমো মোডে প্রাপক যাচাই হয় না।</div>`);
+      <div class="modal-note">Transfers happen instantly and do not go through an admin, so they cannot be reversed once sent. Double-check the recipient's ID. In demo mode the recipient is not verified.</div>`);
     trInfo();
   }
   function trInfo() {
@@ -249,14 +249,14 @@
   }
   function submitTransfer() {
     const sym = val("trAsset"), a = asset(sym), to = val("trTo"), amount = parseFloat(val("trAmt"));
-    if (!/^[A-Za-z0-9_-]{3,32}$/.test(to)) return say("সঠিক প্রাপক আইডি দিন");
-    if (to.toLowerCase() === MY_ID.toLowerCase()) return say("নিজের আইডিতে Transfer করা যায় না");
-    if (!(amount > 0)) return say("সঠিক পরিমাণ দিন");
-    if (amount > availAmt(sym) + 1e-12) return say("Available ব্যালেন্সে এতো নেই");
-    if (!window.confirm("Send " + amount + " " + sym + " to " + to + "?\n\nএটা সাথে সাথে হবে এবং ফেরত নেওয়া যাবে না।")) return;
-    if (!W().debit(sym, amount)) return say("Transfer করা যায়নি");
+    if (!/^[A-Za-z0-9_-]{3,32}$/.test(to)) return say("Enter a valid recipient ID");
+    if (to.toLowerCase() === MY_ID.toLowerCase()) return say("You can't transfer to your own ID");
+    if (!(amount > 0)) return say("Enter a valid amount");
+    if (amount > availAmt(sym) + 1e-12) return say("Not enough available balance");
+    if (!window.confirm("Send " + amount + " " + sym + " to " + to + "?\n\nThis happens instantly and cannot be reversed.")) return;
+    if (!W().debit(sym, amount)) return say("Transfer failed");
     window.ZenvyroTx.log({ id: newId("TR"), kind: "transfer", dir: "out", sym, amount, status: "completed", sub: "To " + to });
-    window.closeModal(); say("Transfer সম্পন্ন হয়েছে");
+    window.closeModal(); say("Transfer completed");
   }
 
   function assetDetail(sym) {
@@ -271,7 +271,7 @@
       <button class="btn alt" style="width:100%;margin-top:10px" onclick="zvwTransferForm('${sym}')">Transfer</button>`);
   }
 
-  // ---- Admin (ডেমো টেস্ট হুক) ----
+  // ---- Admin (demo test hooks) ----
   function adminApprove(id, priceUsdt) {
     const t = txs.find(x => x.id === id && x.status === "pending");
     if (!t || !W()) return false;
@@ -287,7 +287,7 @@
   function adminReject(id) {
     const t = txs.find(x => x.id === id && x.status === "pending" && (x.kind === "deposit" || x.kind === "withdraw"));
     if (!t) return false;
-    t.status = "rejected"; saveTx(); render(); return true; // withdraw-এর লক নিজে থেকেই খুলে যায়
+    t.status = "rejected"; saveTx(); render(); return true; // a withdraw's lock is released automatically
   }
 
   function init() {
@@ -324,7 +324,7 @@
         return r;
       };
     }
-    setInterval(render, 5000); // Mining/ZENY ও অন্য পরিবর্তন প্রতিফলিত করতে
+    setInterval(render, 5000); // reflect Mining/ZENY and other changes
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

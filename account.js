@@ -1,7 +1,7 @@
-/* Zenvyro — ধাপ ৪ক: Account পেজ (প্রোফাইল, Personal Info, Security & Privacy, Help & Support + Refer & Earn)
-   শুধু JavaScript; স্টাইল #zvAccount-এর ভেতরে সীমাবদ্ধ।
-   পাসওয়ার্ড/2FA/KYC/লগইন ইতিহাস ইত্যাদি আসল কাজ ব্যাকএন্ডে হবে। ব্যাকএন্ড ছাড়া এগুলো
-   কাজ করছে বলে দেখানো হয় না। কনফিগ: window.ZENVYRO_USER, ZENVYRO_AUTH, ZENVYRO_SUPPORT, ZENVYRO_PRIVACY_URL */
+/* Zenvyro — Step 4a: Account page (profile, Personal Info, Security & Privacy, Help & Support + Refer & Earn)
+   JavaScript only; styles are scoped to #zvAccount.
+   Password/2FA/KYC/login history and similar must really be done on a backend. Without one, these are
+   not shown as working. Config: window.ZENVYRO_USER, ZENVYRO_AUTH, ZENVYRO_SUPPORT, ZENVYRO_PRIVACY_URL */
 (() => {
   "use strict";
 
@@ -14,7 +14,7 @@
   const jset = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
   const M = () => window.ZenvyroMining && window.ZenvyroMining.getState();
 
-  // ---- প্রোফাইল ----
+  // ---- Profile ----
   const cfg = () => window.ZENVYRO_USER || {};
   function siteName() {
     const h = document.querySelector(".welcome h1");
@@ -36,7 +36,7 @@
   }
   function applyName() { const h = document.querySelector(".welcome h1"); if (h) h.textContent = profile().name + " ✦"; }
 
-  // এই ডিভাইসের লগইন/ভিজিট রেকর্ড (শুধু স্থানীয়)
+  // this device's login/visit record (local only)
   (function recordVisit() {
     const list = jget(LKEY, []), now = Date.now();
     if (!list.length || now - list[0].ts > 30 * 60 * 1000) {
@@ -104,7 +104,7 @@
 .zv-sw.on{background:#6a3dff}.zv-sw.on:after{left:25px}`;
   const style = document.createElement("style"); style.textContent = css; document.head.appendChild(style);
 
-  // ---- পেজ ----
+  // ---- Page ----
   let root = null;
   const row = (ic, t, s, fn) => `<button class="zr" onclick="${fn}"><span class="ri">${ic}</span><span class="rt"><b>${t}</b><small>${s}</small></span><span class="ch">›</span></button>`;
 
@@ -133,7 +133,7 @@
 
       <div class="grid"><div>
         <div class="card"><div class="sh">🎁 &nbsp;Refer &amp; Earn</div>
-          ${row("👥", "Refer &amp; Earn", "কোড শেয়ার করুন, রেফারেল ও কমিশন দেখুন", "zvaRefer()")}</div>
+          ${row("👥", "Refer &amp; Earn", "Share your code and track referrals", "zvaRefer()")}</div>
 
         <div class="card"><div class="sh">👤 &nbsp;Personal Information</div>
           ${row("👤", "Edit Profile", "Update your personal details", "zvaEdit()")}
@@ -152,10 +152,10 @@
           <button class="out" onclick="zvaLogout()"><span>⎋</span><span style="flex:1;text-align:left">Log Out</span><span>›</span></button></div>
       </div>
 
-      <div class="side"><div class="shield">🛡</div><h3>Your Security<br>Our Priority</h3><p>আপনার অ্যাকাউন্ট ও অ্যাসেট সুরক্ষিত রাখতে আমরা কাজ করি।</p>
-        <div class="chip"><span class="ci">🔐</span><div><b>Secure Connection</b><small>HTTPS-এ সংযুক্ত</small></div></div>
-        <div class="chip"><span class="ci">✅</span><div><b>2FA Protection</b><small>${window.ZENVYRO_2FA_ENABLED ? "Enabled" : "এখনো চালু নেই"}</small></div></div>
-        <div class="chip"><span class="ci">🎧</span><div><b>Support</b><small>Help &amp; Support থেকে যোগাযোগ করুন</small></div></div>
+      <div class="side"><div class="shield">🛡</div><h3>Your Security<br>Our Priority</h3><p>We work to keep your account and assets safe.</p>
+        <div class="chip"><span class="ci">🔐</span><div><b>Secure Connection</b><small>Connected over HTTPS</small></div></div>
+        <div class="chip"><span class="ci">✅</span><div><b>2FA Protection</b><small>${window.ZENVYRO_2FA_ENABLED ? "Enabled" : "Not enabled yet"}</small></div></div>
+        <div class="chip"><span class="ci">🎧</span><div><b>Support</b><small>Reach us via Help &amp; Support</small></div></div>
         <div class="sig">Zenvyro Team ♥</div></div></div></div>`;
   }
 
@@ -177,40 +177,40 @@
   function editProfile() {
     const p = profile();
     window.openModal("Edit Profile", fld("epName", "Name", `type="text" maxlength="40" value="${esc(p.name)}"`) + fld("epTitle", "Profession / Title", `type="text" maxlength="40" value="${esc(p.title)}"`) +
-      `<button class="btn" style="width:100%;margin-top:14px" onclick="zvaSaveProfile()">Save</button><div class="modal-note">এখন তথ্য শুধু এই ডিভাইসে সেভ হয়। ব্যাকএন্ড যুক্ত হলে অ্যাকাউন্টের সাথে সংরক্ষিত হবে।</div>`);
+      `<button class="btn" style="width:100%;margin-top:14px" onclick="zvaSaveProfile()">Save</button><div class="modal-note">For now your details are saved on this device only. Once a backend is connected they will be stored with your account.</div>`);
   }
   function saveProfile() {
     const name = val("epName"), title = val("epTitle");
-    if (name.length < 2) return say("নাম দিন");
+    if (name.length < 2) return say("Enter your name");
     jset(PKEY, { name: name.slice(0, 40), title: title.slice(0, 40) });
-    applyName(); window.closeModal(); render(); say("Profile আপডেট হয়েছে");
+    applyName(); window.closeModal(); render(); say("Profile updated");
   }
 
   function changePass() {
     window.openModal("Change Password", fld("cpOld", "Current password", 'type="password" autocomplete="current-password"') + fld("cpNew", "New password", 'type="password" autocomplete="new-password"') + fld("cpNew2", "Confirm new password", 'type="password" autocomplete="new-password"') +
-      `<button class="btn" style="width:100%;margin-top:14px" onclick="zvaSavePass()">Update password</button><div class="modal-note">পাসওয়ার্ড কখনো এই ডিভাইসে সেভ হয় না। কমপক্ষে ৮ অক্ষর দিন।</div>`);
+      `<button class="btn" style="width:100%;margin-top:14px" onclick="zvaSavePass()">Update password</button><div class="modal-note">Your password is never saved on this device. Use at least 8 characters.</div>`);
   }
   function savePass() {
     const o = $("cpOld").value, n = $("cpNew").value, n2 = $("cpNew2").value;
-    if (!o) return say("বর্তমান পাসওয়ার্ড দিন");
-    if (n.length < 8) return say("নতুন পাসওয়ার্ড কমপক্ষে ৮ অক্ষর");
-    if (n !== n2) return say("নতুন পাসওয়ার্ড মিলছে না");
+    if (!o) return say("Enter your current password");
+    if (n.length < 8) return say("New password must be at least 8 characters");
+    if (n !== n2) return say("New passwords don't match");
     const auth = window.ZENVYRO_AUTH;
-    if (!auth || typeof auth.changePassword !== "function") return say("Login সিস্টেম যুক্ত না থাকায় পাসওয়ার্ড বদলানো যাচ্ছে না");
-    Promise.resolve(auth.changePassword(o, n)).then(() => { window.closeModal(); say("পাসওয়ার্ড বদলানো হয়েছে"); }).catch(() => say("পাসওয়ার্ড বদলানো যায়নি"));
+    if (!auth || typeof auth.changePassword !== "function") return say("Password can't be changed because no login system is connected");
+    Promise.resolve(auth.changePassword(o, n)).then(() => { window.closeModal(); say("Password changed"); }).catch(() => say("Could not change password"));
   }
 
   function kyc() {
     window.openModal("KYC Verification", `<div class="modal-list"><div><strong>Status</strong><span>${profile().verified ? "Verified" : "Not verified"}</span></div><div><strong>Requirement</strong><span>Optional</span></div></div>
       <button class="btn" style="width:100%;margin-top:14px;opacity:.5" disabled>Upload documents</button>
-      <div class="modal-note">KYC ডকুমেন্ট আপলোড ও যাচাই ব্যাকএন্ড যুক্ত হলে চালু হবে। এখন কোনো ডকুমেন্ট জমা দেবেন না।</div>`);
+      <div class="modal-note">KYC document upload and verification will be available once a backend is connected. Do not submit any documents for now.</div>`);
   }
 
   function notif() {
     const n = Object.assign({ mining: true, referral: true, wallet: true, news: false }, jget(NKEY, {}));
     const items = [["mining", "Mining reward alerts"], ["referral", "Referral alerts"], ["wallet", "Deposit / Withdraw updates"], ["news", "News & offers"]];
     window.openModal("Notification Settings", `<div class="modal-list">${items.map(i => `<div><strong>${i[1]}</strong><button class="zv-sw ${n[i[0]] ? "on" : ""}" onclick="zvaNToggle('${i[0]}',this)" aria-label="${i[1]}"></button></div>`).join("")}</div>
-      <div class="modal-note">সেটিং এখন এই ডিভাইসে সেভ থাকে। আসল পুশ/ইমেইল নোটিফিকেশন ব্যাকএন্ড যুক্ত হলে কাজ করবে।</div>`);
+      <div class="modal-note">Settings are saved on this device for now. Real push/email notifications will work once a backend is connected.</div>`);
   }
   function nToggle(k, el) {
     const n = Object.assign({ mining: true, referral: true, wallet: true, news: false }, jget(NKEY, {}));
@@ -218,28 +218,28 @@
   }
 
   function twofa() {
-    window.openModal("Two-Factor Authentication", `<div class="modal-note">2FA চালু করতে সার্ভার-সাইড Login সিস্টেম দরকার। যতক্ষণ না যুক্ত হচ্ছে, এটা চালু হবে না এবং এই পেজে "Enabled" দেখানো হবে না।</div>`);
+    window.openModal("Two-Factor Authentication", `<div class="modal-note">Turning on 2FA requires a server-side login system. Until one is connected it cannot be enabled, and this page will not show "Enabled".</div>`);
   }
 
   function logins() {
     const l = jget(LKEY, []);
-    window.openModal("Login Activity", `<div class="modal-list">${l.length ? l.map((x, i) => `<div><strong>${esc(x.dev)}${i === 0 ? " · এই ডিভাইস" : ""}</strong><span>${new Date(x.ts).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false })}</span></div>`).join("") : "<div><strong>কোনো তথ্য নেই</strong><span>—</span></div>"}</div>
-      <div class="modal-note">এখানে শুধু এই ডিভাইস থেকে সাইট খোলার রেকর্ড দেখানো হচ্ছে। অন্য ডিভাইসের আসল লগইন ইতিহাস ব্যাকএন্ড যুক্ত হলে আসবে।</div>`);
+    window.openModal("Login Activity", `<div class="modal-list">${l.length ? l.map((x, i) => `<div><strong>${esc(x.dev)}${i === 0 ? " · This device" : ""}</strong><span>${new Date(x.ts).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false })}</span></div>`).join("") : "<div><strong>No data</strong><span>—</span></div>"}</div>
+      <div class="modal-note">Only records of opening the site from this device are shown here. Real login history from other devices will appear once a backend is connected.</div>`);
   }
 
   function privacy() {
     if (window.ZENVYRO_PRIVACY_URL) { window.open(window.ZENVYRO_PRIVACY_URL, "_blank", "noopener"); return; }
-    window.openModal("Privacy Policy", `<div class="modal-note">Privacy Policy এখনো যোগ করা হয়নি। সাইট আসল ইউজারদের জন্য চালুর আগে আপনার নিজস্ব Privacy Policy ও Terms পেজ বানিয়ে <code>window.ZENVYRO_PRIVACY_URL</code>-এ লিংক দিন।</div>`);
+    window.openModal("Privacy Policy", `<div class="modal-note">A Privacy Policy has not been added yet. Before launching to real users, publish your own Privacy Policy and Terms page and link it via <code>window.ZENVYRO_PRIVACY_URL</code>.</div>`);
   }
 
   function faq() {
     const q = [
-      ["মাইনিং কীভাবে কাজ করে?", "Start Mining চাপলে ১ ঘণ্টার সেশন শুরু হয়। ১ ঘণ্টা শেষ হলে Claim Reward চাপলে আপনার প্যাকের এক ঘণ্টার ZENY ব্যালেন্সে যোগ হয়।"],
-      ["রেফারেল ইনকাম কখন পাব?", "রেফারেল Income Commission প্রতি রাত ১০টায় (বাংলাদেশ সময়) Claim করা যায় এবং ZENY হিসেবে Exchange ব্যালেন্সে যোগ হয়। Purchase Bonus সরাসরি Wallet-এ জমা হয়।"],
-      ["Exchange কীভাবে হয়?", "ZENY থেকে অন্য অ্যাসেটে Request পাঠাতে হয়। Admin Accept করলে Accept-এর সময়ের রেটে মোট ১০% ফি কেটে Wallet-এ জমা হয়; Reject হলে ZENY ফেরত আসে।"],
-      ["Deposit ও Withdraw কীভাবে?", "দুটোই Request, Admin যাচাই করে Accept বা Reject করে। Withdraw Request করলে ওই পরিমাণ লক থাকে।"],
-      ["Transfer ফেরত নেওয়া যায়?", "না। ইউজার থেকে ইউজারে Transfer সাথে সাথে হয়, তাই প্রাপকের আইডি পাঠানোর আগে ভালো করে মিলিয়ে নিন।"],
-      ["আয় কি নিশ্চিত?", "না। রিওয়ার্ড ও কমিশন প্ল্যাটফর্মের নিয়ম অনুযায়ী, নিশ্চিত আয় নয়।"]
+      ["How does mining work?", "Tap Start Mining to begin a 1-hour session. When the hour ends, tap Claim Reward to add one hour of ZENY for your pack to your balance."],
+      ["When do I get referral income?", "Referral Income Commission can be claimed every night at 10 PM (Bangladesh time) and is added to your Exchange balance as ZENY. Purchase Bonus goes straight to your Wallet."],
+      ["How does Exchange work?", "Send a request to exchange ZENY into another asset. When an admin accepts, it is credited to your Wallet at the rate at acceptance after a total 10% fee; if rejected, your ZENY is refunded."],
+      ["How do Deposit and Withdraw work?", "Both are requests that an admin verifies and then accepts or rejects. When you request a withdrawal, that amount is locked."],
+      ["Can a Transfer be reversed?", "No. User-to-user transfers are instant, so double-check the recipient's ID before sending."],
+      ["Are earnings guaranteed?", "No. Rewards and commissions follow platform rules and are not guaranteed income."]
     ];
     window.openModal("FAQ", q.map(x => `<details style="border:1px solid #2c265e;border-radius:14px;padding:12px;margin-bottom:9px;background:#0b0a23"><summary style="font-weight:700;font-size:14px">${x[0]}</summary><p style="color:#c4c5ed;font-size:13px;line-height:1.6;margin:8px 0 0">${x[1]}</p></details>`).join(""));
   }
@@ -250,17 +250,17 @@
     if (s.email) rows.push(`<div><strong>Email</strong><span><a style="color:#c69aff" href="mailto:${esc(s.email)}">${esc(s.email)}</a></span></div>`);
     if (s.telegram) rows.push(`<div><strong>Telegram</strong><span><a style="color:#c69aff" target="_blank" rel="noopener" href="${esc(s.telegram)}">Open</a></span></div>`);
     window.openModal("Contact Support", rows.length ? `<div class="modal-list">${rows.join("")}</div>` :
-      `<div class="modal-note">Support যোগাযোগের তথ্য এখনো সেট করা হয়নি। <code>window.ZENVYRO_SUPPORT = { email, telegram }</code> দিয়ে আপনার আসল যোগাযোগের মাধ্যম যুক্ত করুন।</div>`);
+      `<div class="modal-note">Support contact details are not set yet. Add your real contact channels with <code>window.ZENVYRO_SUPPORT = { email, telegram }</code>.</div>`);
   }
 
   function logout() {
-    if (!window.confirm("Log out করবেন?")) return;
+    if (!window.confirm("Log out?")) return;
     const a = window.ZENVYRO_AUTH;
     if (a && typeof a.logout === "function") { Promise.resolve(a.logout()).then(() => say("Logged out")); return; }
-    say("Login সিস্টেম এখনো যুক্ত হয়নি (ধাপ ৫)");
+    say("The login system isn't connected yet");
   }
 
-  // ---- প্রোফাইল ছবি ----
+  // ---- Profile photo ----
   function setupPicker() {
     const inp = document.createElement("input");
     inp.type = "file"; inp.accept = "image/*"; inp.style.display = "none"; inp.id = "zvaFile";
@@ -274,10 +274,10 @@
         const r = Math.min(img.width, img.height), sx = (img.width - r) / 2, sy = (img.height - r) / 2;
         c.getContext("2d").drawImage(img, sx, sy, r, r, 0, 0, S, S);
         URL.revokeObjectURL(url);
-        try { localStorage.setItem(AKEY, c.toDataURL("image/jpeg", 0.8)); say("ছবি আপডেট হয়েছে"); } catch (e) { say("ছবি সেভ করা যায়নি"); }
+        try { localStorage.setItem(AKEY, c.toDataURL("image/jpeg", 0.8)); say("Photo updated"); } catch (e) { say("Could not save photo"); }
         render();
       };
-      img.onerror = () => { URL.revokeObjectURL(url); say("ছবি পড়া যায়নি"); };
+      img.onerror = () => { URL.revokeObjectURL(url); say("Could not read photo"); };
       img.src = url;
     });
     return inp;
@@ -295,14 +295,14 @@
       zvaLogins: logins, zvaPrivacy: privacy, zvaFaq: faq, zvaContact: contact, zvaLogout: logout
     });
 
-    // হোমের উপরের ডানদিকের Account আইকন এখন Account পেজ খোলে
+    // the Account icon at the top right of Home now opens the Account page
     const circ = document.querySelectorAll(".actions .circle")[1];
     if (circ) circ.onclick = () => window.showSection("account");
 
     const origShow = window.showSection;
     window.showSection = function (name) {
       if (name === "account") { openAccount(); return; }
-      if (name !== "membership") closeAccount(); // Membership মডাল পেজের উপরে খোলে
+      if (name !== "membership") closeAccount(); // the Membership modal opens above the page
       return origShow.apply(this, arguments);
     };
     const origNav = window.navActive;
