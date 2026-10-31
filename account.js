@@ -317,6 +317,7 @@
 
   function privacy() {
     if (window.ZENVYRO_PRIVACY_URL) { window.open(window.ZENVYRO_PRIVACY_URL, "_blank", "noopener"); return; }
+    if (window.ZENVYRO_LEGAL) { window.ZENVYRO_LEGAL.open("privacy"); return; }
     window.openModal("Privacy Policy", `<div class="modal-note">A Privacy Policy has not been added yet. Before launching to real users, publish your own Privacy Policy and Terms page and link it via <code>window.ZENVYRO_PRIVACY_URL</code>.</div>`);
   }
 

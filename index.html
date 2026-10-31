@@ -85,7 +85,8 @@ function showSection(name){
 function selectPack(name,price){closeModal();toast(name==='Free Pack'?'Free Pack selected':`${name} selected (${price}). Payment is not connected.`)}
 function walletAction(action){toast(action+' is not available until payment integration is configured')}
 function copyReferral(){const code='ZENV-NEW-MEMBER';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>toast('Referral code copied')).catch(()=>toast('Referral code: '+code))}else{toast('Referral code: '+code)}}
-</script>  <script src="auth.js" defer></script>
+</script>  <script src="legal.js" defer></script>
+<script src="auth.js" defer></script>
 <script src="cooldown.js" defer></script>
 <script src="mining.js" defer></script>
 <script src="referral.js" defer></script>

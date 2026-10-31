@@ -193,6 +193,7 @@
   function doc(kind) {
     const url = kind === "terms" ? window.ZENVYRO_TERMS_URL : window.ZENVYRO_PRIVACY_URL;
     if (url) { window.open(url, "_blank", "noopener"); return; }
+    if (window.ZENVYRO_LEGAL) { window.ZENVYRO_LEGAL.open(kind); return; }
     const t = kind === "terms" ? "Terms & Conditions" : "Privacy Policy";
     if (typeof window.openModal === "function")
       window.openModal(t, `<div class="modal-note">The ${esc(t)} page has not been published yet. It will be added before launch.</div>`);
