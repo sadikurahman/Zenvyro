@@ -10,6 +10,7 @@
 .modal-backdrop{position:fixed;inset:0;background:#03020dcc;backdrop-filter:blur(10px);z-index:30;display:none;align-items:flex-end;justify-content:center;padding:12px}.modal-backdrop.open{display:flex}.modal{width:min(100%,720px);max-height:88dvh;overflow:auto;background:linear-gradient(145deg,#17103d,#09091e);border:1px solid #5540a4;border-radius:24px;padding:20px;box-shadow:0 25px 90px #0009}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}.modal-head h2{font-size:22px;margin:0}.close-modal{width:38px;height:38px;border:1px solid #393174;border-radius:12px;background:#100d2c;color:#fff;font-size:22px}.modal-note{border:1px solid #4a3a82;background:#ffffff07;border-radius:13px;padding:12px;color:#c4c5ed;font-size:12px;line-height:1.55;margin-top:13px}.pack-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.pack-card{border:1px solid #302864;background:#0b0a23;border-radius:17px;padding:14px}.pack-card.featured{border-color:#a54cff;box-shadow:0 0 22px #8d31ff1b}.pack-card h3{margin:0 0 6px;font-size:16px}.pack-price{font-size:25px;font-weight:900;color:#c69aff}.pack-card p{font-size:12px;color:#b9b9e8;line-height:1.5;min-height:36px}.pack-card ul{padding-left:17px;margin:9px 0 14px;color:#dedcff;font-size:11px;line-height:1.8}.pack-card button{width:100%;font-size:12px;padding:11px 7px}.modal-field{width:100%;border:1px solid #3a3277;background:#08071c;color:#fff;border-radius:12px;padding:13px;font:inherit}.modal-label{display:block;font-size:12px;color:#b8b9e9;margin:13px 0 7px}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.modal-actions button{font-size:13px}.modal-list{border:1px solid #2c265e;border-radius:15px;overflow:hidden}.modal-list div{display:flex;justify-content:space-between;gap:12px;padding:14px;border-bottom:1px solid #24204b;font-size:13px}.modal-list div:last-child{border-bottom:0}.modal-list span{color:#b7b8e6;text-align:right}.ref-box{padding:14px;border:1px dashed #7751d8;border-radius:14px;background:#ffffff06;overflow-wrap:anywhere;font-weight:800;letter-spacing:1px}
 @media(max-width:480px){.modal-backdrop{padding:0}.modal{border-radius:24px 24px 0 0;padding:18px 14px;max-height:90dvh}.pack-grid{grid-template-columns:1fr}.pack-card p{min-height:0}}
 </style>  <link rel="stylesheet" href="cooldown-style.css">
+<link rel="stylesheet" href="phase-footer.css">
 </head>
 <body><div class="app">
 <header class="top"><div class="brand"><div class="brand-mark">Z</div><div>Zenvyro<span class="tagline">MINE · GROW · EARN</span></div></div><div class="actions"><button class="circle" onclick="toast('No new notifications')" aria-label="Notifications">♧</button><button class="circle" onclick="toast('Account settings')" aria-label="Account">♙</button></div></header>
@@ -53,6 +54,15 @@
     <article class="cd-metric"><span class="cd-metric-icon">✦</span><span class="cd-metric-label">Premium Members</span><strong id="cdPremiumUsers">0</strong><em>Network count</em></article>
   </div>
 
+  <div class="zph" id="zphBox">
+    <div class="zph-head">
+      <div class="zph-title"><span class="zph-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg></span><h3 id="zphName">Phase 1 Active Status</h3></div>
+      <span class="zph-live" id="zphLive"><i class="zph-dot"></i>LIVE</span>
+    </div>
+    <div class="zph-time" role="timer" aria-label="Time remaining in Phase 1"><span><b id="zphD">120</b><i>Days</i></span><span><b id="zphH">00</b><i>h</i></span><span><b id="zphM">00</b><i>m</i></span><span><b id="zphS">00</b><i>s</i></span></div>
+    <p class="zph-sub">Premium benefit distribution and native coin distribution will continue during this 120-day initial phase.</p>
+  </div>
+
   <div class="cd-sync-row">
     <span>Last verified sync: <strong id="cdLastSync">No server data connected</strong></span>
     <span>Next refresh: <strong id="cdNextSync">Waiting for endpoint</strong></span>
@@ -60,6 +70,28 @@
   <p class="cd-footnote">For real figures, configure <code>window.ZENVYRO_STATS_ENDPOINT</code> in cooldown.js to a trusted HTTPS API.
   Never use browser animation as a source of financial truth.</p>
 </section>
+
+<footer class="zvf" id="zvFooter" aria-label="Information and support">
+  <div class="zvf-brand"><span class="zvf-mark">Z</span><div><strong>Zenvyro</strong><small>MINE · GROW · EARN</small></div></div>
+  <p class="zvf-lead">Learn about the project, read the details, and reach our team.</p>
+  <nav class="zvf-grid" aria-label="Information links">
+      <button type="button" class="zvf-link" data-zf="about"><span class="zvf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.2M12 7.8h.01"/></svg></span><span class="zvf-tx"><b>About Us</b><span>Our vision and mission</span></span></button>
+      <button type="button" class="zvf-link" data-zf="whitepaper"><span class="zvf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></span><span class="zvf-tx"><b>Whitepaper</b><span>Tokenomics and roadmap</span></span></button>
+      <button type="button" class="zvf-link" data-zf="faq"><span class="zvf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.4 9.4a2.7 2.7 0 1 1 3.9 2.4c-.8.5-1.3 1-1.3 1.9M12 17h.01"/></svg></span><span class="zvf-tx"><b>FAQs</b><span>Answers to common questions</span></span></button>
+      <button type="button" class="zvf-link" data-zf="privacy"><span class="zvf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7.5 3v5.5c0 4.6-3.1 8-7.5 9.5-4.4-1.5-7.5-4.9-7.5-9.5V6z"/><path d="M8.8 12l2.3 2.3 4.1-4.6"/></svg></span><span class="zvf-tx"><b>Privacy Policy</b><span>How your data is protected</span></span></button>
+      <button type="button" class="zvf-link" data-zf="support"><span class="zvf-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="3" y="13" width="4" height="6" rx="1.5"/><rect x="17" y="13" width="4" height="6" rx="1.5"/><path d="M19 19c0 1.700-1.800 2.500-4.500 2.500"/></svg></span><span class="zvf-tx"><b>Contact Support</b><span>Get help from our team</span></span></button>
+  </nav>
+  <div class="zvf-div"></div>
+  <p class="zvf-soc-t">JOIN OUR COMMUNITY</p>
+  <div class="zvf-soc">
+    <button type="button" data-s="telegram" aria-label="Telegram"><span class="zvf-sc"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.400 3.600 2.600 10.900c-.9.400-.9 1.600 0 1.900l4.800 1.500 1.900 5.800c.2.700 1.100.9 1.600.4l2.700-2.600 5 3.700c.6.400 1.400.1 1.600-.6l3-15.400c.2-1-.8-1.700-1.800-1.300z"/><path d="M9.300 14.300l8.600-6.500" stroke="#0b0a20" stroke-width="1.300" fill="none" stroke-linecap="round"/></svg></span>Telegram</button>
+    <button type="button" data-s="twitter" aria-label="Twitter (X)"><span class="zvf-sc"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.800 3h3l-6.600 7.500L22 21h-6.100l-4.800-6.200L5.600 21h-3l7-8L2 3h6.200l4.300 5.700zM16.700 19.200h1.700L7.300 4.700H5.500z"/></svg></span>Twitter (X)</button>
+    <button type="button" data-s="youtube" aria-label="YouTube"><span class="zvf-sc"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 8.200c-.2-1-.9-1.700-1.900-1.900C18.400 6 12 6 12 6s-6.400 0-8.100.3c-1 .2-1.700.9-1.900 1.900C1.700 9.900 1.700 12 1.700 12s0 2.100.3 3.800c.2 1 .9 1.700 1.900 1.900C5.600 18 12 18 12 18s6.400 0 8.100-.3c1-.2 1.700-.9 1.900-1.900.3-1.700.3-3.800.3-3.800s0-2.100-.3-3.800z"/><path d="M10 9.200v5.600l4.800-2.800z" fill="#0b0a20"/></svg></span>YouTube</button>
+  </div>
+  <div class="zvf-bar"><span>&copy; <span id="zvfYear">2026</span> Zenvyro. All rights reserved.</span><span><a href="#" data-zf="terms">Terms &amp; Conditions</a><a href="#" data-zf="privacy">Privacy Policy</a></span></div>
+  <p class="zvf-risk">Digital assets carry risk. Rewards are not guaranteed.</p>
+</footer>
+
 
 </div>
 <nav class="bottom"><div class="nav"><button class="active" onclick="navActive(this)"><span class="ni">⌂</span>Home</button><button onclick="showSection('mining');navActive(this)"><span class="ni">⚒</span>Mining</button><button onclick="showSection('exchange');navActive(this)"><span class="ni">⇄</span>Exchange</button><button onclick="showSection('wallet');navActive(this)"><span class="ni">▱</span>Wallet</button><button onclick="showSection('account');navActive(this)"><span class="ni">♙</span>Account</button></div></nav><div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-head"><h2 id="modalTitle">Membership</h2><button class="close-modal" onclick="closeModal()" aria-label="Close">×</button></div><div id="modalBody"></div></section></div><div class="toast" id="toast" role="status"></div>
@@ -88,6 +120,7 @@ function copyReferral(){const code='ZENV-NEW-MEMBER';if(navigator.clipboard&&nav
 </script>  <script src="legal.js" defer></script>
 <script src="auth.js" defer></script>
 <script src="cooldown.js" defer></script>
+<script src="phase-footer.js" defer></script>
 <script src="mining.js" defer></script>
 <script src="referral.js" defer></script>
 <script src="exchange.js" defer></script>

@@ -1,0 +1,68 @@
+/* Zenvyro: Phase 1 countdown box + information footer. New file, existing styles are untouched. */
+
+/* ---------- Phase 1 Active Status box (sits inside the Cooldown Dashboard, right under the metric cards) ---------- */
+.zph{margin-top:12px;padding:16px 15px 15px;border:1px solid #7550c4;border-radius:20px;
+  background:radial-gradient(ellipse at 100% 0,#2a1456 0,transparent 55%),linear-gradient(120deg,#201048,#100c2b 70%);
+  box-shadow:0 0 26px #8d42ff22,inset 0 0 0 1px #ffffff06;color:#f8f6ff;overflow:hidden}
+.zph *{box-sizing:border-box}
+.zph-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.zph-title{display:flex;align-items:center;gap:10px;min-width:0}
+.zph-ico{display:grid;place-items:center;flex:none;width:34px;height:34px;border:1px solid #6343a6;border-radius:11px;color:#d0a9ff;background:#8d42ff14}
+.zph-ico svg{width:19px;height:19px}
+.zph-title h3{margin:0;font-size:14px;font-weight:800;letter-spacing:.2px}
+.zph-live{display:inline-flex;align-items:center;gap:8px;flex:none;padding:6px 11px;border:1px solid #54427d;border-radius:99px;background:#ffffff06;color:#e3d8ff;font-size:10px;font-weight:800;letter-spacing:1.2px}
+.zph-dot{position:relative;width:8px;height:8px;border-radius:50%;background:#4be0b2;box-shadow:0 0 10px #4be0b2aa}
+.zph-dot:after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid #4be0b2;opacity:0;animation:zphRing 2s ease-out infinite}
+@keyframes zphRing{0%{transform:scale(.5);opacity:.85}100%{transform:scale(1.7);opacity:0}}
+.zph.is-done .zph-dot{background:#8f89b9;box-shadow:none}
+.zph.is-done .zph-dot:after{animation:none}
+.zph-time{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin:16px 0 12px;font-variant-numeric:tabular-nums}
+.zph-time span{display:inline-flex;align-items:baseline;gap:4px}
+.zph-time b{font-size:clamp(28px,8.4vw,40px);font-weight:900;letter-spacing:-1.5px;line-height:1;color:#fff;text-shadow:0 0 22px #8d42ff77}
+.zph-time i{font-style:normal;font-size:13px;font-weight:700;color:#c19aff}
+.zph-time .zph-tick{animation:zphTick .5s ease-out}
+@keyframes zphTick{0%{opacity:.35;transform:translateY(3px)}100%{opacity:1;transform:none}}
+.zph-sub{margin:0;color:#9d97c8;font-size:11px;line-height:1.65}
+@media (prefers-reduced-motion:reduce){.zph-dot:after,.zph-time .zph-tick{animation:none}}
+@media (max-width:360px){.zph{padding:14px 12px}.zph-time{gap:6px 10px}}
+
+/* ---------- Information & Footer ---------- */
+.zvf{--zf-line:#33275f;--zf-muted:#b9b6df;margin:0 0 calc(96px + env(safe-area-inset-bottom));padding:22px 18px 18px;border:1px solid #4b358c;border-radius:24px;
+  background:radial-gradient(ellipse at 0 0,#29134c 0,transparent 45%),linear-gradient(145deg,#100d2b,#0a091e);
+  box-shadow:0 18px 48px #0004,inset 0 1px #ffffff08;color:#f8f6ff}
+.zvf *{box-sizing:border-box}
+.zvf-brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.zvf-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;font-weight:900;font-size:20px;color:#fff;background:linear-gradient(135deg,#ba53ff,#4538ff);box-shadow:0 0 18px #8d42ff66}
+.zvf-brand strong{display:block;font-size:18px;letter-spacing:-.3px}
+.zvf-brand small{display:block;color:#e5c16c;font-size:9px;font-weight:800;letter-spacing:2px;margin-top:2px}
+.zvf-lead{margin:10px 0 16px;color:var(--zf-muted);font-size:12px;line-height:1.6}
+.zvf-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.zvf-link{display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-width:0;padding:14px 13px;text-align:left;cursor:pointer;color:inherit;font:inherit;
+  border:1px solid var(--zf-line);border-radius:16px;background:linear-gradient(145deg,#151033,#0b0a20);transition:transform .2s,border-color .2s,box-shadow .2s}
+.zvf-link:last-child{grid-column:1/-1}
+.zvf-ic{display:grid;place-items:center;width:36px;height:36px;border:1px solid #6343a6;border-radius:11px;color:#d0a9ff;background:#8d42ff12;transition:.2s}
+.zvf-ic svg{width:20px;height:20px}
+.zvf-tx{display:block;min-width:0}
+.zvf-tx b{display:block;font-size:13px;font-weight:800}
+.zvf-tx span{display:block;margin-top:3px;color:#9993c5;font-size:11px;line-height:1.45}
+.zvf-link:focus-visible,.zvf-soc button:focus-visible{outline:2px solid #c05aff;outline-offset:2px}
+.zvf-div{height:1px;margin:20px 0 16px;background:linear-gradient(90deg,transparent,#4b358c,transparent)}
+.zvf-soc-t{margin:0 0 12px;text-align:center;color:var(--zf-muted);font-size:11px;font-weight:700;letter-spacing:1.4px}
+.zvf-soc{display:flex;justify-content:center;gap:16px}
+.zvf-soc button{display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;background:none;border:0;color:#b9b6df;font:inherit;font-size:10px;font-weight:700}
+.zvf-sc{display:grid;place-items:center;width:50px;height:50px;border:1px solid #54427d;border-radius:50%;background:linear-gradient(145deg,#171238,#0b0a20);color:#d8d2f7;transition:transform .2s,border-color .2s,box-shadow .2s,color .2s}
+.zvf-sc svg{width:22px;height:22px}
+.zvf-bar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;margin-top:20px;padding-top:14px;border-top:1px solid #2a2255;color:#8d87b6;font-size:10px;line-height:1.6}
+.zvf-bar a{color:#b9a4ee;text-decoration:none;cursor:pointer;margin-left:10px}
+.zvf-risk{margin:10px 0 0;color:#7f79a8;font-size:10px;line-height:1.6}
+@media (hover:hover){
+ .zvf-link:hover{transform:translateY(-3px);border-color:#8d42ff;box-shadow:0 10px 26px #8d42ff33}
+ .zvf-link:hover .zvf-ic{color:#fff;background:#8d42ff40;border-color:#b074ff}
+ .zvf-soc button:hover .zvf-sc{transform:translateY(-4px) scale(1.06)}
+ .zvf-soc button[data-s="telegram"]:hover .zvf-sc{color:#29a9eb;border-color:#29a9eb;box-shadow:0 0 20px #29a9eb66}
+ .zvf-soc button[data-s="twitter"]:hover .zvf-sc{color:#fff;border-color:#fff;box-shadow:0 0 20px #ffffff55}
+ .zvf-soc button[data-s="youtube"]:hover .zvf-sc{color:#ff3d3d;border-color:#ff3d3d;box-shadow:0 0 20px #ff3d3d66}
+}
+.zvf-link:active{transform:scale(.98)}
+@media (min-width:650px){.zvf{padding:26px 24px 20px}.zvf-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.zvf-link:last-child{grid-column:auto}}
+@media (max-width:390px){.zvf{padding:18px 13px 16px;border-radius:19px}.zvf-link{padding:12px 10px}}
