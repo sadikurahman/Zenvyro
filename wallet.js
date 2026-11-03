@@ -218,12 +218,18 @@
   }
   function wdInfo() {
     const sym = val("wdAsset"), a = asset(sym);
-    $("wdInfo").textContent = "Network: " + a.net + " · Available: " + availAmt(sym).toFixed(a.dec > 6 ? 8 : 6) + " " + sym;
+    $("wdInfo").textContent = "Network: " + a.net + " · Available: " + availAmt(sym).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + " · Minimum withdrawal: $10";
   }
-  function submitWithdraw() {
+  const MIN_WITHDRAW_USD = 10; // minimum withdrawal per request (USD value). A server must enforce this too.
+  async function submitWithdraw() {
     const sym = val("wdAsset"), a = asset(sym), addr = val("wdAddr"), amount = parseFloat(val("wdAmt"));
     if (!/^[A-Za-z0-9:_-]{20,120}$/.test(addr)) return say("Enter a valid wallet address");
     if (!(amount > 0)) return say("Enter a valid amount");
+    let px = sym === "USDT" ? 1 : (W() ? +W().prices()[sym] : 0);
+    if (!(px > 0) && W()) { try { await W().ensurePrices(); } catch (e) {} px = +W().prices()[sym]; }
+    if (!(px > 0)) return say("Could not check the current price. Please try again.");
+    if (amount * px < MIN_WITHDRAW_USD - 1e-9)
+      return say("Minimum withdrawal is $" + MIN_WITHDRAW_USD + " (about " + +(MIN_WITHDRAW_USD / px).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + ")");
     if (amount > availAmt(sym) + 1e-12) return say("Not enough available balance");
     window.ZenvyroTx.log({ id: newId("WD"), kind: "withdraw", sym, amount, status: "pending", sub: sym + " (" + a.net + ")", addr });
     window.closeModal(); say("Withdraw request sent");

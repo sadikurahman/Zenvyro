@@ -17,7 +17,7 @@
 <h2>2. About Zenvyro and ZENY</h2>
 <p>Zenvyro is a digital rewards and community platform. Members run time-based mining sessions inside the App and receive ZENY, a digital reward unit issued and recorded by Zenvyro.</p>
 <ul>
-<li><b>What "mining" means here.</b> In Zenvyro, mining is an in-App, session-based reward process. A session lasts one hour. It does not use your phone's processing power to secure a public blockchain, and the figures shown on screen, such as Mining Power or Hash Rate, are informational values of the App and do not represent computing power contributed by your device.</li>
+<li><b>What "mining" means here.</b> In Zenvyro, mining is an in-App, session-based reward process. A session lasts two hours. It does not use your phone's processing power to secure a public blockchain, and the figures shown on screen, such as Mining Power or Hash Rate, are informational values of the App and do not represent computing power contributed by your device.</li>
 <li><b>What ZENY is.</b> ZENY is a digital reward unit inside the App. It is not legal tender, not a bank deposit, not a share or security, and not a guaranteed claim on any asset. ZENY does not currently trade on a public exchange, and nothing in the App promises that it ever will.</li>
 <li><b>Reference rate.</b> The App shows a platform-set reference rate (currently 1 ZENY = 3 USDT) that is used for Exchange requests and for displaying approximate values. It is set by Zenvyro, it can be changed, and it is not a market price and not a promise that ZENY can be sold for that amount anywhere.</li>
 </ul>
@@ -46,7 +46,7 @@
 <ul>
 <li><b>Registration details.</b> You must give your full name, a valid email address, a mobile number, a password and a referral code. The referral code is mandatory.</li>
 <li><b>One person, one account.</b> Each person may hold only one account. Each device may be used for one account. We use technical checks, such as a device identifier, to apply this rule. Trying to avoid the rule (for example, by clearing data, using several browsers, emulators or other people's devices to create extra accounts) is a breach of these Terms.</li>
-<li><b>Your password.</b> Keep it secret and do not reuse it elsewhere. You are responsible for everything that happens through your account. Tell us at once through Contact Support if you think someone else has access.</li>
+<li><b>Your password.</b> It must be strong: at least 8 characters with uppercase and lowercase letters, a number and a symbol. Keep it secret and do not reuse it elsewhere. You are responsible for everything that happens through your account. Tell us at once through Contact Support if you think someone else has access.</li>
 <li><b>Verification.</b> Identity verification (KYC) is optional at the moment. We may make it required for certain actions, such as withdrawals, to protect members and meet legal duties.</li>
 <li><b>Our staff will never ask for your password</b> or any one-time code. Never share them with anyone.</li>
 </ul>
@@ -54,13 +54,13 @@
 <h2>6. Free Mining</h2>
 <p>Every member can mine for free on the Free Pack. No payment is required, now or later, to start mining or to keep your account.</p>
 <ul>
-<li><b>How a session works.</b> Tap the ZENY coin on the Home screen to start a one-hour session. You can tap the coin to pause; the time already completed is kept, and tapping again continues from the same point. When the full hour is complete, the coin shows Claim, and tapping it adds the reward to your Mining Available Balance.</li>
+<li><b>How a session works.</b> Tap the ZENY coin on the Home screen to start a two-hour session. You can tap the coin to pause; the time already completed is kept, and tapping again continues from the same point. When the full two hours are complete, the coin shows Claim, and tapping it adds the reward to your Mining Available Balance.</li>
 <li><b>Rewards are credited only on Claim</b> after a completed session. A session that you have not completed and claimed earns nothing.</li>
-<li><b>Daily Reward figure.</b> The "Daily Reward" number shown in the App is an illustration of what 24 completed hourly sessions would produce at your pack's rate. It is not a guarantee and not a payment promise.</li>
+<li><b>Daily Reward figure.</b> The "Daily Reward" number shown in the App is an illustration of what 12 completed two-hour sessions would produce at your pack's rate. It is not a guarantee and not a payment promise.</li>
 <li><b>Changes.</b> We may change rates, session rules or limits to keep the system fair and sustainable. Changes apply from the time we announce them in the App and do not reduce rewards you have already claimed.</li>
 </ul>
 <table class="tb"><tr><th>Pack</th><th>ZENY per hour</th></tr>
-<tr><td>Free</td><td>0.001984</td></tr><tr><td>Standard</td><td>0.002778</td></tr><tr><td>Silver</td><td>0.008681</td></tr><tr><td>Gold</td><td>0.021701</td></tr><tr><td>Platinum</td><td>0.063131</td></tr></table>
+<tr><td>Free</td><td>0.001587</td></tr><tr><td>Standard</td><td>0.002222</td></tr><tr><td>Silver</td><td>0.006945</td></tr><tr><td>Gold</td><td>0.017361</td></tr><tr><td>Platinum</td><td>0.050505</td></tr></table>
 
 <h2>7. Membership Packs (Optional)</h2>
 <p>Members who want more can choose a paid pack. A pack raises the hourly mining rate and the referral commission rate and adds extra features such as reports and support levels. Packs are optional and are never needed to use the App.</p>

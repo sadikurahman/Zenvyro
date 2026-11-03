@@ -80,11 +80,11 @@
 
   // ---- Membership packs (benefits shown when tapping the badge; commission rates are not shown) ----
   const PACKS = {
-    Free: { rate: 0.001984, ben: ["Referral Commission Income", "Basic Mining Dashboard", "Hourly Coin Counter", "Referral Link & History"] },
-    Standard: { rate: 0.002778, ben: ["Referral Commission Income", "Earning History", "Daily Reward Statistics", "Standard Support"] },
-    Silver: { rate: 0.008681, ben: ["Referral Commission Income", "Advanced Earning Statistics", "Daily & Monthly Reward Reports", "Faster Support"] },
-    Gold: { rate: 0.021701, ben: ["Referral Commission Income", "Detailed Mining & Reward Reports", "Withdrawal Status Alerts", "Priority Support"] },
-    Platinum: { rate: 0.063131, ben: ["Referral Commission Income", "Advanced Analytics Dashboard", "Detailed Transaction & Reward History", "Premium Account Support", "Highest Reward Allocation"] }
+    Free: { rate: 0.001587, ben: ["Referral Commission Income", "Basic Mining Dashboard", "Hourly Coin Counter", "Referral Link & History"] },
+    Standard: { rate: 0.002222, ben: ["Referral Commission Income", "Earning History", "Daily Reward Statistics", "Standard Support"] },
+    Silver: { rate: 0.006945, ben: ["Referral Commission Income", "Advanced Earning Statistics", "Daily & Monthly Reward Reports", "Faster Support"] },
+    Gold: { rate: 0.017361, ben: ["Referral Commission Income", "Detailed Mining & Reward Reports", "Withdrawal Status Alerts", "Priority Support"] },
+    Platinum: { rate: 0.050505, ben: ["Referral Commission Income", "Advanced Analytics Dashboard", "Detailed Transaction & Reward History", "Premium Account Support", "Highest Reward Allocation"] }
   };
 
   // ---- CSS ----
@@ -282,6 +282,8 @@
     const o = $("cpOld").value, n = $("cpNew").value, n2 = $("cpNew2").value;
     if (!o) return say("Enter your current password");
     if (n.length < 8) return say("New password must be at least 8 characters");
+    const pwIssue = window.ZENVYRO_AUTH && typeof window.ZENVYRO_AUTH.passwordIssue === "function" ? window.ZENVYRO_AUTH.passwordIssue(n) : "";
+    if (pwIssue) return say(pwIssue);
     if (n !== n2) return say("New passwords don't match");
     const auth = window.ZENVYRO_AUTH;
     if (!auth || typeof auth.changePassword !== "function") return say("Password can't be changed because no login system is connected");
@@ -323,7 +325,7 @@
 
   function faq() {
     const q = [
-      ["How does mining work?", "Tap Start Mining to begin a 1-hour session. When the hour ends, tap Claim Reward to add one hour of ZENY for your pack to your balance."],
+      ["How does mining work?", "Tap Start Mining to begin a 2-hour session. When the 2 hours end, tap Claim Reward to add two hours of ZENY for your pack to your balance."],
       ["When do I get referral income?", "Referral Income Commission can be claimed every night at 10 PM (Bangladesh time) and is added to your Exchange balance as ZENY. Purchase Bonus goes straight to your Wallet."],
       ["How does Exchange work?", "Send a request to exchange ZENY into another asset. When an admin accepts, it is credited to your Wallet at the rate at acceptance after a total 10% fee; if rejected, your ZENY is refunded."],
       ["How do Deposit and Withdraw work?", "Both are requests that an admin verifies and then accepts or rejects. When you request a withdrawal, that amount is locked."],

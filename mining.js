@@ -1,4 +1,4 @@
-/* Zenvyro — Step 1: Mining session (1 hour) + Claim Reward
+/* Zenvyro — Step 1: Mining session (2 hours) + Claim Reward
    JavaScript logic only. No changes to the HTML/CSS design.
    Data is kept in localStorage for now (demo/testing). It is editable in the browser,
    so real balances and payments must be verified on a backend. */
@@ -6,13 +6,14 @@
   "use strict";
 
   const RATES = {            // ZENY / hour
-    Free: 0.001984,
-    Standard: 0.002778,
-    Silver: 0.008681,
-    Gold: 0.021701,
-    Platinum: 0.063131
+    Free: 0.001587,
+    Standard: 0.002222,
+    Silver: 0.006945,
+    Gold: 0.017361,
+    Platinum: 0.050505
   };
-  const SESSION_MS = 60 * 60 * 1000;
+  const SESSION_HOURS = 2;                      // claim interval (hours)
+  const SESSION_MS = SESSION_HOURS * 60 * 60 * 1000;
   const STORE_KEY = "zenvyro_mining_v1";
   const ZENY_TO_USDT = 3; // reference only
 
@@ -51,7 +52,7 @@
   const say = msg => { if (typeof window.toast === "function") window.toast(msg); };
   const mmss = ms => {
     const s = Math.max(0, Math.ceil(ms / 1000));
-    return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
+    return Math.floor(s / 3600) + ":" + String(Math.floor(s % 3600 / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); // H:MM:SS, e.g. 2:00:00
   };
 
   function status() {
@@ -202,7 +203,7 @@
     state.sessionEnd = Date.now() + SESSION_MS;
     state.pausedRemaining = null;
     save(); render(); playStartAnimation();
-    say("1-hour mining session started");
+    say(SESSION_HOURS + "-hour mining session started");
   }
   function pauseSession() {
     const left = state.sessionEnd - Date.now();
@@ -219,7 +220,7 @@
     say("Mining resumed");
   }
   function claimReward() {
-    const reward = RATES[state.tier];
+    const reward = RATES[state.tier] * SESSION_HOURS; // reward = hourly rate x session hours
     state.balance = Math.round((state.balance + reward) * 1e8) / 1e8;
     state.totalMined = Math.round(((state.totalMined || 0) + reward) * 1e8) / 1e8;
     state.sessionEnd = null;

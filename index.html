@@ -70,11 +70,11 @@ function showSection(name){
  if(name==='mining'){document.getElementById('miningPanel').scrollIntoView({behavior:'smooth',block:'center'});return}
  if(name==='membership'){
  const packs=[
- {name:'Free Pack',price:'$0',desc:'0.001984 ZENY / hour',benefits:['2% Referral Commission','Basic Mining Dashboard','Hourly Coin Counter','Referral Link & History'],button:'Current plan'},
- {name:'Standard Pack',price:'$10',desc:'0.002778 ZENY / hour',benefits:['4% Referral Commission','Earning History','Daily Reward Statistics','Standard Support'],button:'Choose Standard'},
- {name:'Silver Pack',price:'$25',desc:'0.008681 ZENY / hour',benefits:['6% Referral Commission','Advanced Earning Statistics','Daily & Monthly Reward Reports','Faster Support'],button:'Choose Silver'},
- {name:'Gold Pack',price:'$50',desc:'0.021701 ZENY / hour',benefits:['8% Referral Commission','Detailed Mining & Reward Reports','Withdrawal Status Alerts','Priority Support'],button:'Choose Gold'},
- {name:'Platinum Pack',price:'$100',desc:'0.063131 ZENY / hour',benefits:['10% Referral Commission','Advanced Analytics Dashboard','Detailed Transaction & Reward History','Premium Account Support','Highest Reward Allocation'],button:'Choose Platinum'}];
+ {name:'Free Pack',price:'$0',desc:'0.001587 ZENY / hour',benefits:['2% Referral Commission','Basic Mining Dashboard','Hourly Coin Counter','Referral Link & History'],button:'Current plan'},
+ {name:'Standard Pack',price:'$10',desc:'0.002222 ZENY / hour',benefits:['4% Referral Commission','Earning History','Daily Reward Statistics','Standard Support'],button:'Choose Standard'},
+ {name:'Silver Pack',price:'$25',desc:'0.006945 ZENY / hour',benefits:['6% Referral Commission','Advanced Earning Statistics','Daily & Monthly Reward Reports','Faster Support'],button:'Choose Silver'},
+ {name:'Gold Pack',price:'$50',desc:'0.017361 ZENY / hour',benefits:['8% Referral Commission','Detailed Mining & Reward Reports','Withdrawal Status Alerts','Priority Support'],button:'Choose Gold'},
+ {name:'Platinum Pack',price:'$100',desc:'0.050505 ZENY / hour',benefits:['10% Referral Commission','Advanced Analytics Dashboard','Detailed Transaction & Reward History','Premium Account Support','Highest Reward Allocation'],button:'Choose Platinum'}];
  const cards=packs.map((p,i)=>`<article class="pack-card ${i===4?'featured':''}"><h3>${p.name}</h3><div class="pack-price">${p.price}</div><p>${p.desc}</p><ul>${p.benefits.map(x=>`<li>${x}</li>`).join('')}</ul><button class="btn ${i===0?'alt':''}" onclick="selectPack('${p.name}','${p.price}')">${p.button}</button></article>`).join('');
  openModal('Membership Packs',`<div class="pack-grid">${cards}</div><div class="modal-note">Rewards and benefits are display settings, not guaranteed earnings. Pack purchase and payouts are not connected yet; do not send funds to this frontend.</div>`);return;
  }
