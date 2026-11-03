@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07031a">
+<meta name="robots" content="noindex,nofollow">
+<title>Zenvyro Admin Panel</title>
+<style>
+:root{--bg:#07031a;--tx:#fff;--mu:#c9c3ff;--gr:#2ee59d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+body{min-height:100vh;background:radial-gradient(120% 60% at 80% -10%,#4a17b8 0,#1a0a52 38%,transparent 70%),radial-gradient(90% 50% at 0 40%,#2a0f7a55 0,transparent 70%),var(--bg)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+svg{display:block}
+.ic{width:24px;height:24px}
+.app{max-width:430px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px calc(env(safe-area-inset-bottom,0px) + 96px)}
+.card{position:relative;border:1.5px solid transparent;border-radius:16px;background:linear-gradient(135deg,#1b0c4d,#0c0630 70%) padding-box,linear-gradient(135deg,#9a55ff,#3a1b9a 45%,#b87cff) border-box;box-shadow:0 0 16px #7d3cff40,inset 0 0 22px #6a30ff22}
+.gold{background:linear-gradient(135deg,#1f1040,#0c0630 70%) padding-box,linear-gradient(135deg,#ffb340,#5a2f50 50%,#ffb340) border-box;box-shadow:0 0 16px #ff9d2e40,inset 0 0 22px #ffa02a18}
+.green{background:linear-gradient(135deg,#0b3a35,#07122b 70%) padding-box,linear-gradient(135deg,#2ee59d,#15506a 50%,#7affc0) border-box;box-shadow:0 0 16px #1fe59a45,inset 0 0 22px #1fe59a1a}
+.red{background:linear-gradient(135deg,#43101f,#0f0626 70%) padding-box,linear-gradient(135deg,#ff4d5e,#5a1a40 50%,#ff8a5e) border-box;box-shadow:0 0 16px #ff4d5e45,inset 0 0 22px #ff4d5e1a}
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;height:56px;margin-bottom:8px}
+.top .l{display:flex;align-items:center;gap:14px}
+.menu{width:34px;height:34px;display:grid;place-items:center}
+.menu svg{width:30px;height:30px;stroke:#fff;stroke-width:2.2;fill:none;stroke-linecap:round}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:48px;height:36px;filter:drop-shadow(0 0 8px #a45cff)}
+.bt b{display:block;font-size:17px;letter-spacing:3px;font-weight:800;line-height:1.1}
+.bt span{font-size:15px;color:#b57cff;font-weight:600}
+.me{display:flex;align-items:center;gap:6px}
+.av{position:relative;width:44px;height:44px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#b46dff,#4a1fb0);box-shadow:0 0 12px #8b3dff}
+.av svg{width:100%;height:100%;border-radius:50%}
+.av i{position:absolute;right:0;bottom:2px;width:11px;height:11px;border-radius:50%;background:#2ee59d;border:2px solid #07031a}
+.me .ch{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+/* welcome */
+.wel{display:flex;align-items:center;gap:12px;padding:10px 12px;margin-bottom:10px;overflow:hidden}
+.wel .crown{width:56px;height:56px;flex:none;fill:url(#gGold);filter:drop-shadow(0 0 8px #ffb34088)}
+.wel h2{margin:0;font-size:17px;font-weight:700}
+.wel p{margin:3px 0 0;font-size:13px;color:var(--mu)}
+.pill{position:absolute;right:10px;top:10px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#7affc0;padding:5px 10px;border-radius:20px;background:#0f3a3a99;border:1px solid #2ee59d55}
+.pill i{width:9px;height:9px;border-radius:50%;background:#2ee59d;box-shadow:0 0 8px #2ee59d;animation:pl 1.8s infinite}
+.pill.off{color:#ff8a94;border-color:#ff4d5e66;background:#3a0f1f99}.pill.off i{background:#ff4d5e;box-shadow:0 0 8px #ff4d5e;animation:none}
+@keyframes pl{50%{opacity:.4}}
+/* stats */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.st{display:flex;align-items:center;gap:10px;padding:12px 10px;min-height:66px}
+.st .ic{width:38px;height:38px;flex:none}
+.st small,.pf small{display:block;font-size:12px;color:#e6e2ff}
+.st b,.pf b{display:block;font-size:22px;font-weight:800;line-height:1.15;letter-spacing:.2px}
+.d{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:700;color:var(--gr)}
+.d svg{width:12px;height:12px;stroke:var(--gr);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.pf{display:grid;grid-template-columns:1fr 1fr;padding:12px 8px;margin-bottom:10px;background:linear-gradient(135deg,#1b0c4d,#0c0630 60%,#2a1a30) padding-box,linear-gradient(135deg,#9a55ff,#3a1b9a 50%,#ffb340) border-box}
+.pf>div{display:flex;align-items:center;gap:10px;padding:0 8px}
+.pf>div+div{border-left:1px solid #7d3cff55}
+.pf .ic{width:34px;height:34px;flex:none}
+/* gradients on icons */
+.fp{fill:url(#gPur)}.fg{fill:url(#gGold)}.fn{fill:url(#gGrn)}.fr{fill:url(#gRed)}
+.sk{fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+/* section */
+.sec{padding:12px;margin-bottom:10px}
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sh h3{margin:0;display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700}
+.sh h3 .ic{width:28px;height:28px}
+.btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:18px;border:1px solid #8b57ff;background:#2a1a6a66;color:#fff}
+.btn svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.rng{position:relative}
+.rng .menu2{display:none;position:absolute;right:0;top:34px;z-index:5;min-width:130px;border-radius:12px;border:1px solid #8b57ff;background:#150a40;padding:4px}
+.rng.open .menu2{display:block}
+.menu2 button{display:block;width:100%;text-align:left;padding:8px 10px;font-size:13px;border-radius:8px}
+.menu2 button.on,.menu2 button:hover{background:#3a1f9a}
+.lg{display:flex;justify-content:flex-end;gap:18px;font-size:13px;margin:2px 4px 0}
+.lg span{display:flex;align-items:center;gap:6px}.lg i{width:12px;height:12px;border-radius:50%}
+#chart{width:100%;height:auto}
+#chart text{fill:#d9d4ff;font-size:11px}
+/* pending */
+.rq{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid #6a3cff33}
+.rq:first-of-type{border-top:0}
+.rq .bx{width:38px;height:34px;border-radius:9px;display:grid;place-items:center;flex:none}
+.rq .bx svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bx.p{background:linear-gradient(135deg,#8a3dff,#4a1fb0)}.bx.g{background:linear-gradient(135deg,#17c98a,#0a6a5a)}.bx.b{background:linear-gradient(135deg,#2f7bff,#1a3fb0)}
+.rq span.n{flex:1;font-size:14px;color:#ece9ff}
+.bd{min-width:26px;height:26px;border-radius:50%;background:#e8222f;display:grid;place-items:center;font-size:13px;font-weight:700;box-shadow:0 0 8px #ff2a3a88;margin-right:6px}
+.bd.z{visibility:hidden}
+.sm{font-size:13px;font-weight:600;padding:5px 14px;border-radius:9px;border:1px solid #8b57ff;background:#2a1a6a99}
+.ap{border-color:#2ee59d;background:linear-gradient(135deg,#1f9a3a,#0f7a2a);color:#b8ffcf}
+.ap:disabled{opacity:.5}
+/* membership */
+.ms{display:flex;align-items:center}
+.ms .dm{width:96px;height:80px;flex:none;filter:drop-shadow(0 0 10px #a45cff)}
+.ms .col{flex:1;padding:0 8px}
+.ms .col+.col{border-left:1px solid #7d3cff55}
+.ms small{font-size:13px;color:#e6e2ff}
+.ms b{display:block;font-size:22px;font-weight:800;margin:2px 0}
+/* quick */
+.qa{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.qa button{height:64px;border-radius:12px;border:1px solid #6a3cff77;background:#170a4488;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;line-height:1.1;text-align:center}
+.qa svg{width:26px;height:26px;fill:#c9a8ff}
+/* nav */
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 6px);width:min(430px,calc(100% - 12px));display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:6px;border-radius:22px;border:1.5px solid #7d3cff77;background:#0d0630ee;backdrop-filter:blur(10px);box-shadow:0 0 18px #7d3cff55;z-index:20}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:16px;font-size:13px;color:#e6e2ff}
+.nav svg{width:26px;height:26px;fill:#fff}
+.nav button.on{background:linear-gradient(135deg,#7a2dff,#4a1fb0);border:1px solid #b78bff;box-shadow:0 0 14px #8b3dffaa;color:#fff;font-weight:600}
+/* sheet + toast */
+.sheet{position:fixed;inset:0;z-index:50;background:#02000dcc;display:none;align-items:flex-end;justify-content:center}
+.sheet.on{display:flex}
+.box{width:min(430px,100%);max-height:84vh;overflow:auto;border-radius:22px 22px 0 0;border:1.5px solid #7d3cff88;border-bottom:0;background:linear-gradient(180deg,#1b0c4d,#0a0428);padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 18px)}
+.box .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.box .hd b{font-size:18px}
+.x{width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:#3a1f9a}
+.x svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.6;stroke-linecap:round}
+.li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid #6a3cff33;font-size:14px}
+.li:first-child{border-top:0}.li small{display:block;color:#b9b2f5;font-size:12px;margin-top:2px}
+.li a{color:#fff;text-decoration:none;display:block;width:100%}
+.tg{width:46px;height:26px;border-radius:14px;background:#3a2a6a;position:relative;flex:none;transition:.2s}
+.tg:after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.tg.on{background:#7a2dff}.tg.on:after{left:23px}
+textarea{width:100%;min-height:96px;border-radius:12px;border:1px solid #8b57ff;background:#0f0634;color:#fff;padding:10px;font:inherit;font-size:14px;resize:vertical}
+.pr{width:100%;margin-top:10px;padding:12px;border-radius:12px;font-weight:700;background:linear-gradient(135deg,#8a3dff,#4a1fb0);border:1px solid #b78bff}
+.note{font-size:12px;color:#b9b2f5;margin:8px 0 0}
+.toast{position:fixed;left:50%;bottom:104px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:#2a1a6a;border:1px solid #8b57ff;padding:10px 16px;border-radius:12px;font-size:13px;z-index:60;transition:.25s;max-width:90%}
+.toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset="1" stop-color="#f29a1f"/></linearGradient>
+<linearGradient id="gPur" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c58bff"/><stop offset="1" stop-color="#7a2dff"/></linearGradient>
+<linearGradient id="gGrn" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3dffb0"/><stop offset="1" stop-color="#0aa86a"/></linearGradient>
+<linearGradient id="gRed" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6a6a"/><stop offset="1" stop-color="#d81f3a"/></linearGradient>
+<linearGradient id="gZ" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff7ae6"/><stop offset=".5" stop-color="#a45cff"/><stop offset="1" stop-color="#5a3dff"/></linearGradient>
+</defs>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.6"/><path d="M2.5 20c0-3.7 2.9-6 6.5-6s6.5 2.3 6.5 6z"/><circle cx="17.2" cy="9" r="2.8"/><path d="M16 14.3c3.3.1 5.5 2 5.5 5.7h-4.3c0-2.3-.4-4.1-1.2-5.7z"/></symbol>
+<symbol id="i-dia" viewBox="0 0 24 24"><path class="sk" stroke="#ffc24d" d="M6.2 3h11.6L22 9l-10 12L2 9z M2 9h20 M9 3l-2 6 5 12 5-12-2-6"/></symbol>
+<symbol id="i-wal" viewBox="0 0 24 24"><path d="M3 7a3 3 0 0 1 3-3h11v3h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a3 3 0 0 1-3-3z"/><path d="M14 11h7v5h-7a2.5 2.5 0 0 1 0-5z" fill="#07122b"/><circle cx="16.3" cy="13.5" r="1.1" fill="#7affc0"/></symbol>
+<symbol id="i-wd" viewBox="0 0 24 24"><path d="M3 6a2 2 0 0 1 2-2h12v3h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="16" cy="15" r="5.2" fill="#2a0a20"/><path d="M16 18.2v-6.4M13.3 14.4 16 11.7l2.7 2.7" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-bars" viewBox="0 0 24 24"><rect x="3" y="14" width="4.6" height="7" rx="1.2"/><rect x="9.7" y="9" width="4.6" height="12" rx="1.2"/><rect x="16.4" y="3" width="4.6" height="18" rx="1.2"/></symbol>
+<symbol id="i-cup" viewBox="0 0 24 24"><path d="M7 3h10v6.2a5 5 0 0 1-10 0z"/><path class="sk" stroke="#f4a62a" stroke-width="1.8" d="M7 5H3.2v1.8A4 4 0 0 0 7 10.8M17 5h3.8v1.8a4 4 0 0 1-3.8 4"/><path d="M10.6 14h2.8v3.6h-2.8z"/><rect x="7.5" y="17.6" width="9" height="3.2" rx="1"/><path d="M12 5.2l.9 1.9 2 .2-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.2z" fill="#a8641a"/></symbol>
+<symbol id="i-crown" viewBox="0 0 24 24"><path d="M2.6 8l4.7 4.2L12 3.5l4.7 8.7L21.4 8l-2 11.2H4.6z"/><rect x="4.8" y="19.8" width="14.4" height="1.8" rx=".9"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M12 2.8a6 6 0 0 0-6 6V13l-2 3.2h16L18 13V8.8a6 6 0 0 0-6-6z"/><path d="M9.6 18.2a2.4 2.4 0 0 0 4.8 0z"/></symbol>
+<symbol id="i-cash" viewBox="0 0 24 24"><path d="M3.5 7.5h17M6 4.5h12M5 10.5h14v9H5z M12 12.3v5.4M10 14l2-1.7 2 1.7" fill="none"/></symbol>
+<symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" fill="none"/></symbol>
+<symbol id="i-sw" viewBox="0 0 24 24"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4" fill="none"/></symbol>
+<symbol id="i-mega" viewBox="0 0 24 24"><path d="M3 10v4a1 1 0 0 0 1 1h2.5l8 4V5l-8 4H4a1 1 0 0 0-1 1z"/><path d="M6.5 15l1.2 5h2.6l-1-4.6z"/><path d="M17.5 9a4.2 4.2 0 0 1 0 6" stroke="#c9a8ff" stroke-width="1.8" fill="none" stroke-linecap="round"/></symbol>
+<symbol id="i-gift" viewBox="0 0 24 24"><rect x="3.5" y="10" width="17" height="11" rx="1.4"/><rect x="2.5" y="6.5" width="19" height="4" rx="1.4"/><path d="M12 6.5C9.2 6.5 7.2 5.8 7.6 4.2 8.2 2.2 11.4 3.6 12 6.5zm0 0c2.8 0 4.8-.7 4.4-2.3C15.8 2.2 12.6 3.6 12 6.5z" fill="#c9a8ff"/><path d="M12 6.5V21" stroke="#170a44" stroke-width="1.6"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><path d="M12 8.6a3.4 3.4 0 1 0 0 6.8 3.4 3.4 0 0 0 0-6.8z"/><path d="M10.4 2.5h3.2l.5 2.4 1.5.7 2.1-1.3 2.2 2.2-1.3 2.1.7 1.5 2.4.5v3.2l-2.4.5-.7 1.5 1.3 2.1-2.2 2.2-2.1-1.3-1.5.7-.5 2.4h-3.2l-.5-2.4-1.5-.7-2.1 1.3-2.2-2.2 1.3-2.1-.7-1.5-2.4-.5v-3.2l2.4-.5.7-1.5-1.3-2.1 2.2-2.2 2.1 1.3 1.5-.7zM12 9.6a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8z" fill-rule="evenodd"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M5.5 2.5h9l4.5 4.5v14.5h-13.5z" fill-rule="evenodd"/><path d="M8.5 11.5h7M8.5 15h7M8.5 18.2h4" stroke="#0d0630" stroke-width="1.8" stroke-linecap="round"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M12 20V5M6 10.5 12 4.5l6 6"/></symbol>
+<symbol id="i-rt" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
+</svg>
+
+<div class="app">
+  <div class="top">
+    <div class="l">
+      <button class="menu" id="bMenu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 48 34" aria-hidden="true"><path fill="url(#gZ)" d="M12 2H46L40 10H6zM40 10 16 24H6L30 10zM6 24H40L34 32H0z"/></svg>
+        <div class="bt"><b>ZENVYRO</b><span>Admin Panel</span></div>
+      </div>
+    </div>
+    <button class="me" id="bMe" aria-label="Account">
+      <span class="av"><svg viewBox="0 0 44 44"><rect width="44" height="44" fill="#1a0f4a"/><path d="M6 44c1-10 8-14 16-14s15 4 16 14z" fill="#16102e"/><path d="M18 30l4 6 4-6z" fill="#fff"/><circle cx="22" cy="19" r="9" fill="#e8b48a"/><path d="M12.5 17c0-8 5-11 10-11s9 3 9 11c-2-4-5-5-9.500-5s-7 1-9.500 5z" fill="#1b1030"/><rect x="13.500" y="16.500" width="17" height="5" rx="2.500" fill="#0a0716"/><path d="M16.500 25c2 2 9 2 11 0" stroke="#7a4a30" stroke-width="1.200" fill="none"/></svg><i></i></span>
+      <svg class="ch" viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg>
+    </button>
+  </div>
+
+  <div class="card gold wel" style="background:linear-gradient(120deg,#1b0c4d,#2a1070 60%,#1a0a50) padding-box,linear-gradient(135deg,#a05cff,#3a1b9a 50%,#c58bff) border-box;box-shadow:0 0 16px #7d3cff55">
+    <svg class="crown" viewBox="0 0 24 24"><use href="#i-crown"/></svg>
+    <div><h2>Welcome Back, Admin!</h2><p>Manage your platform with ease.</p></div>
+    <div class="pill" id="srv"><i></i><span>Server Online</span></div>
+  </div>
+
+  <div class="g2">
+    <div class="card st"><svg class="ic fp"><use href="#i-users"/></svg><div><small>Total Users</small><b data-k="users" data-f="n">0</b><span class="d"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg><em data-d="usersD" style="font-style:normal"></em></span></div></div>
+    <div class="card gold st"><svg class="ic"><use href="#i-dia"/></svg><div><small>Premium Members</small><b data-k="premium" data-f="n">0</b><span class="d"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg><em data-d="premD" style="font-style:normal"></em></span></div></div>
+    <div class="card green st"><svg class="ic fn"><use href="#i-wal"/></svg><div><small>Total Deposit</small><b data-k="deposit" data-f="m">0</b><span class="d"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg><em data-d="depD" style="font-style:normal"></em></span></div></div>
+    <div class="card red st"><svg class="ic fr"><use href="#i-wd"/></svg><div><small>Total Withdraw</small><b data-k="withdraw" data-f="m">0</b><span class="d"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg><em data-d="wdD" style="font-style:normal"></em></span></div></div>
+  </div>
+
+  <div class="card pf">
+    <div><svg class="ic fp"><use href="#i-bars"/></svg><div><small>Total Profit</small><b data-k="profit" data-f="m">0</b><span class="d"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg><em data-d="profD" style="font-style:normal"></em></span></div></div>
+    <div><svg class="ic fg"><use href="#i-cup"/></svg><div><small>Total Sales</small><b data-k="sales" data-f="m">0</b><span class="d"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg><em data-d="salesD" style="font-style:normal"></em></span></div></div>
+  </div>
+
+  <div class="card sec">
+    <div class="sh"><h3><svg class="ic fp"><use href="#i-bars"/></svg>Platform Overview</h3>
+      <div class="rng" id="rng"><button class="btn" id="rngB"><span id="rngT">Last 7 Days</span><svg viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg></button>
+        <div class="menu2"><button data-n="7" class="on">Last 7 Days</button><button data-n="14">Last 14 Days</button><button data-n="30">Last 30 Days</button></div></div></div>
+    <div class="lg"><span><i style="background:#a45cff;box-shadow:0 0 8px #a45cff"></i>Users</span><span><i style="background:#ffc233;box-shadow:0 0 8px #ffc233"></i>Profit</span></div>
+    <svg id="chart" viewBox="0 0 360 200" role="img" aria-label="Platform overview chart"></svg>
+  </div>
+
+  <div class="card sec">
+    <div class="sh"><h3><svg class="ic fg"><use href="#i-bell"/></svg>Pending Requests</h3><button class="btn" data-open="req">View All<svg viewBox="0 0 24 24"><use href="#i-rt"/></svg></button></div>
+    <div id="rq"></div>
+  </div>
+
+  <div class="card sec" style="padding-bottom:8px">
+    <div class="sh"><h3><svg class="ic fg"><use href="#i-crown"/></svg>Membership Sales</h3><button class="btn" data-open="rep">View Report<svg viewBox="0 0 24 24"><use href="#i-rt"/></svg></button></div>
+    <div class="ms">
+      <svg class="dm" viewBox="0 0 96 80"><defs><linearGradient id="gD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9a8ff"/><stop offset="1" stop-color="#6a22e8"/></linearGradient></defs><path d="M26 8h44l22 22-44 46L4 30z" fill="url(#gD)"/><path d="M4 30h88M26 8l22 68 22-68M26 8l-8 22 30 46M70 8l8 22-30 46" stroke="#f0d6ff" stroke-opacity=".7" stroke-width="1.400" fill="none"/></svg>
+      <div class="col"><small>Today's Sales</small><b data-k="today" data-f="m2">0</b><span class="d"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg><em data-d="todayD" style="font-style:normal"></em></span></div>
+      <div class="col"><small>This Month</small><b data-k="month" data-f="m2">0</b><span class="d"><svg viewBox="0 0 24 24"><use href="#i-up"/></svg><em data-d="monthD" style="font-style:normal"></em></span></div>
+    </div>
+  </div>
+
+  <div class="card sec">
+    <div class="sh"><h3><svg class="ic fg"><path d="M13.500 2 4 13.500h6.500L9.500 22 20 9.500h-6.700z"/></svg>Quick Actions</h3></div>
+    <div class="qa">
+      <button data-open="ann"><svg viewBox="0 0 24 24"><use href="#i-mega"/></svg>Send<br>Announcement</button>
+      <button data-open="mem"><svg viewBox="0 0 24 24"><use href="#i-gift"/></svg>Manage<br>Membership</button>
+      <button data-open="set"><svg viewBox="0 0 24 24"><use href="#i-gear"/></svg>System<br>Settings</button>
+      <button data-open="log"><svg viewBox="0 0 24 24"><use href="#i-bars"/></svg>View Logs</button>
+    </div>
+  </div>
+</div>
+
+<nav class="nav" id="nav">
+  <button class="on" data-nav="dash"><svg viewBox="0 0 24 24"><use href="#i-grid"/></svg>Dashboard</button>
+  <button data-nav="usr"><svg viewBox="0 0 24 24"><use href="#i-users"/></svg>Users</button>
+  <button data-nav="txn"><svg viewBox="0 0 24 24"><use href="#i-doc"/></svg>Transactions</button>
+  <button data-nav="set"><svg viewBox="0 0 24 24"><use href="#i-gear"/></svg>Settings</button>
+  <button data-nav="rep"><svg viewBox="0 0 24 24"><use href="#i-crown"/></svg>Reports</button>
+</nav>
+
+<div class="sheet" id="sheet"><div class="box"><div class="hd"><b id="shT"></b><button class="x" id="shX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div><div id="shB"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  "use strict";
+  /* Zenvyro Admin Panel. Demo preview: figures are sample data until a backend is connected.
+     To connect real data later, set window.ZENVYRO_ADMIN_ENDPOINT to a JSON URL with the same keys as DEMO. */
+  const KEY = "zenvyro_admin_v1";
+  const DEMO = { users: 48750, usersD: 12.5, premium: 12380, premD: 8.3, deposit: 245780, depD: 15.2, withdraw: 198650, wdD: 13.7,
+    profit: 47130, profD: 18.9, sales: 12580, salesD: 21.4, today: 1250, todayD: 16.7, month: 12580, monthD: 22.3 };
+  const PACKS = [["Free", 0, 0.001587], ["Standard", 10, 0.002222], ["Silver", 25, 0.006945], ["Gold", 50, 0.017361], ["Platinum", 100, 0.050505]];
+  const ROWS = [["wd", "Withdrawal Requests", "i-cash", "p", "Withdrawal"], ["dep", "Deposit Requests", "i-dl", "g", "Deposit"], ["ex", "Exchange Requests", "i-sw", "b", "Exchange"]];
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  let data = { ...DEMO }, days = 7;
+  let st = { pend: { wd: 12, dep: 8, ex: 6 }, set: { maint: false, reg: true, wdraw: true }, logs: [] };
+  try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s) st = { ...st, ...s, pend: { ...st.pend, ...s.pend }, set: { ...st.set, ...s.set } }; } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+  const log = t => { st.logs.unshift({ t, ts: Date.now() }); st.logs = st.logs.slice(0, 40); save(); };
+  const fmt = { n: v => Math.round(v).toLocaleString("en-US"), m: v => "$" + Math.round(v).toLocaleString("en-US"),
+    m2: v => "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) };
+  const ico = (id, cls) => `<svg class="ic ${cls || ""}" viewBox="0 0 24 24"><use href="#${id}"/></svg>`;
+  const when = ts => new Date(ts).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  let tt; function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("on"), 2200); }
+
+  /* ---- stats ---- */
+  function paint(anim) {
+    $$("[data-d]").forEach(e => e.textContent = "+" + Number(data[e.dataset.d]).toFixed(1) + "%");
+    $$("[data-k]").forEach(e => {
+      const to = Number(data[e.dataset.k]) || 0, f = fmt[e.dataset.f], t0 = performance.now();
+      if (!anim) { e.textContent = f(to); return; }
+      (function step(t) { const p = Math.min(1, (t - t0) / 700); e.textContent = f(to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); })(t0);
+    });
+  }
+  async function load() {
+    const url = window.ZENVYRO_ADMIN_ENDPOINT;
+    if (url) {
+      try {
+        const r = await fetch(url, { headers: { Accept: "application/json" }, cache: "no-store" });
+        if (!r.ok) throw 0;
+        const j = await r.json();
+        for (const k in DEMO) if (Number.isFinite(+j[k])) data[k] = +j[k];
+      } catch (e) { toast("Could not load live data"); }
+    }
+    paint(true);
+  }
+
+  /* ---- chart ---- */
+  function series(n, seed, base, top) {
+    if (n === 7) return seed === 1 ? [4800, 9800, 14000, 10400, 15500, 14200, 28500] : [1500, 7600, 10800, 7200, 12500, 11800, 22000];
+    let a = [], r = seed * 9301; for (let i = 0; i < n; i++) { r = (r * 49297 + 233280) % 233280; a.push(base + (top - base) * (i / (n - 1)) * .8 + (r / 233280 - .5) * top * .22); }
+    return a.map(v => Math.max(1500, Math.min(29000, v)));
+  }
+  function curve(p) { let d = "M" + p[0][0] + " " + p[0][1]; for (let i = 0; i < p.length - 1; i++) { const a = p[i - 1] || p[i], b = p[i], c = p[i + 1], e = p[i + 2] || c;
+    d += `C${(b[0] + (c[0] - a[0]) / 6).toFixed(1)} ${(b[1] + (c[1] - a[1]) / 6).toFixed(1)} ${(c[0] - (e[0] - b[0]) / 6).toFixed(1)} ${(c[1] - (e[1] - b[1]) / 6).toFixed(1)} ${c[0]} ${c[1]}`; } return d; }
+  function chart() {
+    const L = 40, R = 348, T = 12, B = 168, W = R - L, H = B - T, n = days;
+    const x = i => L + W * i / (n - 1), y = v => B - H * Math.min(v, 30000) / 30000;
+    let g = "";
+    ["30K", "20K", "10K", "0K"].forEach((l, i) => { const yy = T + H * i / 3; g += `<line x1="${L}" x2="${R}" y1="${yy}" y2="${yy}" stroke="#6a3cff" stroke-opacity=".28"/><text x="${L - 8}" y="${yy + 4}" text-anchor="end">${l}</text>`; });
+    const step = n > 7 ? Math.ceil(n / 7) : 1, now = new Date();
+    for (let i = 0; i < n; i++) {
+      g += `<line x1="${x(i)}" x2="${x(i)}" y1="${T}" y2="${B}" stroke="#6a3cff" stroke-opacity=".16"/>`;
+      if ((n - 1 - i) % step === 0) { const d = new Date(now); d.setDate(now.getDate() - (n - 1 - i)); g += `<text x="${x(i)}" y="${B + 20}" text-anchor="middle">${d.toLocaleDateString("en-US", { month: "short", day: "2-digit" })}</text>`; }
+    }
+    [[series(n, 2, 1500, 22000), "#ffc233", "gy"], [series(n, 1, 4000, 28000), "#a45cff", "gp"]].forEach(([s, c, id]) => {
+      const p = s.map((v, i) => [+x(i).toFixed(1), +y(v).toFixed(1)]), d = curve(p);
+      g += `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".55"/><stop offset="1" stop-color="${c}" stop-opacity=".05"/></linearGradient></defs>`;
+      g += `<path d="${d}L${R} ${B}L${L} ${B}Z" fill="url(#${id})"/><path d="${d}" fill="none" stroke="${c}" stroke-width="2.4" stroke-linecap="round" style="filter:drop-shadow(0 0 4px ${c})"/>`;
+      if (n <= 14) p.forEach(q => g += `<circle cx="${q[0]}" cy="${q[1]}" r="4.2" fill="${c}" stroke="#fff" stroke-opacity=".85" stroke-width="1.200"/>`);
+    });
+    $("#chart").innerHTML = g;
+  }
+
+  /* ---- pending requests ---- */
+  function renderReq() {
+    $("#rq").innerHTML = ROWS.map(r => `<div class="rq"><div class="bx ${r[3]}"><svg viewBox="0 0 24 24"><use href="#${r[2]}"/></svg></div><span class="n">${r[1]}</span><span class="bd ${st.pend[r[0]] ? "" : "z"}">${st.pend[r[0]]}</span><button class="sm" data-view="${r[0]}">View</button><button class="sm ap" data-appr="${r[0]}" ${st.pend[r[0]] ? "" : "disabled"}>Approve</button></div>`).join("");
+  }
+  function approve(t) {
+    if (!st.pend[t]) return toast("No pending requests");
+    st.pend[t]--; const r = ROWS.find(x => x[0] === t); log(r[4] + " request approved"); save(); renderReq(); toast(r[4] + " request approved");
+  }
+  function reqItems(t) {
+    const n = Math.min(st.pend[t], 12), r = ROWS.find(x => x[0] === t), seed = { wd: 37, dep: 53, ex: 71 }[t];
+    return Array.from({ length: n }, (_, i) => { const id = "ZV-" + (10000 + (seed * (i + 3) * 97) % 89999), amt = 10 + (seed * (i + 5)) % 190;
+      return `<div class="li"><div>${id}<small>${r[4]} · $${amt}.00</small></div><button class="sm ap" data-appr2="${t}">Approve</button></div>`; }).join("") || '<div class="li">No pending requests</div>';
+  }
+
+  /* ---- sheets ---- */
+  const tg = (k, label, sub) => `<div class="li"><div>${label}<small>${sub}</small></div><button class="tg ${st.set[k] ? "on" : ""}" data-tg="${k}" aria-label="${label}"></button></div>`;
+  const PAGES = {
+    req: () => ["Pending Requests", ROWS.map(r => `<div class="li" style="font-weight:700">${r[1]}<span class="bd ${st.pend[r[0]] ? "" : "z"}" style="margin:0">${st.pend[r[0]]}</span></div>` + reqItems(r[0])).join("")],
+    rep: () => ["Membership Report", `<div class="li"><div>Today's Sales<small>Demo figure</small></div><b>${fmt.m2(data.today)}</b></div><div class="li"><div>This Month<small>Demo figure</small></div><b>${fmt.m2(data.month)}</b></div>` + PACKS.slice(1).map((p, i) => `<div class="li"><div>${p[0]} Pack<small>$${p[1]} · ${[420, 260, 140, 60][i]} active members</small></div><b>$${(p[1] * [420, 260, 140, 60][i]).toLocaleString("en-US")}</b></div>`).join("")],
+    ann: () => ["Send Announcement", '<textarea id="annT" maxlength="300" placeholder="Write your announcement"></textarea><button class="pr" id="annS">Send Announcement</button><p class="note">Saved on this device only. Connect the backend to deliver it to users.</p>'],
+    mem: () => ["Manage Membership", PACKS.map(p => `<div class="li"><div>${p[0]} Pack<small>${p[2].toFixed(6)} ZENY / hour</small></div><b>$${p[1]}</b></div>`).join("") + '<p class="note">Pack prices and rates are read-only until the backend is connected.</p>'],
+    set: () => ["System Settings", tg("maint", "Maintenance Mode", "Pause the app for all users") + tg("reg", "New Registrations", "Allow new accounts") + tg("wdraw", "Withdrawals", "Allow withdrawal requests") + '<p class="note">Settings are stored on this device until the backend is connected.</p>'],
+    log: () => ["Activity Logs", st.logs.length ? st.logs.map(l => `<div class="li"><div>${esc(l.t)}<small>${when(l.ts)}</small></div></div>`).join("") : '<div class="li">No activity yet</div>'],
+    usr: () => ["Users", ["Free", "Standard", "Silver", "Gold", "Platinum", "Free", "Free", "Standard"].map((p, i) => `<div class="li"><div>ZV-${20410 + i * 137}<small>${p} Pack · Joined ${when(Date.now() - i * 86400000 * 3).slice(0, 6)}</small></div><small>Active</small></div>`).join("") + '<p class="note">Sample list. Real users appear after the backend is connected.</p>'],
+    txn: () => ["Transactions", [["Deposit", 100], ["Withdraw", 45], ["Exchange", 20], ["Deposit", 50], ["Withdraw", 15], ["Exchange", 8]].map((t, i) => `<div class="li"><div>${t[0]}<small>${when(Date.now() - i * 5400000)}</small></div><b>$${t[1]}.00</b></div>`).join("") + '<p class="note">Sample list. Real transactions appear after the backend is connected.</p>'],
+    menu: () => ["Menu", [["dash", "Dashboard"], ["usr", "Users"], ["txn", "Transactions"], ["set", "Settings"], ["rep", "Reports"]].map(a => `<div class="li"><a href="#" data-go="${a[0]}">${a[1]}</a></div>`).join("") + '<div class="li"><a href="index.html">Back to Zenvyro app</a></div>'],
+    me: () => ["Admin Account", '<div class="li"><div>Administrator<small>Full access (demo)</small></div></div><div class="li"><a href="index.html">Back to Zenvyro app</a></div>']
+  };
+  function open(k) {
+    const [t, h] = PAGES[k](); $("#shT").textContent = t; $("#shB").innerHTML = h; $("#sheet").classList.add("on"); $("#sheet").dataset.k = k;
+  }
+  const close = () => $("#sheet").classList.remove("on");
+  function go(k) {
+    $$("#nav button").forEach(b => b.classList.toggle("on", b.dataset.nav === k));
+    if (k === "dash") { close(); window.scrollTo({ top: 0, behavior: "smooth" }); } else open(k);
+  }
+
+  document.addEventListener("click", e => {
+    const q = a => e.target.closest(a);
+    let b;
+    if ((b = q("[data-appr]"))) approve(b.dataset.appr);
+    else if ((b = q("[data-view]"))) { const r = ROWS.find(x => x[0] === b.dataset.view); $("#shT").textContent = r[1]; $("#shB").innerHTML = reqItems(r[0]); $("#sheet").classList.add("on"); $("#sheet").dataset.k = "v" + r[0]; }
+    else if ((b = q("[data-appr2]"))) { const t = b.dataset.appr2; approve(t); const o = $("#sheet").dataset.k; if (o === "req") open("req"); else { $("#shB").innerHTML = reqItems(t); } }
+    else if ((b = q("[data-open]"))) open(b.dataset.open);
+    else if ((b = q("[data-nav]"))) go(b.dataset.nav);
+    else if ((b = q("[data-go]"))) { e.preventDefault(); go(b.dataset.go); }
+    else if ((b = q("[data-tg]"))) { const k = b.dataset.tg; st.set[k] = !st.set[k]; b.classList.toggle("on", st.set[k]); log("Setting changed: " + k + " " + (st.set[k] ? "on" : "off")); save(); }
+    else if (q("#annS")) { const v = $("#annT").value.trim(); if (!v) return toast("Write a message first"); log("Announcement: " + v.slice(0, 60)); toast("Announcement saved"); close(); }
+    else if (q("#bMenu")) open("menu");
+    else if (q("#bMe")) open("me");
+    else if (q("#shX") || e.target.id === "sheet") close();
+    else if (q("#rngB")) $("#rng").classList.toggle("open");
+    else if ((b = q(".menu2 button"))) { days = +b.dataset.n; $$(".menu2 button").forEach(x => x.classList.toggle("on", x === b)); $("#rngT").textContent = "Last " + days + " Days"; $("#rng").classList.remove("open"); chart(); }
+    else if (!q("#rng")) $("#rng").classList.remove("open");
+  });
+
+  function net() { const s = $("#srv"), on = navigator.onLine !== false; s.classList.toggle("off", !on); s.querySelector("span").textContent = on ? "Server Online" : "Server Offline"; }
+  window.addEventListener("online", net); window.addEventListener("offline", net);
+  net(); renderReq(); chart(); load();
+})();
+</script>
+</body>
+</html>

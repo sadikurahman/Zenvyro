@@ -27,11 +27,12 @@
   }
 
   function load() {
-    const base = { tier: "Free", balance: 0, sessionEnd: null, pausedRemaining: null, totalMined: 0 };
+    const base = { v: 2, tier: "Free", balance: 0, sessionEnd: null, pausedRemaining: null, totalMined: 0 };
     try {
       const s = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
       if (!s) return base;
-      return {
+      const o = {
+        v: 2,
         tier: normTier(window.ZENVYRO_TIER || s.tier),
         balance: Number.isFinite(+s.balance) && +s.balance >= 0 ? +s.balance : 0,
         sessionEnd: Number.isFinite(+s.sessionEnd) && +s.sessionEnd > 0 ? +s.sessionEnd : null,
@@ -39,6 +40,16 @@
         totalMined: Number.isFinite(+s.totalMined) && +s.totalMined >= 0 ? +s.totalMined
           : (Number.isFinite(+s.balance) && +s.balance > 0 ? +s.balance : 0)
       };
+      // Old 1-hour session saved before the 2-hour update: finish it cleanly so the new 2-hour timer starts fresh
+      if (s.v !== 2 && (o.sessionEnd || o.pausedRemaining)) {
+        if (o.sessionEnd && o.sessionEnd <= Date.now()) {
+          const r = RATES[o.tier];                       // the completed 1-hour session is credited once
+          o.balance = Math.round((o.balance + r) * 1e8) / 1e8;
+          o.totalMined = Math.round((o.totalMined + r) * 1e8) / 1e8;
+        }
+        o.sessionEnd = null; o.pausedRemaining = null;
+      }
+      return o;
     } catch (e) { return base; }
   }
 
