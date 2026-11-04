@@ -2,7 +2,6 @@
    Settings (all optional, set them before this file loads):
      window.ZENVYRO_PHASE1_START  = "2026-11-05T00:00:00+06:00"   // when the 120-day phase starts
      window.ZENVYRO_COMMUNITY     = { telegram:"https://t.me/...", twitter:"https://x.com/...", youtube:"https://youtube.com/...", email:"support@..." }
-     window.ZENVYRO_INFO          = { about:"text", whitepaper:"https://..." }
 */
 (() => {
   "use strict";
@@ -42,26 +41,10 @@
   /* ---------- Footer links ---------- */
   const row = (a, b) => `<div style="display:block"><strong style="display:block">${a}</strong><span style="display:block;margin-top:4px;line-height:1.55">${b}</span></div>`;
   const note = t => `<div class="modal-note">${t}</div>`;
-  const FAQ = [
-    ["How does mining work?", "Tap the coin on the home screen to start a 2-hour session. When the timer ends, tap Claim Reward to add your pack's ZENY to your balance."],
-    ["How do I increase my mining rate?", "Open Upgrade Membership from the Account page and choose a higher pack. Each pack has a higher ZENY per hour rate."],
-    ["What is the minimum withdrawal?", "The minimum withdrawal is $10."],
-    ["Is there a fee on Exchange?", "Yes. Exchange has a 10% fee, shown before you confirm."],
-    ["How do I invite friends?", "Tap Invite on the home screen to get your personal referral link."]
-  ];
   const open = {
-    about() {
-      const t = (window.ZENVYRO_INFO || {}).about;
-      openModal("About Us", t ? `<div class="modal-note" style="line-height:1.7">${esc(t)}</div>` :
-        row("Our vision", "A simple, clear place where members can mine, grow and manage ZENY in one app.") +
-        row("Our mission", "Keep every feature easy to understand: transparent packs, clear fees and a rewards flow you can follow step by step."));
-    },
-    whitepaper() {
-      const u = safeUrl((window.ZENVYRO_INFO || {}).whitepaper);
-      if (u) { window.open(u, "_blank", "noopener"); return; }
-      openModal("Whitepaper", note("The whitepaper (tokenomics and roadmap) has not been published yet."));
-    },
-    faq() { openModal("FAQs", '<div class="modal-list">' + FAQ.map(f => row(esc(f[0]), esc(f[1]))).join("") + "</div>"); },
+    about() { location.href = "about.html"; },
+    whitepaper() { location.href = "whitepaper.html"; },
+    faq() { location.href = "faq.html"; },
     privacy() { if (window.ZENVYRO_LEGAL) window.ZENVYRO_LEGAL.open("privacy"); },
     terms() { if (window.ZENVYRO_LEGAL) window.ZENVYRO_LEGAL.open("terms"); },
     support() {
