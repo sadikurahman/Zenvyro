@@ -1,0 +1,37 @@
+/* Zenvyro premium purchase flow (voucher code or crypto). Reuses the existing modal styles; nothing else is changed. */
+.pu-head{display:flex;align-items:center;gap:13px;padding:14px;border:1px solid #5a3fb0;border-radius:16px;background:linear-gradient(120deg,#201048,#100c2b 70%)}
+.pu-head b{display:block;font-size:16px}.pu-head small{display:block;color:#b8b9e9;font-size:12px;margin-top:2px}
+.pu-ic{display:grid;place-items:center;flex:none;width:40px;height:40px;border:1px solid #6343a6;border-radius:12px;color:#d0a9ff;background:#8d42ff14}
+.pu-ic svg{width:22px;height:22px}
+.pu-lead{margin:16px 0 4px;color:#d9d6f7;font-size:13px}
+.pu-opt{display:flex;align-items:center;gap:13px;width:100%;margin-top:10px;padding:15px 14px;text-align:left;cursor:pointer;color:#fff;font:inherit;border:1px solid #3a3277;border-radius:16px;background:linear-gradient(145deg,#151033,#0b0a20);transition:border-color .2s,transform .2s}
+.pu-opt:active{transform:scale(.985)}
+.pu-opt>span:nth-child(2){flex:1;min-width:0}
+.pu-opt b{display:block;font-size:14px}.pu-opt small{display:block;margin-top:3px;color:#a9a5d6;font-size:12px;line-height:1.45}
+.pu-opt>svg{width:18px;height:18px;flex:none;color:#b79aff}
+@media (hover:hover){.pu-opt:hover{border-color:#8d42ff}}
+.pu-back{display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;padding:6px 12px 6px 8px;border:1px solid #3a3277;border-radius:99px;background:#ffffff08;color:#d9d6f7;font:inherit;font-size:12px;cursor:pointer}
+.pu-back svg{width:14px;height:14px}
+.pu-banner{padding:12px 14px;border:1px solid #5a3fb0;border-radius:14px;background:#8d42ff12;color:#e9e3ff;font-size:13px;line-height:1.55}
+.pu-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:17px;letter-spacing:1.5px;text-align:center;text-transform:uppercase}
+.pu-msg{min-height:18px;margin-top:10px;font-size:12.5px;line-height:1.5}
+.pu-msg.err{color:#ff9aa6}.pu-msg.ok{color:#7affc0}
+.pu-addr{display:flex;align-items:center;gap:8px;padding:11px 12px;border:1px solid #3a3277;border-radius:12px;background:#08071c}
+.pu-addr code{flex:1;min-width:0;word-break:break-all;font-size:12px;color:#e9e3ff}
+.pu-addr button{flex:none;padding:6px 11px;border:1px solid #6343a6;border-radius:99px;background:#8d42ff1f;color:#e3d8ff;font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+.pu-warn{margin-top:12px;padding:11px 13px;border:1px solid #70552b;border-radius:13px;background:#e5c16c0b;color:#e7d9b7;font-size:12px;line-height:1.55}
+.pu-done{padding:22px 10px;text-align:center}
+.pu-done .pu-ic{margin:0 auto 12px;width:52px;height:52px;border-radius:16px}.pu-done .pu-ic svg{width:28px;height:28px}
+.pu-done b{display:block;font-size:17px}.pu-done p{margin:8px 0 0;color:#c4c5ed;font-size:13px;line-height:1.6}
+.pu-list{margin-top:14px;border:1px solid #2c265e;border-radius:14px;overflow:hidden}
+.pu-list div{display:flex;justify-content:space-between;gap:10px;padding:11px 13px;border-bottom:1px solid #24204b;font-size:12px}
+.pu-list div:last-child{border-bottom:0}.pu-list small{display:block;color:#a9a5d6;margin-top:2px}
+.pu-tag{align-self:center;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:800;letter-spacing:.6px;white-space:nowrap}
+.pu-tag.pending{background:#e5c16c22;color:#e5c16c}.pu-tag.approved{background:#12603a;color:#7affc0}.pu-tag.rejected{background:#6a1428;color:#ff9aa6}
+/* full-screen notice shown while an account is restricted */
+#puBan{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 0,#3a1450 0,#0a0620 60%),#070617}
+#puBan.on{display:flex}
+#puBan .bx{width:min(420px,100%);padding:26px 20px;text-align:center;border:1px solid #8a2f4d;border-radius:22px;background:linear-gradient(145deg,#2a0f2a,#0d0a22);box-shadow:0 0 40px #ff4d5e22}
+#puBan .pu-ic{margin:0 auto 14px;width:56px;height:56px;border-color:#a84062;color:#ff9aa6;background:#ff4d5e14}
+#puBan h2{margin:0 0 8px;font-size:20px}#puBan p{margin:0 0 10px;color:#d9d6f7;font-size:13.5px;line-height:1.65}
+#puBan .until{display:inline-block;margin:4px 0 12px;padding:8px 14px;border:1px solid #8a2f4d;border-radius:12px;background:#ff4d5e12;color:#ffc2ca;font-weight:700;font-size:13px}
