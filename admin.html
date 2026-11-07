@@ -382,7 +382,7 @@ textarea{min-height:96px;resize:vertical}
   }
   /* ---- Manage Membership: vouchers, crypto payments, failed attempts ---- */
   const AP = () => window.ZenvyroAPI;
-  let memTab = "vouch", vFilter = "all", lastGen = null;
+  let memTab = "vouch", vFilter = "all", lastGen = null, vPackSel = "Standard", vQtySel = 10;
   const REASON = { not_found: "Code not found", already_used: "Code already used", wrong_pack: "Code is for another pack", disabled: "Disabled code", txid_reused: "TXID already used" };
   const copy = t => { if (navigator.clipboard) navigator.clipboard.writeText(t).then(() => toast("Copied")).catch(() => toast("Copy failed")); else toast("Copy not supported"); };
   const memTabs = c => `<div class="bg" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px">${[["packs", "Packs"], ["vouch", "Vouchers"], ["pay", "Crypto" + (c.pending ? " (" + c.pending + ")" : "")], ["att", "Attempts"]].map(t => `<button class="sm ${memTab === t[0] ? "on" : ""}" data-mt="${t[0]}">${t[1]}</button>`).join("")}</div>`;
@@ -393,8 +393,8 @@ textarea{min-height:96px;resize:vertical}
     if (memTab === "packs") h += PACKS.map(p => `<div class="li"><div>${p[0]} Pack<small>${p[2].toFixed(6)} ZENY / hour</small></div><b>$${p[1]}</b></div>`).join("") + '<p class="note">Pack prices and rates are read-only here.</p>';
     else if (memTab === "vouch") {
       const v = await AP().adminVouchers(), cnt = k => v.filter(x => k === "all" || x.status === k).length, list = v.filter(x => vFilter === "all" || x.status === vFilter).slice(0, 100);
-      h += `<p class="sub" style="margin-top:2px">Generate vouchers</p><select class="in" id="vPack">${Object.entries(AP().PACKS).map(([n, u]) => `<option value="${n}">${n} Pack ($${u})</option>`).join("")}</select>
-<input class="in" id="vQty" type="number" inputmode="numeric" min="1" max="200" value="10" style="margin-top:8px" placeholder="How many codes (1 to 200)"><button class="pr" data-gen>Generate Codes</button>`;
+      h += `<p class="sub" style="margin-top:2px">Generate vouchers</p><select class="in" id="vPack">${Object.entries(AP().PACKS).map(([n, u]) => `<option value="${n}"${n === vPackSel ? " selected" : ""}>${n} Pack ($${u})</option>`).join("")}</select>
+<input class="in" id="vQty" type="number" inputmode="numeric" min="1" max="200" value="${vQtySel}" style="margin-top:8px" placeholder="How many codes (1 to 200)"><button class="pr" data-gen>Generate Codes</button>`;
       if (lastGen) h += `<p class="sub">New codes (${lastGen.length}). Copy them now.</p><textarea class="in" id="vOut" readonly rows="6" style="font-family:ui-monospace,Menlo,monospace;font-size:13px">${lastGen.join("\n")}</textarea><button class="pr" data-copy="vOut" style="background:#2a1a6a">Copy All Codes</button>`;
       h += `<p class="sub">All vouchers</p><div class="bg" style="grid-template-columns:repeat(4,1fr);margin-bottom:6px">${["all", "unused", "used", "disabled"].map(k => `<button class="sm ${vFilter === k ? "on" : ""}" data-vf="${k}">${k[0].toUpperCase() + k.slice(1)} ${cnt(k)}</button>`).join("")}</div>${list.map(vRow).join("") || '<div class="li">No vouchers yet</div>'}<p class="note">Each code works only for its own pack. Treat codes like cash and share them only with the buyer.</p>`;
     } else if (memTab === "pay") {
@@ -403,13 +403,14 @@ textarea{min-height:96px;resize:vertical}
 <p class="sub">Receiving addresses</p>${info.map(a => `<label class="note" style="display:block;margin:10px 0 4px">${a.asset} (${a.network})</label><input class="in" data-addr="${a.id}" value="${esc(a.address)}" placeholder="Wallet address" autocomplete="off" spellcheck="false">`).join("")}<button class="pr" data-saveaddr>Save Addresses</button><p class="note">Double-check every address. Members will send real money to these addresses.</p>`;
     } else {
       const at = await AP().adminAttempts(), rs = await AP().adminRestricted();
-      h += `<p class="sub" style="margin-top:2px">Restricted accounts</p>${rs.map(r => `<div class="li"><div>${esc(r.userId)}<small>${r.banned ? "Restricted until " + when(r.bannedUntil) : "Warning on record, not restricted"} · restrictions: ${r.banCount}</small></div>${r.banned ? `<button class="sm ap" data-unb="${esc(r.userId)}">Unban</button>` : '<span class="tag bad">Warning</span>'}</div>`).join("") || '<div class="li">No restricted accounts</div>'}
+      if (AP().mode === "demo") h += '<div class="note" style="margin:0 0 8px;padding:10px 12px;border:1px solid #70552b;border-radius:12px;color:#e7d9b7">Demo mode: this list shows only accounts used in THIS browser. Real, all-device control comes with the backend.</div>';
+      h += `<p class="sub" style="margin-top:2px">Restricted accounts</p>${rs.map(r => `<div class="li"><div>${esc(r.userId)}<small>${r.banned ? "Restricted until " + when(r.bannedUntil) : "Warning on record, not restricted"} · restrictions: ${r.banCount}</small></div><div style="display:grid;gap:6px;justify-items:end">${r.banned ? `<button class="sm ap" data-unb="${esc(r.userId)}">Unban</button>` : '<span class="tag bad">Warning</span>'}<button class="sm" data-clr="${esc(r.userId)}">Clear record</button></div></div>`).join("") || '<div class="li">No restricted accounts</div>'}
 <p class="sub">Failed attempts (latest 100)</p>${at.map(a => `<div class="li"><div>${esc(a.user)}<small>${REASON[a.reason] || a.reason} · tried ${esc(a.pack)} Pack · code ${esc(a.code)}</small></div><small>${when(a.ts)}</small></div>`).join("") || '<div class="li">No failed attempts</div>'}`;
     }
     show("Manage Membership", h, "mem");
   }
   async function gen() {
-    const n = +$("#vQty").value, pk = $("#vPack").value;
+    const n = +$("#vQty").value, pk = $("#vPack").value; vPackSel = pk; vQtySel = n;
     if (!(n >= 1 && n <= 200)) return toast("Enter a number from 1 to 200");
     if (!confirm("Generate " + n + " voucher code(s) for the " + pk + " Pack?")) return;
     const r = await AP().adminGenerate(pk, n, ""); if (!r.ok) return toast("Could not generate codes");
@@ -436,6 +437,7 @@ textarea{min-height:96px;resize:vertical}
     if ((b = q("[data-pok]"))) { decide(b.dataset.pok, true); return true; }
     if ((b = q("[data-pno]"))) { decide(b.dataset.pno, false); return true; }
     if ((b = q("[data-unb]"))) { if (confirm("Remove the restriction from " + b.dataset.unb + "?")) AP().adminUnban(b.dataset.unb).then(() => { log("Unbanned " + b.dataset.unb); openMem(); }); return true; }
+    if ((b = q("[data-clr]"))) { if (confirm("Unban " + b.dataset.clr + " and clear all strikes and warnings?")) AP().adminUnban(b.dataset.clr, true).then(() => { log("Cleared record of " + b.dataset.clr); openMem(); }); return true; }
     if (q("[data-saveaddr]")) { saveAddr(); return true; }
     return false;
   }
@@ -485,6 +487,8 @@ textarea{min-height:96px;resize:vertical}
     else if (!q("#rng")) $("#rng").classList.remove("open");
   });
   document.addEventListener("input", e => { if (e.target.id === "uq") $("#ul").innerHTML = userRows(e.target.value); });
+  document.addEventListener("change", e => { if (e.target.id === "vPack") vPackSel = e.target.value; });
+  document.addEventListener("input", e => { if (e.target.id === "vQty") vQtySel = e.target.value; });
 
   function net() { const s = $("#srv"), on = navigator.onLine !== false; s.classList.toggle("off", !on); s.querySelector("span").textContent = on ? "Server Online" : "Server Offline"; }
   window.addEventListener("online", net); window.addEventListener("offline", net);

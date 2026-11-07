@@ -89,7 +89,7 @@
     async adminDisable(id) { const db = load(), v = db.vouchers.find(x => x.id === id); if (!v || v.status !== "unused") return false; v.status = "disabled"; save(db); return true; },
     async adminAttempts() { return load().attempts.slice(0, 100); },
     async adminRestricted() { const db = load(); return Object.keys(db.users).filter(k => { const u = db.users[k]; return banned(u) || u.warn; }).map(k => ({ ...view(db, k) })); },
-    async adminUnban(id) { const db = load(), u = db.users[id]; if (!u) return false; u.bannedUntil = 0; u.fails = 0; save(db); return true; },
+    async adminUnban(id, clear) { const db = load(), u = db.users[id]; if (!u) return false; u.bannedUntil = 0; u.fails = 0; if (clear) { u.banCount = 0; u.warn = false; } save(db); return true; },
     async adminPayments() { return load().payments.slice(0, 100); },
     async adminDecide(id, approve, note) {
       const db = load(), p = db.payments.find(x => x.id === id); if (!p || p.status !== "pending") return false;

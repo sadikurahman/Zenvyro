@@ -165,7 +165,7 @@ ${list.length ? '<div class="pu-list">' + list.map(p => `<div><span>${esc(p.pack
     try {
       const me = await API().me(); applyTier(me.tier); if (!modalOpen()) soon();
       if (!ov) { ov = document.createElement("div"); ov.id = "puBan"; document.body.appendChild(ov); }
-      if (me.banned) ov.innerHTML = `<div class="bx"><span class="pu-ic">${IC.lock}</span><h2>Account Restricted</h2><p>Your account is restricted because of repeated invalid voucher attempts.</p><div class="until">Until ${date(me.bannedUntil)}</div><p>If you think this is a mistake, please contact support.</p><button type="button" class="btn" data-zf="support" style="width:100%">Contact Support</button></div>`;
+      if (me.banned) ov.innerHTML = `<div class="bx"><span class="pu-ic">${IC.lock}</span><h2>Account Restricted</h2><p>Your account is restricted because of repeated invalid voucher attempts.</p><div class="until">Until ${date(me.bannedUntil)}</div><p>If you think this is a mistake, please contact support.</p>${API().mode === "demo" ? '<p style="font-size:12px;color:#e7d9b7">Demo mode: this restriction is stored in this browser. To remove it, open admin.html in this same browser, then Manage Membership, Attempts, Unban.</p>' : ""}<button type="button" class="btn" data-zf="support" style="width:100%">Contact Support</button></div>`;
       ov.classList.toggle("on", !!me.banned);
     } catch (e) {}
   }
