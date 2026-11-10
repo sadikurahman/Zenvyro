@@ -7,6 +7,7 @@
   "use strict";
 
   const ASSETS = [
+    { sym: "TRX", name: "TRON", ch: "T", bg: "#e8003d", net: "TRC20", dec: 6 },
     { sym: "USDT", name: "Tether", ch: "₮", bg: "#1fbf8f", net: "TRC20", dec: 6 },
     { sym: "BTC", name: "Bitcoin", ch: "₿", bg: "#f7931a", net: "BTC", dec: 8 },
     { sym: "TON", name: "Toncoin", ch: "▽", bg: "#1da1f2", net: "TON", dec: 6 },
@@ -174,7 +175,7 @@
   const val = id => ($(id) ? $(id).value.trim() : "");
 
   function depositForm(sel) {
-    sel = sel || "USDT";
+    sel = sel || "TRX";
     window.openModal("Deposit", `
       <label class="modal-label" for="dpAsset">Asset</label>
       <select class="modal-field" id="dpAsset" onchange="zvwDepositAddr()">${opts(sel)}</select>
@@ -202,7 +203,7 @@
   }
 
   function withdrawForm(sel) {
-    sel = sel || "USDT";
+    sel = sel || "TRX";
     window.openModal("Withdraw", `
       <label class="modal-label" for="wdAsset">Asset</label>
       <select class="modal-field" id="wdAsset" onchange="zvwWdInfo()">${opts(sel)}</select>
@@ -236,7 +237,7 @@
   }
 
   function transferForm(sel) {
-    sel = sel || "USDT";
+    sel = sel || "TRX";
     window.openModal("Transfer", `
       <label class="modal-label" for="trAsset">Asset (exchanged balance)</label>
       <select class="modal-field" id="trAsset" onchange="zvwTrInfo()">${opts(sel)}</select>

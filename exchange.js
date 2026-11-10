@@ -14,13 +14,14 @@
   ];
   const TOTAL_FEE = FEES.reduce((a, f) => a + f.pct, 0); // 10
   const ASSETS = [
+    { sym: "TRX", name: "TRON", icon: "◈", dec: 6 },
     { sym: "USDT", name: "Tether", icon: "₮", dec: 2 },
     { sym: "BTC", name: "Bitcoin", icon: "₿", dec: 8 },
     { sym: "TON", name: "Toncoin", icon: "💎", dec: 4 },
     { sym: "BNB", name: "BNB", icon: "◆", dec: 5 },
     { sym: "SOL", name: "Solana", icon: "◎", dec: 4 }
   ];
-  const CG_URL = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,the-open-network,binancecoin,solana&vs_currencies=usd";
+  const CG_URL = "https://api.coingecko.com/api/v3/simple/price?ids=tron,bitcoin,the-open-network,binancecoin,solana&vs_currencies=usd";
   const WKEY = "zenvyro_wallet_v1";
 
   const $ = id => document.getElementById(id);
@@ -133,7 +134,7 @@
   function renderReqs() { const el = $("exReqs"); if (el) el.innerHTML = reqRows(); }
 
   // ---- Prices (in USDT) ----
-  let prices = { USDT: 1 }, priceState = "idle", priceTime = 0, sel = "USDT";
+  let prices = { USDT: 1 }, priceState = "idle", priceTime = 0, sel = "TRX";
 
   async function loadPrices() {
     if (priceState === "ok" && Date.now() - priceTime < 60000) return;
@@ -149,7 +150,7 @@
         const r = await fetch(CG_URL, { cache: "no-store" });
         if (!r.ok) throw new Error("price");
         const j = await r.json();
-        p = { BTC: +(j.bitcoin || {}).usd, TON: +(j["the-open-network"] || {}).usd,
+        p = { TRX: +(j.tron || {}).usd, BTC: +(j.bitcoin || {}).usd, TON: +(j["the-open-network"] || {}).usd,
               BNB: +(j.binancecoin || {}).usd, SOL: +(j.solana || {}).usd };
       }
       for (const k in p) if (!(Number.isFinite(p[k]) && p[k] > 0)) throw new Error("bad price");

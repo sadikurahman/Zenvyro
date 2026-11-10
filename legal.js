@@ -65,7 +65,7 @@
 <h2>7. Membership Packs (Optional)</h2>
 <p>Members who want more can choose a paid pack. A pack raises the hourly mining rate and the referral commission rate and adds extra features such as reports and support levels. Packs are optional and are never needed to use the App.</p>
 <table class="tb"><tr><th>Pack</th><th>Price</th><th>Referral commission</th></tr>
-<tr><td>Free</td><td>$0</td><td>2%</td></tr><tr><td>Standard</td><td>$10</td><td>4%</td></tr><tr><td>Silver</td><td>$25</td><td>6%</td></tr><tr><td>Gold</td><td>$50</td><td>8%</td></tr><tr><td>Platinum</td><td>$100</td><td>10%</td></tr></table>
+<tr><td>Free</td><td>0 TRX</td><td>2%</td></tr><tr><td>Standard</td><td>32 TRX</td><td>4%</td></tr><tr><td>Silver</td><td>80 TRX</td><td>6%</td></tr><tr><td>Gold</td><td>155 TRX</td><td>8%</td></tr><tr><td>Platinum</td><td>315 TRX</td><td>10%</td></tr></table>
 <ul>
 <li>You pay using the payment methods shown in the App at the time of purchase. We may verify a payment before activating a pack.</li>
 <li>Prices, features and rates may change. A change does not affect a pack you have already bought for the period it was sold for.</li>

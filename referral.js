@@ -7,7 +7,7 @@
 
   // income commission %, locked at the time the referee joins, based on the referrer's pack
   const INCOME_COMMISSION = { Free: 2, Standard: 4, Silver: 6, Gold: 8, Platinum: 10 };
-  const PACK_PRICE = { Free: 0, Standard: 10, Silver: 25, Gold: 50, Platinum: 100 };
+  const PACK_PRICE = { Free: 0, Standard: 32, Silver: 80, Gold: 155, Platinum: 315 }; // TRX
   const PURCHASE_BONUS_PCT = 5; // on the referee's first pack purchase, once
 
   // calculation helpers for the backend (should run on the server)
@@ -133,7 +133,7 @@
     if (!data.history.length) return '<div><strong>No referrals yet</strong><span>No commission yet</span></div>';
     return data.history.map(h => {
       const isBonus = h.type === "bonus";
-      const amt = (+h.amount || 0).toFixed(isBonus ? 2 : 6) + (isBonus ? " USDT" : " ZENY");
+      const amt = (+h.amount || 0).toFixed(isBonus ? 2 : 6) + (isBonus ? " TRX" : " ZENY");
       return `<div><strong>${isBonus ? "Purchase Bonus · Credited to Wallet" : "Income Commission"}<br><small style="color:#aeb9ff;font-weight:500">${esc(h.from || "User")} · ${esc(h.date || "")}</small></strong><span>+${amt}</span></div>`;
     }).join("");
   }
@@ -155,7 +155,7 @@
         <div><strong>Total Referrals</strong><span>${data.referrals}</span></div>
         <div><strong>Premium Members</strong><span>${premium.length}</span></div>
         <div><strong>Income Commission</strong><span>${data.incomeEarned.toFixed(6)} ZENY</span></div>
-        <div><strong>Purchase Bonus (to Wallet)</strong><span>${data.bonusEarned.toFixed(2)} USDT</span></div>
+        <div><strong>Purchase Bonus (to Wallet)</strong><span>${data.bonusEarned.toFixed(2)} TRX</span></div>
         <div><strong>Pending (to claim)</strong><span>${claim.pendingIncome.toFixed(6)} ZENY</span></div>
       </div>
       <button class="btn" id="refClaimBtn" style="width:100%;margin-top:12px" onclick="claimReferral()">🎁 &nbsp; Claim Referral Income</button>

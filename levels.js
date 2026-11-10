@@ -10,13 +10,13 @@
   // wd = withdrawals per month (0 = unlimited). extra = perks of that level only. Level 1 needs any premium pack.
   const LV = {
     1: { wd: 1, boost: 0, extra: [] },
-    2: { own: 300, team: 1200, boost: 7, wd: 2, extra: [] },
-    3: { own: 800, team: 4000, boost: 15, wd: 3, extra: [] },
-    4: { own: 3000, team: 15000, boost: 25, wd: 4, extra: [] },
-    5: { own: 10000, team: 30000, boost: 40, wd: 6, extra: ["$200 monthly bonus"] },
-    6: { own: 25000, team: 70000, boost: 70, wd: 0, extra: ["$500 monthly salary", "Country Manager"] },
-    7: { own: 50000, team: 200000, boost: 100, wd: 0, extra: ["$1,500 monthly salary", "National Co-founder", "1% company profit share"] },
-    8: { own: 200000, team: 1000000, boost: 300, wd: 0, extra: ["Global Partner", "4% company profit share (3% + 1%)"] }
+    2: { own: 945, team: 3780, boost: 7, wd: 2, extra: [] },
+    3: { own: 2520, team: 12600, boost: 15, wd: 3, extra: [] },
+    4: { own: 9450, team: 47250, boost: 25, wd: 4, extra: [] },
+    5: { own: 31500, team: 94500, boost: 40, wd: 6, extra: ["630 TRX monthly bonus"] },
+    6: { own: 78750, team: 220500, boost: 70, wd: 0, extra: ["1,575 TRX monthly salary", "Country Manager"] },
+    7: { own: 157500, team: 630000, boost: 100, wd: 0, extra: ["4,725 TRX monthly salary", "National Co-founder", "1% company profit share"] },
+    8: { own: 630000, team: 3150000, boost: 300, wd: 0, extra: ["Global Partner", "4% company profit share (3% + 1%)"] }
   };
   const tierName = () => { try { return (window.ZenvyroMining && window.ZenvyroMining.getState().tier) || "Free"; } catch (e) { return "Free"; } };
   const cum = n => { let t = 0; for (let i = 2; i <= n; i++) t += LV[i].boost; return t; };
@@ -26,11 +26,11 @@
   const nextList = n => n === 1 ? ["Referral commission unlocked", wdText(1)]
     : [`+${LV[n].boost}% mining speed (total +${cum(n)}%)`, wdText(n)].concat(LV[n].extra);
   const DEMO_TEAM = [
-    { id: "ZNV-889301", name: "Rohan Ahmed", level: 3, own: 100, team: 400 },
-    { id: "ZNV-774120", name: "Tanvir Islam", level: 2, own: 50, team: 650 },
-    { id: "ZNV-662908", name: "Hasan Mahmud", level: 2, own: 25, team: 180 },
-    { id: "ZNV-551744", name: "Sakib Hossain", level: 1, own: 10, team: 90 },
-    { id: "ZNV-430215", name: "Habib Rahman", level: 1, own: 10, team: 0 }
+    { id: "ZNV-889301", name: "Rohan Ahmed", level: 3, own: 315, team: 1260 },
+    { id: "ZNV-774120", name: "Tanvir Islam", level: 2, own: 160, team: 2050 },
+    { id: "ZNV-662908", name: "Hasan Mahmud", level: 2, own: 80, team: 570 },
+    { id: "ZNV-551744", name: "Sakib Hossain", level: 1, own: 32, team: 280 },
+    { id: "ZNV-430215", name: "Habib Rahman", level: 1, own: 32, team: 0 }
   ];
   const I = {
     gift: '<rect x="3.5" y="9" width="17" height="11" rx="1.5"/><path d="M12 9v11M3.5 13.5h17"/><path d="M12 9c-3 0-5-1-5-3a2 2 0 0 1 4-.5C11.7 7 12 9 12 9zm0 0c3 0 5-1 5-3a2 2 0 0 0-4-.5C12.3 7 12 9 12 9z"/>',
@@ -106,11 +106,11 @@
     const note = `<div class="zl-note">Progress starts from zero after every level. Benefits are plan details, not guaranteed income, and follow the Terms.</div>`;
     let h = `<div class="zl"><div class="zl-h">Level ${st.lvl}<span>Your current level</span></div><div class="zl-sec" style="margin-top:0">Your Benefits</div>${li(nowList(st.lvl), "check")}`;
     if (last) return h + `<div class="zl-empty">You have reached the highest level.</div>${note}</div>`;
-    const bar = (label, v, max, sub) => `<div class="zl-bar"><div class="zl-bt"><span>${label}</span><b>$${fmt(Math.min(v, max))} / $${fmt(max)}</b></div><div class="zl-tr"><i style="width:${Math.min(100, v / max * 100)}%"></i></div><small>${sub}</small></div>`;
+    const bar = (label, v, max, sub) => `<div class="zl-bar"><div class="zl-bt"><span>${label}</span><b>${fmt(Math.min(v, max))} / ${fmt(max)} TRX</b></div><div class="zl-tr"><i style="width:${Math.min(100, v / max * 100)}%"></i></div><small>${sub}</small></div>`;
     let ready, prog;
     if (st.lvl === 0) {
       ready = tierName() !== "Free" || (DEMO && st.pack);
-      prog = `<div class="zl-bar"><div class="zl-bt"><span>Premium Pack</span><b>${ready ? "Done" : "Needed"}</b></div><small>Buy any premium pack to reach Level 1. Your pack: ${esc(tierName())}</small></div>${ready ? "" : '<button class="zl-up" style="margin-top:0" onclick="closeModal();showSection(\'membership\')">View Packs</button>'}`;
+      prog = `<div class="zl-bar"><div class="zl-bt"><span>Premium Pack</span><b>${ready ? "Done" : "Needed"}</b></div><small>Buy any NFT pack to reach Level 1. Your pack: ${esc(tierName())}</small></div>${ready ? "" : '<button class="zl-up" style="margin-top:0" onclick="closeModal();showSection(\'membership\')">View Packs</button>'}`;
     } else {
       const t = LV[n]; ready = st.own >= t.own || st.team >= t.team;
       prog = bar("Own NFT Investment", st.own, t.own, "Your own NFT purchases") + `<div class="zl-or">Complete any one target to level up</div>` + bar("Team Investment", st.team, t.team, "NFT purchases by your team (Layer 1 + Layer 2)");
@@ -118,7 +118,7 @@
     return h + `<div class="zl-sec">Progress to Level ${n}</div>${prog}
       <div class="zl-sec">Next Level Benefits (Level ${n})</div>${li(nextList(n), "up")}
       <button class="zl-up" ${ready ? "" : "disabled"} onclick="zvLvUp()">Upgrade to Level ${n}</button>
-      ${DEMO ? `<div class="zl-dm">${st.lvl === 0 ? `<button onclick="zvLvDemo('pack')">Demo: pretend pack bought</button>` : `<button onclick="zvLvDemo('own')">Demo: +$100 own</button><button onclick="zvLvDemo('team')">Demo: +$300 team</button>`}</div><div class="zl-note">Demo mode: sample numbers only.</div>` : ""}${note}</div>`;
+      ${DEMO ? `<div class="zl-dm">${st.lvl === 0 ? `<button onclick="zvLvDemo('pack')">Demo: pretend pack bought</button>` : `<button onclick="zvLvDemo('own')">Demo: +315 TRX own</button><button onclick="zvLvDemo('team')">Demo: +1000 TRX team</button>`}</div><div class="zl-note">Demo mode: sample numbers only.</div>` : ""}${note}</div>`;
   }
 
   function winBody(n) {
@@ -143,7 +143,7 @@
   }
   function demoAdd(kind) {
     if (!DEMO) return;
-    if (kind === "pack") st.pack = true; else if (kind === "own") st.own += 100; else st.team += 300;
+    if (kind === "pack") st.pack = true; else if (kind === "own") st.own += 315; else st.team += 1000;
     save(); document.getElementById("modalBody").innerHTML = levelBody();
   }
 
@@ -168,8 +168,8 @@
     const vol = ms.reduce((s, m) => s + m.own + m.team, 0);
     const rows = ms.map((m, i) => `<div class="zl-m"><div class="zl-rk">${i + 1}</div><div class="zl-av">${ic("user")}</div>
       <div class="zl-w"><b>${esc(m.name)}</b><span class="zl-lp">Level ${m.level}</span><span class="zl-id">${esc(m.id)}</span></div>
-      <div class="zl-r">Your NFT: <b>$${fmt(m.own)}</b><br>Team NFT: <b>$${fmt(m.team)}</b></div></div>`).join("");
-    return `<div class="zl"><div class="zl-sum"><div>${ic("users")}<span><small>Direct Referrals</small><b>${ms.length}</b></span></div><div>${ic("gift")}<span><small>Total Team Volume</small><b>$${fmt(vol)}</b></span></div></div>
+      <div class="zl-r">Your NFT: <b>${fmt(m.own)} TRX</b><br>Team NFT: <b>${fmt(m.team)} TRX</b></div></div>`).join("");
+    return `<div class="zl"><div class="zl-sum"><div>${ic("users")}<span><small>Direct Referrals</small><b>${ms.length}</b></span></div><div>${ic("gift")}<span><small>Total Team Volume</small><b>${fmt(vol)} TRX</b></span></div></div>
       <div class="zl-sec">Your Direct Referrals</div>
       ${rows || '<div class="zl-empty">No direct referral has bought an NFT yet.</div>'}
       <div class="zl-note">Only members who bought an NFT are listed. Team NFT is the volume of the members they referred (Layer 2).${DEMO ? " Demo mode: sample data only." : ""}</div></div>`;

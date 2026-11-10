@@ -5,16 +5,12 @@
 (() => {
   "use strict";
   const KEY = "zenvyro_demo_db_v1";
-  const PACKS = { Standard: 10, Silver: 25, Gold: 50, Platinum: 100 };
+  const PACKS = { Standard: 32, Silver: 80, Gold: 155, Platinum: 315 }; // prices in TRX
   const ORDER = ["Free", "Standard", "Silver", "Gold", "Platinum"];
   const MAX_FAILS = 3, BAN_FIRST = 3 * 864e5, BAN_REPEAT = 365 * 864e5;          // 3 days, then 1 year
   const ALPHA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";                              // no I, O, 0, 1
   const ASSETS = [
-    { id: "USDT_TRC20", asset: "USDT", network: "TRC20", kind: "hex" },
-    { id: "BNB_BEP20", asset: "BNB", network: "BEP20", kind: "evm" },
-    { id: "BTC", asset: "BTC", network: "Bitcoin", kind: "hex" },
-    { id: "TON", asset: "TON", network: "TON", kind: "ton" },
-    { id: "SOL", asset: "SOL", network: "Solana", kind: "sol" }
+    { id: "TRX_TRC20", asset: "TRX", network: "TRC20", kind: "hex" }
   ];
   const TX = { hex: /^[0-9a-f]{64}$/i, evm: /^0x[0-9a-f]{64}$/i, ton: /^([0-9a-f]{64}|[A-Za-z0-9+/_-]{43}=?)$/i, sol: /^[1-9A-HJ-NP-Za-km-z]{86,90}$/ };
 
@@ -59,7 +55,7 @@
       if (v.pack !== pack) return fail(db, u, id, pack, k, "wrong_pack");                          // the code is NOT consumed
       v.status = "used"; v.usedBy = id; v.usedAt = Date.now();
       u.tier = pack; u.fails = 0;
-      db.purchases.push({ ts: Date.now(), user: id, pack, usd: PACKS[pack], via: "voucher" });
+      db.purchases.push({ ts: Date.now(), user: id, pack, trx: PACKS[pack], via: "voucher" });
       save(db); return { ok: true, tier: pack };
     },
     async submitPayment({ pack, asset, txid }) {
@@ -72,7 +68,7 @@
       if (db.payments.filter(p => p.user === id && p.status === "pending").length >= 3) return { ok: false, error: "too_many" };
       const key = t.toLowerCase();
       if (db.usedTx[key]) { att(db, id, pack, t, "txid_reused"); save(db); return { ok: false, error: "txid_used" }; }
-      const p = { id: rid("P"), user: id, pack, usd: PACKS[pack], asset, txid: t, status: "pending", createdAt: Date.now(), note: "" };
+      const p = { id: rid("P"), user: id, pack, trx: PACKS[pack], asset, txid: t, status: "pending", createdAt: Date.now(), note: "" };
       db.payments.unshift(p); db.usedTx[key] = p.id; save(db); return { ok: true, payment: p };
     },
     async myPayments() { const db = load(), id = uid(); return db.payments.filter(p => p.user === id).slice(0, 10); },
@@ -82,7 +78,7 @@
       qty = Math.floor(+qty); if (!(qty >= 1 && qty <= 200)) return { ok: false, error: "invalid_qty" };
       const db = load(), out = [], have = new Set(db.vouchers.map(v => v.key));
       while (out.length < qty) { const k = rnd(); if (have.has(k)) continue; have.add(k);
-        db.vouchers.unshift({ id: rid("V"), key: k, code: fmt(k), pack, usd: PACKS[pack], status: "unused", createdAt: Date.now(), batch: batch || "", usedBy: "", usedAt: 0 }); out.push(fmt(k)); }
+        db.vouchers.unshift({ id: rid("V"), key: k, code: fmt(k), pack, trx: PACKS[pack], status: "unused", createdAt: Date.now(), batch: batch || "", usedBy: "", usedAt: 0 }); out.push(fmt(k)); }
       save(db); return { ok: true, codes: out };
     },
     async adminVouchers() { return load().vouchers.slice(0, 500); },
@@ -94,7 +90,7 @@
     async adminDecide(id, approve, note) {
       const db = load(), p = db.payments.find(x => x.id === id); if (!p || p.status !== "pending") return false;
       p.status = approve ? "approved" : "rejected"; p.decidedAt = Date.now(); p.note = note || "";   // a used TXID stays blocked forever
-      if (approve) { const u = U(db, p.user); if (rank(p.pack) > rank(u.tier)) u.tier = p.pack; db.purchases.push({ ts: Date.now(), user: p.user, pack: p.pack, usd: p.usd, via: "crypto" }); }
+      if (approve) { const u = U(db, p.user); if (rank(p.pack) > rank(u.tier)) u.tier = p.pack; db.purchases.push({ ts: Date.now(), user: p.user, pack: p.pack, trx: p.usd, via: "crypto" }); }
       save(db); return true;
     },
     async adminSetAddress(id, address) { const db = load(); if (!ASSETS.some(a => a.id === id)) return false; db.addresses[id] = String(address || "").trim().slice(0, 120); save(db); return true; },

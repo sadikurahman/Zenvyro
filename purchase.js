@@ -29,15 +29,15 @@
   let pack = "", busy = false;
 
   const DEMO_NOTE = () => API().mode === "demo" ? '<div class="pu-warn">Demo mode: payments are not live yet. Do not send real funds.</div>' : "";
-  const head = () => `<div class="pu-head"><span class="pu-ic">${IC.crown}</span><div><b>${pack} Pack</b><small>$${API().PACKS[pack]} &middot; ${RATE[pack]} ZENY / hour</small></div></div>`;
+  const head = () => `<div class="pu-head"><span class="pu-ic">${IC.crown}</span><div><b>${pack} Pack</b><small>${API().PACKS[pack]} TRX &middot; ${RATE[pack]} ZENY / hour</small></div></div>`;
   const backBtn = to => `<button type="button" class="pu-back" data-pu="${to}">${IC.back}Back</button>`;
 
   function chooser() {
     flow++;
     document.getElementById("modalTitle").textContent = "Upgrade Membership";
     body(head() + `<p class="pu-lead">Choose how you want to pay.</p>
-<button type="button" class="pu-opt" data-pu="voucher"><span class="pu-ic">${IC.ticket}</span><span><b>Voucher Code</b><small>Redeem a prepaid $${API().PACKS[pack]} code. Your pack is activated instantly.</small></span>${IC.next}</button>
-<button type="button" class="pu-opt" data-pu="crypto"><span class="pu-ic">${IC.coin}</span><span><b>Crypto Payment</b><small>Pay with USDT, BNB, BTC, TON or SOL. Our team verifies your transaction.</small></span>${IC.next}</button>
+<button type="button" class="pu-opt" data-pu="voucher"><span class="pu-ic">${IC.ticket}</span><span><b>Voucher Code</b><small>Redeem a prepaid ${API().PACKS[pack]} TRX code. Your pack is activated instantly.</small></span>${IC.next}</button>
+<button type="button" class="pu-opt" data-pu="crypto"><span class="pu-ic">${IC.coin}</span><span><b>Crypto Payment</b><small>Pay with TRX (TRC20). Our team verifies your transaction.</small></span>${IC.next}</button>
 ${DEMO_NOTE()}`);
   }
 
@@ -52,7 +52,7 @@ ${DEMO_NOTE()}`);
     if (me.banned) return restricted(me.bannedUntil, me.banCount > 1);
     document.getElementById("modalTitle").textContent = "Voucher Code";
     const warn = me.fails > 0 ? `<div class="pu-msg err">${me.fails} of ${API().MAX_FAILS} invalid attempts used.</div>` : '<div class="pu-msg" id="puMsg"></div>';
-    body(`${backBtn("chooser")}<div class="pu-banner">You are buying the <b>${pack} Pack ($${API().PACKS[pack]})</b>. Enter a <b>$${API().PACKS[pack]}</b> voucher code.</div>
+    body(`${backBtn("chooser")}<div class="pu-banner">You are buying the <b>${pack} Pack (${API().PACKS[pack]} TRX)</b>. Enter a <b>${API().PACKS[pack]} TRX</b> voucher code.</div>
 <label class="modal-label" for="puCode">Voucher code</label>
 <input class="modal-field pu-code" id="puCode" maxlength="19" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="text" placeholder="XXXX-XXXX-XXXX-XXXX">
 ${me.fails > 0 ? warn + '<div class="pu-msg" id="puMsg"></div>' : warn}
@@ -107,7 +107,7 @@ ${me.fails > 0 ? warn + '<div class="pu-msg" id="puMsg"></div>' : warn}
     const me = await API().me(); if (me.banned) return restricted(me.bannedUntil, me.banCount > 1);
     const info = await API().payInfo(), list = await API().myPayments();
     document.getElementById("modalTitle").textContent = "Crypto Payment";
-    body(`${backBtn("chooser")}<div class="pu-banner">Pay the equivalent of <b>$${API().PACKS[pack]}.00 USD</b> for the <b>${pack} Pack</b>, then submit your transaction ID.</div>
+    body(`${backBtn("chooser")}<div class="pu-banner">Pay <b>${API().PACKS[pack]} TRX</b> (TRC20) for the <b>${pack} Pack</b>, then submit your transaction ID.</div>
 <label class="modal-label" for="puAsset">Asset and network</label>
 <select class="modal-field" id="puAsset">${info.map(a => `<option value="${a.id}">${a.asset} (${a.network})</option>`).join("")}</select>
 <label class="modal-label">Send payment to</label>
@@ -118,7 +118,7 @@ ${me.fails > 0 ? warn + '<div class="pu-msg" id="puMsg"></div>' : warn}
 <div class="pu-msg" id="puMsg"></div>
 <button type="button" class="btn" id="puPay" style="width:100%;margin-top:10px">Submit Payment</button>
 <div class="modal-note">Each transaction ID can be used only once. A team member checks the transaction before your pack is activated.</div>${DEMO_NOTE()}
-${list.length ? '<div class="pu-list">' + list.map(p => `<div><span>${esc(p.pack)} Pack &middot; $${p.usd}<small>${date(p.createdAt)}</small></span><span class="pu-tag ${p.status}">${p.status.toUpperCase()}</span></div>`).join("") + "</div>" : ""}`);
+${list.length ? '<div class="pu-list">' + list.map(p => `<div><span>${esc(p.pack)} Pack &middot; ${p.trx} TRX<small>${date(p.createdAt)}</small></span><span class="pu-tag ${p.status}">${p.status.toUpperCase()}</span></div>`).join("") + "</div>" : ""}`);
     window.__puInfo = info; showAddr();
   }
   function showAddr() {
