@@ -6,16 +6,25 @@
   "use strict";
   const DEMO = true;
   const KEY = "zenvyro_level_v1", MAX = 8;
-  // Level N targets: own NFT purchase OR team NFT purchase (either one completes it). Level 3-8 numbers are placeholders: edit freely.
+  // Level plan. own / team = target to reach THAT level (own NFT OR team NFT, 2 layers). boost = extra mining % added at that level (adds up).
+  // wd = withdrawals per month (0 = unlimited). extra = perks of that level only. Level 1 needs any premium pack.
   const LV = {
-    2: { own: 300, team: 1200, bonus: 10, perks: ["Standard Withdrawal Access Unlocked"] },
-    3: { own: 500, team: 2000, bonus: 20, perks: [] },
-    4: { own: 800, team: 3500, bonus: 30, perks: [] },
-    5: { own: 1200, team: 5000, bonus: 50, perks: [] },
-    6: { own: 2000, team: 8000, bonus: 80, perks: [] },
-    7: { own: 3500, team: 14000, bonus: 120, perks: [] },
-    8: { own: 5000, team: 20000, bonus: 200, perks: [] }
+    1: { wd: 1, boost: 0, extra: [] },
+    2: { own: 300, team: 1200, boost: 7, wd: 2, extra: [] },
+    3: { own: 800, team: 4000, boost: 15, wd: 3, extra: [] },
+    4: { own: 3000, team: 15000, boost: 25, wd: 4, extra: [] },
+    5: { own: 10000, team: 30000, boost: 40, wd: 6, extra: ["$200 monthly bonus"] },
+    6: { own: 25000, team: 70000, boost: 70, wd: 0, extra: ["$500 monthly salary", "Country Manager"] },
+    7: { own: 50000, team: 200000, boost: 100, wd: 0, extra: ["$1,500 monthly salary", "National Co-founder", "1% company profit share"] },
+    8: { own: 200000, team: 1000000, boost: 300, wd: 0, extra: ["Global Partner", "4% company profit share (3% + 1%)"] }
   };
+  const tierName = () => { try { return (window.ZenvyroMining && window.ZenvyroMining.getState().tier) || "Free"; } catch (e) { return "Free"; } };
+  const cum = n => { let t = 0; for (let i = 2; i <= n; i++) t += LV[i].boost; return t; };
+  const wdText = n => LV[n].wd ? `${LV[n].wd} withdrawal${LV[n].wd > 1 ? "s" : ""} per month` : "Unlimited withdrawals";
+  const nowList = n => n < 1 ? ["Purchase commission only", "Referral commission is locked"]
+    : ["Referral commission by your pack", wdText(n)].concat(cum(n) ? [`+${cum(n)}% total mining speed`] : [], LV[n].extra);
+  const nextList = n => n === 1 ? ["Referral commission unlocked", wdText(1)]
+    : [`+${LV[n].boost}% mining speed (total +${cum(n)}%)`, wdText(n)].concat(LV[n].extra);
   const DEMO_TEAM = [
     { id: "ZNV-889301", name: "Rohan Ahmed", level: 3, own: 100, team: 400 },
     { id: "ZNV-774120", name: "Tanvir Islam", level: 2, own: 50, team: 650 },
@@ -69,6 +78,7 @@
 .zl-id{font-size:11px;color:#aeb9ff}
 .zl-r{text-align:right;font-size:11.5px;color:#c8b8ff;line-height:1.5;white-space:nowrap}.zl-r b{color:#fff}
 .zl-empty{border:1px dashed #4a32a8;border-radius:14px;padding:18px;text-align:center;color:#b9b2ee;font-size:14px}
+.zl-ben .zl-i{font-size:20px}
 #zvAccount .pt{gap:8px;align-items:center}
 #zvAccount .zv-lvb{display:inline-flex;align-items:center;gap:4px;border:1px solid #9a5cff;border-radius:16px;background:#1a1058;color:#e0d2ff;padding:4px 10px;font-size:11px;font-weight:700;line-height:1.2;box-shadow:0 0 10px #8a3dff55}
 @keyframes zlPop{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
@@ -81,9 +91,9 @@
   const load = () => {
     try {
       const s = JSON.parse(localStorage.getItem(KEY) || "null");
-      if (s) return { lvl: Math.min(MAX, Math.max(1, Math.floor(+s.lvl) || 1)), own: Math.max(0, +s.own || 0), team: Math.max(0, +s.team || 0) };
+      if (s) return { lvl: Math.min(MAX, Math.max(0, Math.floor(+s.lvl) || 0)), own: Math.max(0, +s.own || 0), team: Math.max(0, +s.team || 0), pack: !!s.pack };
     } catch (e) {}
-    return { lvl: 1, own: 0, team: 0 };
+    return { lvl: 0, own: 0, team: 0, pack: false };
   };
   let st = load();
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
@@ -91,45 +101,49 @@
   const modalOpen = () => { const m = document.getElementById("modalBackdrop"); return m && m.classList.contains("open"); };
 
   function levelBody() {
-    if (st.lvl >= MAX) return `<div class="zl"><div class="zl-h">Level ${MAX}<span>Highest level</span></div><div class="zl-empty">You have reached the highest level.</div></div>`;
-    const n = st.lvl + 1, t = LV[n];
+    const n = st.lvl + 1, last = st.lvl >= MAX;
+    const li = (a, i) => a.map(t => `<div class="zl-ben">${ic(i)}<span>${esc(t)}</span></div>`).join("");
+    const note = `<div class="zl-note">Progress starts from zero after every level. Benefits are plan details, not guaranteed income, and follow the Terms.</div>`;
+    let h = `<div class="zl"><div class="zl-h">Level ${st.lvl}<span>Your current level</span></div><div class="zl-sec" style="margin-top:0">Your Benefits</div>${li(nowList(st.lvl), "check")}`;
+    if (last) return h + `<div class="zl-empty">You have reached the highest level.</div>${note}</div>`;
     const bar = (label, v, max, sub) => `<div class="zl-bar"><div class="zl-bt"><span>${label}</span><b>$${fmt(Math.min(v, max))} / $${fmt(max)}</b></div><div class="zl-tr"><i style="width:${Math.min(100, v / max * 100)}%"></i></div><small>${sub}</small></div>`;
-    const ready = st.own >= t.own || st.team >= t.team;
-    const perks = [`${ic("gift")}<span>$${fmt(t.bonus)} One-time Fixed Wallet Bonus</span>`].concat(t.perks.map(p => `${ic("unlock")}<span>${esc(p)}</span>`));
-    return `<div class="zl">
-      <div class="zl-h">Level ${st.lvl} &rarr; Level ${n}<span>${ready ? "Target reached" : "In progress"}</span></div>
-      ${bar("Own NFT Investment", st.own, t.own, "Your own NFT purchases")}
-      <div class="zl-or">Complete any one target to level up</div>
-      ${bar("Team Investment", st.team, t.team, "NFT purchases by your team (Layer 1 + 2 + 3)")}
-      <div class="zl-sec">Next Level Benefits (Level ${n})</div>
-      ${perks.map(p => `<div class="zl-ben">${p}</div>`).join("")}
+    let ready, prog;
+    if (st.lvl === 0) {
+      ready = tierName() !== "Free" || (DEMO && st.pack);
+      prog = `<div class="zl-bar"><div class="zl-bt"><span>Premium Pack</span><b>${ready ? "Done" : "Needed"}</b></div><small>Buy any premium pack to reach Level 1. Your pack: ${esc(tierName())}</small></div>${ready ? "" : '<button class="zl-up" style="margin-top:0" onclick="closeModal();showSection(\'membership\')">View Packs</button>'}`;
+    } else {
+      const t = LV[n]; ready = st.own >= t.own || st.team >= t.team;
+      prog = bar("Own NFT Investment", st.own, t.own, "Your own NFT purchases") + `<div class="zl-or">Complete any one target to level up</div>` + bar("Team Investment", st.team, t.team, "NFT purchases by your team (Layer 1 + Layer 2)");
+    }
+    return h + `<div class="zl-sec">Progress to Level ${n}</div>${prog}
+      <div class="zl-sec">Next Level Benefits (Level ${n})</div>${li(nextList(n), "up")}
       <button class="zl-up" ${ready ? "" : "disabled"} onclick="zvLvUp()">Upgrade to Level ${n}</button>
-      ${DEMO ? `<div class="zl-dm"><button onclick="zvLvDemo('own')">Demo: +$100 own</button><button onclick="zvLvDemo('team')">Demo: +$300 team</button></div><div class="zl-note">Demo mode: numbers are samples only. Levels 3-8 targets are placeholders.</div>` : ""}
-      <div class="zl-note">Progress starts from zero again after every level. Bonus amounts are fixed one-time rewards and are not guaranteed income.</div></div>`;
+      ${DEMO ? `<div class="zl-dm">${st.lvl === 0 ? `<button onclick="zvLvDemo('pack')">Demo: pretend pack bought</button>` : `<button onclick="zvLvDemo('own')">Demo: +$100 own</button><button onclick="zvLvDemo('team')">Demo: +$300 team</button>`}</div><div class="zl-note">Demo mode: sample numbers only.</div>` : ""}${note}</div>`;
   }
 
-  function winBody(n, bonus) {
+  function winBody(n) {
     let cf = "";
     for (let i = 0; i < 16; i++) {
       const a = i / 16 * Math.PI * 2, d = 90 + (i % 3) * 25;
       cf += `<span class="zl-cf" style="--x:${Math.round(Math.cos(a) * d)}px;--y:${Math.round(Math.sin(a) * d)}px;background:${i % 2 ? "#ffd36b" : "#cda5ff"};animation-delay:${(i % 4) * 60}ms"></span>`;
     }
-    return `<div class="zl"><div class="zl-win">${cf}<div class="zl-ring">${ic("up")}</div><h3>Level ${n} Complete</h3><p>You are now on Level ${n}</p><b class="g">+$${fmt(bonus)}</b><p>added to your Wallet</p></div>
+    const items = nextList(n).map(t => `<div class="zl-ben">${ic("check")}<span>${esc(t)}</span></div>`).join("");
+    return `<div class="zl"><div class="zl-win">${cf}<div class="zl-ring">${ic("up")}</div><h3>Level ${n} Complete</h3><p>You are now on Level ${n}</p></div>${items}
       <button class="zl-up" onclick="zvaLevel()">Continue</button></div>`;
   }
 
   function openLevel() { window.openModal("Level", levelBody()); }
   function upgrade() {
     if (st.lvl >= MAX) return;
-    const n = st.lvl + 1, t = LV[n];
-    if (!(st.own >= t.own || st.team >= t.team)) return;
-    try { if (window.ZenvyroWallet) window.ZenvyroWallet.credit("USDT", t.bonus, t.bonus); } catch (e) {}
-    st = { lvl: n, own: 0, team: 0 }; save(); syncBadge();
-    document.getElementById("modalBody").innerHTML = winBody(n, t.bonus);
+    const n = st.lvl + 1;
+    const ready = st.lvl === 0 ? (tierName() !== "Free" || (DEMO && st.pack)) : (st.own >= LV[n].own || st.team >= LV[n].team);
+    if (!ready) return;
+    st = { lvl: n, own: 0, team: 0, pack: st.pack }; save(); syncBadge();
+    document.getElementById("modalBody").innerHTML = winBody(n);
   }
   function demoAdd(kind) {
     if (!DEMO) return;
-    if (kind === "own") st.own += 100; else st.team += 300;
+    if (kind === "pack") st.pack = true; else if (kind === "own") st.own += 100; else st.team += 300;
     save(); document.getElementById("modalBody").innerHTML = levelBody();
   }
 
@@ -144,7 +158,7 @@
       const j = await r.json();
       return (Array.isArray(j.members) ? j.members : []).slice(0, 200).map(m => ({
         id: String(m.id || ""), name: String(m.name || "Member"),
-        level: Math.min(MAX, Math.max(1, Math.floor(+m.level) || 1)), own: Math.max(0, +m.own || 0), team: Math.max(0, +m.team || 0)
+        level: Math.min(MAX, Math.max(0, Math.floor(+m.level) || 0)), own: Math.max(0, +m.own || 0), team: Math.max(0, +m.team || 0)
       }));
     } catch (e) { return null; }
   }
@@ -158,7 +172,7 @@
     return `<div class="zl"><div class="zl-sum"><div>${ic("users")}<span><small>Direct Referrals</small><b>${ms.length}</b></span></div><div>${ic("gift")}<span><small>Total Team Volume</small><b>$${fmt(vol)}</b></span></div></div>
       <div class="zl-sec">Your Direct Referrals</div>
       ${rows || '<div class="zl-empty">No direct referral has bought an NFT yet.</div>'}
-      <div class="zl-note">Only members who bought an NFT are listed. Team NFT is the volume of their Layer 2 + Layer 3 team.${DEMO ? " Demo mode: sample data only." : ""}</div></div>`;
+      <div class="zl-note">Only members who bought an NFT are listed. Team NFT is the volume of the members they referred (Layer 2).${DEMO ? " Demo mode: sample data only." : ""}</div></div>`;
   }
   async function openTeam() {
     window.openModal("Team", '<div class="zl"><div class="zl-empty">Loading team...</div></div>');

@@ -194,7 +194,7 @@
         <div class="tools"><button class="ic" onclick="toast('No new notifications')" aria-label="Notifications">${ic("bell")}<span class="dot"></span></button><button class="ic" onclick="zvaNotif()" aria-label="Settings">${ic("gear")}</button></div></div>
 
       <div class="card prof">
-        <div class="pt"><button class="zv-lvb" onclick="zvaLevel()" aria-label="Level progress">Level <b>${window.ZenvyroLevel ? window.ZenvyroLevel.get().lvl : 1}</b></button><button class="prem" onclick="zvaPack()" aria-label="Membership benefits">${ic("crown")}<span>${esc(tier)} Pack</span><span class="ch2">${ic("chev")}</span></button></div>
+        <div class="pt"><button class="zv-lvb" onclick="zvaLevel()" aria-label="Level progress">Level <b>${window.ZenvyroLevel ? window.ZenvyroLevel.get().lvl : 0}</b></button><button class="prem" onclick="zvaPack()" aria-label="Membership benefits">${ic("crown")}<span>${esc(tier)} Pack</span><span class="ch2">${ic("chev")}</span></button></div>
         <div class="pr"><div class="av" ${av ? `style="background-image:url(${av})"` : ""}>${av ? "" : SVG_AVATAR}<button class="cam" onclick="zvaPick()" aria-label="Change photo">${ic("camera")}</button></div>
           <div class="who"><div class="nm"><span>${esc(p.name)}</span>${premium ? SVG_TICK : ""}</div><div class="tt">${esc(p.title)}</div><span class="mid">Member ID: ${esc(memberId())}</span></div></div>
         <div class="stats">
