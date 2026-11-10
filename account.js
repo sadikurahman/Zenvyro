@@ -184,7 +184,7 @@
   function render() {
     if (!root || !root.classList.contains("open")) return;
     const p = profile(), st = M() || { tier: "Free", totalMined: 0 };
-    const total = window.ZenvyroWallet ? window.ZenvyroWallet.total() : 0;
+    const trx = (() => { try { const b = window.ZenvyroWallet.balances().TRX; return b ? b.amount : 0; } catch (e) { return 0; } })();
     const refs = window.ZenvyroReferral && window.ZenvyroReferral.count ? window.ZenvyroReferral.count() : 0;
     const av = (() => { try { return localStorage.getItem(AKEY); } catch (e) { return null; } })();
     const tier = PACKS[st.tier] ? st.tier : "Free";
@@ -196,11 +196,11 @@
       <div class="card prof">
         <div class="pt"><button class="zv-lvb" onclick="zvaLevel()" aria-label="Level progress">Level <b>${window.ZenvyroLevel ? window.ZenvyroLevel.get().lvl : 0}</b></button><button class="prem" onclick="zvaPack()" aria-label="Membership benefits">${ic("crown")}<span>${esc(tier)} Pack</span><span class="ch2">${ic("chev")}</span></button></div>
         <div class="pr"><div class="av" ${av ? `style="background-image:url(${av})"` : ""}>${av ? "" : SVG_AVATAR}<button class="cam" onclick="zvaPick()" aria-label="Change photo">${ic("camera")}</button></div>
-          <div class="who"><div class="nm"><span>${esc(p.name)}</span>${premium ? SVG_TICK : ""}</div><div class="tt">${esc(p.title)}</div><span class="mid">Member ID: ${esc(memberId())}</span></div></div>
+          <div class="who"><div class="nm"><span>${esc(p.name)}</span>${premium ? SVG_TICK : ""}</div><div class="tt">${esc(p.title)}</div><div class="mrow"><span class="mid">Member ID: ${esc(memberId())}</span><button class="zv-sum" onclick="zvaSummary()">${ic("doc")}Summary</button></div></div></div>
         <div class="stats">
           <button class="stat" onclick="zvaRefer()"><span class="si">${ic("users")}</span><span><small>Referral</small><b>${refs}</b></span><span class="ch">${ic("chev")}</span></button>
           <button class="stat" onclick="showSection('mining')"><span class="si">${ic("pick")}</span><span><small>Total Mining</small><b>${(+st.totalMined || 0).toFixed(3)}<i>ZENY</i></b></span><span class="ch">${ic("chev")}</span></button>
-          <button class="stat" onclick="showSection('wallet')"><span class="si">${ic("wallet")}</span><span><small>Wallet Balance</small><b>$${Number(total).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b></span><span class="ch">${ic("chev")}</span></button>
+          <button class="stat" onclick="showSection('wallet')"><span class="si">${ic("wallet")}</span><span><small>Wallet Balance</small><b>${Number(trx).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<i>TRX</i></b></span><span class="ch">${ic("chev")}</span></button>
           <button class="stat" onclick="toast('Account Active')"><span class="si">${ic("shieldCheck")}</span><span><small>Account Status</small><b class="grn">Active</b></span><span class="ch">${ic("chev")}</span></button>
         </div></div>
 

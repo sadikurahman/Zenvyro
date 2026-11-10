@@ -182,6 +182,10 @@
 
   window.ZenvyroLevel = {
     get: () => Object.assign({}, st),
+    addOwn(x) { st.own += Math.max(0, +x || 0); save(); },
+    markPack() { st.pack = true; save(); },
+    boost: () => cum(st.lvl),
+    wd: () => st.lvl < 1 ? 0 : (LV[st.lvl].wd || Infinity),
     setTotals(own, team) { st.own = Math.max(0, +own || 0); st.team = Math.max(0, +team || 0); save(); if (modalOpen() && document.querySelector("#modalBody .zl-up")) document.getElementById("modalBody").innerHTML = levelBody(); }
   };
   Object.assign(window, { zvaLevel: openLevel, zvLvUp: upgrade, zvLvDemo: demoAdd, zvaTeam: openTeam });
