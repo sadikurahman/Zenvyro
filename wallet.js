@@ -223,7 +223,7 @@
       <div class="modal-note" id="wdBreak" style="margin-top:8px"></div>
       <button class="btn alt" style="width:100%;margin-top:8px;padding:10px" onclick="zvwWdMax()">Max</button>
       <button class="btn" style="width:100%;margin-top:12px" onclick="zvwWithdraw()">Submit Withdraw Request</button>
-      <div class="modal-note">For every withdrawal, an extra 30% of the amount you withdraw must also be available. When the withdrawal is completed, that extra 30% moves to Hold Token for Airdrop (shown in Summary) and cannot be withdrawn. The airdrop date and amount are not decided and are not guaranteed. When you send a request, the amount plus the 30% is locked. If an admin accepts, the amount is sent; if rejected, the lock is released. Double-check the address and network — funds sent to a wrong address cannot be recovered.</div>`);
+      <div class="modal-note">When you send a request, the total is locked. If an admin accepts, the amount is sent; if rejected, the lock is released. Double-check the address and network: funds sent to a wrong address cannot be recovered.</div>`);
     wdInfo();
   }
   function wdInfo() {
@@ -234,9 +234,9 @@
   function wdBreak() {
     const el = $("wdBreak"); if (!el) return;
     const sym = val("wdAsset"), a = asset(sym), amt = parseFloat(val("wdAmt")), d = a.dec > 6 ? 8 : 6;
-    if (!(amt > 0)) { el.textContent = "An extra " + HOLD_PCT + "% (Hold Token for Airdrop) is needed with every withdrawal."; return; }
+    if (!(amt > 0)) { el.textContent = "Hold Token for Airdrop is added to every withdrawal. Airdrop details coming soon."; return; }
     const h = holdOf(amt);
-    el.textContent = "You receive " + amt.toFixed(d) + " " + sym + " · Hold Token for Airdrop " + h.toFixed(d) + " " + sym + " (" + HOLD_PCT + "%) · Total needed " + (amt + h).toFixed(d) + " " + sym;
+    el.textContent = "You receive " + amt.toFixed(d) + " " + sym + " · Hold Token for Airdrop " + h.toFixed(d) + " " + sym + " · Total needed " + (amt + h).toFixed(d) + " " + sym;
   }
   const MIN_WITHDRAW_USD = 10; // minimum withdrawal per request (USD value). A server must enforce this too.
   async function submitWithdraw() {
@@ -249,7 +249,7 @@
     if (amount * px < MIN_WITHDRAW_USD - 1e-9)
       return say("Minimum withdrawal is $" + MIN_WITHDRAW_USD + " (about " + +(MIN_WITHDRAW_USD / px).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + ")");
     const hold = holdOf(amount);
-    if (amount + hold > availAmt(sym) + 1e-12) return say("Not enough available balance. You need the amount plus " + HOLD_PCT + "% (" + +(amount + hold).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + ")");
+    if (amount + hold > availAmt(sym) + 1e-12) return say("Not enough balance. You need " + +(amount + hold).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + " in total");
     window.ZenvyroTx.log({ id: newId("WD"), kind: "withdraw", sym, amount, hold, status: "pending", sub: sym + " (" + a.net + ")", addr });
     window.closeModal(); say("Withdraw request sent");
   }

@@ -148,8 +148,8 @@
         <div class="zs-c">${ic("gem")}<small>NFT Holdings</small><b>${count}</b><em>${fmt(value)} TRX total</em></div>
         <div class="zs-c fz">${ic("snow")}<small>Frozen Balance</small><b>${fmt(pend, 6)} TRX</b><em>${fmt(held, 6)} ZENY on hold</em></div>
         <div class="zs-c">${ic("out")}<small>Total Withdrawal</small><b>${fmt(done, 6)} TRX</b><em>Withdrawn so far</em></div>
-        <div class="zs-c av">${ic("wallet")}<small>Available Withdrawal</small><b>${fmt(avail, 6)} TRX</b><em>${L.lvl < 1 ? "Unlocks at Level 1" : "After the " + AH.pct + "% Airdrop Hold"}</em></div>
-        <div class="zs-c hold">${ic("gem")}<small>Hold Token for Airdrop</small><b>${fmt(hTrx, 6)} TRX</b><em>${hOthers ? esc(hOthers) + " &middot; " : ""}Not withdrawable. The airdrop date and amount are not decided and are not guaranteed.</em></div></div>
+        <div class="zs-c av">${ic("wallet")}<small>Available Withdrawal</small><b>${fmt(avail, 6)} TRX</b><em>${L.lvl < 1 ? "Unlocks at Level 1" : "After Hold Token for Airdrop"}</em></div>
+        <div class="zs-c hold">${ic("gem")}<small>Hold Token for Airdrop</small><b>${fmt(hTrx, 6)} TRX</b><em>${hOthers ? esc(hOthers) + " &middot; " : ""}Airdrop details coming soon.</em></div></div>
       <div class="zs-w"><div class="r"><span>Withdrawals this month</span><b>${lim === 0 ? "Locked (Level 1 needed)" : used + " / " + (unl ? "Unlimited" : lim)}</b></div>${unl ? "" : `<div class="zs-tr"><i style="width:${lim ? Math.min(100, used / lim * 100) : 0}%"></i></div>`}</div>
       ${nfts.length ? `<div class="zm-note">Your NFTs: ${nfts.map(i => esc(i.name)).join(", ")}</div>` : ""}`;
   }
