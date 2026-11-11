@@ -63,6 +63,7 @@
     gift: '<rect x="3.5" y="9" width="17" height="11" rx="1.5"/><path d="M12 9v11M3.5 13.5h17"/><path d="M12 9c-3 0-5-1-5-3a2 2 0 0 1 4-.5C11.7 7 12 9 12 9zm0 0c3 0 5-1 5-3a2 2 0 0 0-4-.5C12.3 7 12 9 12 9z"/>',
     lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
     clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+    star: '<path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z"/>',
     doc: '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 15.5h5"/>',
     help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.6a2.6 2.6 0 1 1 3.6 2.4c-.7.4-1.1 1-1.1 1.8M12 17h.01"/>',
     mail: '<rect x="3" y="5.5" width="18" height="13" rx="2.2"/><path d="M3.5 7.5l8.5 6 8.5-6"/>',
@@ -89,7 +90,7 @@
 
   // ---- CSS ----
   const css = `
-#zvAccount{position:fixed;inset:0;z-index:4;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;padding:calc(14px + env(safe-area-inset-top,0px)) 14px 210px;background:radial-gradient(ellipse at 50% 0,#2b1475 0,#0a0720 46%,#04040e 100%);color:#fff}
+#zvAccount{position:fixed;inset:0;z-index:4;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;padding:calc(14px + env(safe-area-inset-top,0px)) 14px 120px;background:radial-gradient(ellipse at 50% 0,#2b1475 0,#0a0720 46%,#04040e 100%);color:#fff}
 #zvAccount.open{display:block}
 #zvAccount .in{max-width:1000px;margin:auto}
 #zvAccount .zi{width:1em;height:1em;display:block;flex-shrink:0}
@@ -101,7 +102,7 @@
 #zvAccount .tools{display:flex;gap:4px}
 #zvAccount .ic{width:44px;height:44px;border-radius:14px;border:0;background:none;display:grid;place-items:center;font-size:25px;color:#d9ceff;position:relative;padding:0}
 #zvAccount .dot{position:absolute;top:7px;right:9px;width:10px;height:10px;border-radius:50%;background:#ff4466}
-#zvAccount .card{border:1px solid #5a35d8;border-radius:22px;background:linear-gradient(135deg,#150c4ee6,#0b0830f2);box-shadow:0 0 28px #6b32ff2a,inset 0 0 0 1px #2e1d7a;margin-bottom:14px;overflow:hidden}
+#zvAccount .card{border:1px solid #5a35d8;border-radius:22px;background:linear-gradient(135deg,#150c4ee6,#0b0830f2);box-shadow:0 0 28px #6b32ff2a,inset 0 0 0 1px #2e1d7a;margin-bottom:10px;overflow:hidden}
 #zvAccount .prof{padding:12px 14px 0}
 #zvAccount .pt{display:flex;justify-content:flex-end;margin-bottom:6px}
 #zvAccount .prem{display:inline-flex;align-items:center;gap:5px;border:1px solid #d8a93a;border-radius:16px;background:#2a1d08;color:#ffd36b;padding:4px 9px 4px 8px;font-size:11px;font-weight:700;line-height:1.2}
@@ -139,15 +140,15 @@
 #zvAccount .ban button .zi{font-size:14px}
 #zvAccount .grid{display:grid;grid-template-columns:1fr;gap:0}
 @media(min-width:820px){#zvAccount .grid{grid-template-columns:1.6fr 1fr;gap:14px;align-items:start}}
-#zvAccount .sh{display:flex;align-items:center;gap:10px;padding:12px 16px;font-weight:800;font-size:17px;background:#1b1160;border-bottom:1px solid #2a2170}
-#zvAccount .sh .zi{font-size:20px;color:#c9b4ff}
-#zvAccount .zr{display:flex;align-items:center;gap:12px;width:100%;padding:11px 16px;background:none;border:0;border-top:1px solid #231a66;color:#fff;text-align:left}
+#zvAccount .sh{display:flex;align-items:center;gap:10px;padding:9px 14px;font-weight:800;font-size:15px;background:#1b1160;border-bottom:1px solid #2a2170}
+#zvAccount .sh .zi{font-size:17px;color:#c9b4ff}
+#zvAccount .zr{display:flex;align-items:center;gap:10px;width:100%;padding:8px 14px;background:none;border:0;border-top:1px solid #231a66;color:#fff;text-align:left}
 #zvAccount .sh+.zr{border-top:0}
-#zvAccount .ri{width:44px;height:44px;border-radius:50%;border:1px solid #6b45d8;background:#1a1058;display:grid;place-items:center;font-size:20px;flex-shrink:0;color:#d6c8ff}
-#zvAccount .rt{flex:1;min-width:0}#zvAccount .rt b{display:block;font-size:15px}#zvAccount .rt small{color:#b9b2ee;font-size:12px}
-#zvAccount .zr>.ch{font-size:18px;color:#a98bff}
-#zvAccount .lo{position:fixed;left:0;right:0;bottom:80px;z-index:4;padding:10px 14px 8px;display:flex;justify-content:center;pointer-events:none;background:linear-gradient(180deg,#04040e00,#04040ef2 38%)}
-#zvAccount .lo button{pointer-events:auto;width:100%;max-width:972px;border:1px solid #d83a7a;border-radius:16px;background:#2a0c24;color:#ff6fa0;padding:13px 16px;display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px}
+#zvAccount .ri{width:34px;height:34px;border-radius:50%;border:1px solid #6b45d8;background:#1a1058;display:grid;place-items:center;font-size:17px;flex-shrink:0;color:#d6c8ff}
+#zvAccount .rt{flex:1;min-width:0}#zvAccount .rt b{display:block;font-size:13.5px}#zvAccount .rt small{color:#b9b2ee;font-size:11px}
+#zvAccount .zr>.ch{font-size:16px;color:#a98bff}
+#zvAccount .lo{max-width:1000px;margin:6px auto 0}
+#zvAccount .lo button{width:100%;border:1px solid #d83a7a;border-radius:16px;background:#2a0c24;color:#ff6fa0;padding:13px 16px;display:flex;align-items:center;gap:12px;font-weight:700;font-size:15px}
 #zvAccount .lo button .zi{font-size:22px}
 #zvAccount .lo button .zi:last-child{font-size:18px}
 #zvAccount .side{border:1px solid #5a35d8;border-radius:22px;background:linear-gradient(160deg,#1a0f5a,#0a0730);padding:18px 16px;margin-bottom:14px}
@@ -159,9 +160,26 @@
 #zvAccount .chip span.ci{width:40px;height:40px;border-radius:50%;background:#2a1a86;display:grid;place-items:center;font-size:19px;color:#d6c8ff;flex-shrink:0}
 #zvAccount .chip b{font-size:14px;display:block}#zvAccount .chip small{color:#b9b2ee;font-size:12px}
 #zvAccount .sig{font-family:'Brush Script MT','Snell Roundhand',cursive;font-style:italic;color:#a98bff;font-size:24px;text-align:center;margin-top:14px;display:flex;justify-content:center;align-items:center;gap:6px}
-.zv-sw{position:relative;width:52px;height:30px;border-radius:20px;background:#2b2570;flex-shrink:0;border:0;padding:0}
-.zv-sw:after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
-.zv-sw.on{background:#6a3dff}.zv-sw.on:after{left:25px}
+#zvAccount .card.prof{position:relative;border:1.5px solid #8a52ff;background:radial-gradient(ellipse at 100% 100%,#ff9a3c40,transparent 42%),linear-gradient(135deg,#0c0630,#120a48 60%,#070420);box-shadow:0 0 26px #7a3dff66,inset 0 0 24px #4a2bd033}
+#zvAccount .card.prof:after{content:"";position:absolute;right:0;bottom:0;width:60%;height:42%;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 80'><path d='M0 66h74l14-14h58l14 14h62' fill='none' stroke='%23a98bff' stroke-width='1.4'/><path d='M150 80l12-12h58' fill='none' stroke='%23ffb347' stroke-width='1.4'/></svg>") no-repeat right bottom/contain;opacity:.55;pointer-events:none}
+#zvAccount .prof .pr,#zvAccount .prof .stats{position:relative;z-index:1}
+#zvAccount .prof .pr{gap:10px;align-items:center;padding:0 0 14px}
+#zvAccount .prof .av{width:78px;height:78px;font-size:46px;border-color:#a06bff}
+#zvAccount .prof .cam{width:30px;height:30px;font-size:15px}
+#zvAccount .prof .nm{font-size:clamp(17px,5.2vw,23px)}
+#zvAccount .prof .tt{margin:1px 0 8px;font-size:14px}
+#zvAccount .prof .mid{font-size:11.5px;padding:5px 9px}
+#zvAccount .prof .mrow{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+#zvAccount .prof .zv-sum{display:inline-flex;align-items:center;gap:7px;border:1px solid #7a4dff;border-radius:18px;background:linear-gradient(135deg,#2a1a86,#1a1058);color:#fff;font-weight:700;font-size:13px;padding:7px 14px;box-shadow:0 0 12px #8a3dff44}
+#zvAccount .prof .zv-sum .zi{font-size:17px}
+#zvAccount .prof .pt{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0;align-self:flex-start;flex-shrink:0}
+#zvAccount .prof .zv-lvb{display:flex;align-items:center;justify-content:center;gap:6px;border:1.5px solid #9a5cff;border-radius:18px;background:linear-gradient(135deg,#2a1a86,#1a1058);color:#e8dcff;padding:7px 12px;font-size:13px;font-weight:700;box-shadow:0 0 14px #8a3dff55}
+#zvAccount .prof .zv-lvb .zi{font-size:17px;color:#ffd36b}
+#zvAccount .prof .prem{justify-content:center;border:1.5px solid #d8a93a;padding:7px 10px;font-size:13px;box-shadow:0 0 14px #d8a93a40}
+#zvAccount .prof .prem .zi{font-size:16px}
+.zv-sw{position:relative;width:44px;height:26px;border-radius:20px;background:#2b2570;flex-shrink:0;border:0;padding:0}
+.zv-sw:after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.zv-sw.on{background:#6a3dff}.zv-sw.on:after{left:21px}
 .zv-ben{list-style:none;margin:14px 0 0;padding:0}
 .zv-ben li{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #231a66;font-size:14px;color:#e6e0ff}
 .zv-ben li svg{width:18px;height:18px;color:#2bf0b0;flex-shrink:0}`;
@@ -176,9 +194,7 @@
     if (!root) return;
     const nav = document.querySelector(".bottom");
     const h = nav ? nav.offsetHeight : 80;
-    const bar = root.querySelector(".lo");
-    if (bar) bar.style.bottom = h + "px";
-    root.style.paddingBottom = (h + 90) + "px";
+    root.style.paddingBottom = (h + 28) + "px";
   }
 
   function render() {
@@ -194,9 +210,9 @@
         <div class="tools"><button class="ic" onclick="toast('No new notifications')" aria-label="Notifications">${ic("bell")}<span class="dot"></span></button><button class="ic" onclick="zvaNotif()" aria-label="Settings">${ic("gear")}</button></div></div>
 
       <div class="card prof">
-        <div class="pt"><button class="zv-lvb" onclick="zvaLevel()" aria-label="Level progress">Level <b>${window.ZenvyroLevel ? window.ZenvyroLevel.get().lvl : 0}</b></button><button class="prem" onclick="zvaPack()" aria-label="Membership benefits">${ic("crown")}<span>${esc(tier)} Pack</span><span class="ch2">${ic("chev")}</span></button></div>
         <div class="pr"><div class="av" ${av ? `style="background-image:url(${av})"` : ""}>${av ? "" : SVG_AVATAR}<button class="cam" onclick="zvaPick()" aria-label="Change photo">${ic("camera")}</button></div>
-          <div class="who"><div class="nm"><span>${esc(p.name)}</span>${premium ? SVG_TICK : ""}</div><div class="tt">${esc(p.title)}</div><div class="mrow"><span class="mid">Member ID: ${esc(memberId())}</span><button class="zv-sum" onclick="zvaSummary()">${ic("doc")}Summary</button></div></div></div>
+          <div class="who"><div class="nm"><span>${esc(p.name)}</span>${premium ? SVG_TICK : ""}</div><div class="tt">${esc(p.title)}</div><div class="mrow"><span class="mid">Member ID: ${esc(memberId())}</span><button class="zv-sum" onclick="zvaSummary()">${ic("doc")}Summary</button></div></div>
+          <div class="pt"><button class="zv-lvb" onclick="zvaLevel()" aria-label="Level progress">${ic("star")}<span>Level <b>${window.ZenvyroLevel ? window.ZenvyroLevel.get().lvl : 0}</b></span></button><button class="prem" onclick="zvaPack()" aria-label="Membership benefits">${ic("crown")}<span>${esc(tier)} Pack</span><span class="ch2">${ic("chev")}</span></button></div></div>
         <div class="stats">
           <button class="stat" onclick="zvaRefer()"><span class="si">${ic("users")}</span><span><small>Referral</small><b>${refs}</b></span><span class="ch">${ic("chev")}</span></button>
           <button class="stat" onclick="showSection('mining')"><span class="si">${ic("pick")}</span><span><small>Total Mining</small><b>${(+st.totalMined || 0).toFixed(3)}<i>ZENY</i></b></span><span class="ch">${ic("chev")}</span></button>
