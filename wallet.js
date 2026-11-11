@@ -42,8 +42,16 @@
     update(id, patch) { const t = txs.find(x => x.id === id); if (t) { Object.assign(t, patch); saveTx(); render(); } }
   };
 
-  const locked = sym => txs.filter(t => t.kind === "withdraw" && t.status === "pending" && t.sym === sym).reduce((a, t) => a + +t.amount, 0);
+  // Airdrop Hold: every withdrawal needs an extra 30% of the amount. When the withdrawal is completed,
+  // that 30% moves to "Hold Token for Airdrop" (shown in Summary, never withdrawable). A server must enforce this too.
+  const HOLD_PCT = 30, HKEY = "zenvyro_airdrophold_v1";
+  let holds = (() => { try { const o = JSON.parse(localStorage.getItem(HKEY) || "{}"); return o && typeof o === "object" ? o : {}; } catch (e) { return {}; } })();
+  const saveHolds = () => { try { localStorage.setItem(HKEY, JSON.stringify(holds)); } catch (e) {} };
+  window.ZenvyroAirdropHold = { get: () => Object.assign({}, holds), pct: HOLD_PCT };
+  const holdOf = amt => Math.round(amt * HOLD_PCT / 100 * 1e8) / 1e8;
+  const locked = sym => txs.filter(t => t.kind === "withdraw" && t.status === "pending" && t.sym === sym).reduce((a, t) => a + +t.amount + (+t.hold || 0), 0);
   const availAmt = sym => Math.max(0, (bals()[sym] ? bals()[sym].amount : 0) - locked(sym));
+  const maxWd = sym => availAmt(sym) / (1 + HOLD_PCT / 100);
   function availUsdt() {
     const b = bals(); let v = 0;
     ASSETS.forEach(a => { const x = b[a.sym]; if (x && x.amount > 0) v += x.value * (availAmt(a.sym) / x.amount); });
@@ -211,15 +219,24 @@
       <label class="modal-label" for="wdAddr">Wallet address</label>
       <input class="modal-field" id="wdAddr" type="text" placeholder="Your wallet address" autocapitalize="off" autocorrect="off">
       <label class="modal-label" for="wdAmt">Amount</label>
-      <input class="modal-field" id="wdAmt" type="number" inputmode="decimal" step="any" min="0" placeholder="0.00">
+      <input class="modal-field" id="wdAmt" type="number" inputmode="decimal" step="any" min="0" placeholder="0.00" oninput="zvwWdBreak()">
+      <div class="modal-note" id="wdBreak" style="margin-top:8px"></div>
       <button class="btn alt" style="width:100%;margin-top:8px;padding:10px" onclick="zvwWdMax()">Max</button>
       <button class="btn" style="width:100%;margin-top:12px" onclick="zvwWithdraw()">Submit Withdraw Request</button>
-      <div class="modal-note">When you send a request, that amount is locked. If an admin accepts, it is sent; if rejected, the lock is released. Double-check the address and network — funds sent to a wrong address cannot be recovered.</div>`);
+      <div class="modal-note">For every withdrawal, an extra 30% of the amount you withdraw must also be available. When the withdrawal is completed, that extra 30% moves to Hold Token for Airdrop (shown in Summary) and cannot be withdrawn. The airdrop date and amount are not decided and are not guaranteed. When you send a request, the amount plus the 30% is locked. If an admin accepts, the amount is sent; if rejected, the lock is released. Double-check the address and network — funds sent to a wrong address cannot be recovered.</div>`);
     wdInfo();
   }
   function wdInfo() {
     const sym = val("wdAsset"), a = asset(sym);
-    $("wdInfo").textContent = "Network: " + a.net + " · Available: " + availAmt(sym).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + " · Minimum withdrawal: $10";
+    $("wdInfo").textContent = "Network: " + a.net + " · Available: " + availAmt(sym).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + " · You can withdraw up to: " + maxWd(sym).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + " · Minimum withdrawal: $10";
+    wdBreak();
+  }
+  function wdBreak() {
+    const el = $("wdBreak"); if (!el) return;
+    const sym = val("wdAsset"), a = asset(sym), amt = parseFloat(val("wdAmt")), d = a.dec > 6 ? 8 : 6;
+    if (!(amt > 0)) { el.textContent = "An extra " + HOLD_PCT + "% (Hold Token for Airdrop) is needed with every withdrawal."; return; }
+    const h = holdOf(amt);
+    el.textContent = "You receive " + amt.toFixed(d) + " " + sym + " · Hold Token for Airdrop " + h.toFixed(d) + " " + sym + " (" + HOLD_PCT + "%) · Total needed " + (amt + h).toFixed(d) + " " + sym;
   }
   const MIN_WITHDRAW_USD = 10; // minimum withdrawal per request (USD value). A server must enforce this too.
   async function submitWithdraw() {
@@ -231,8 +248,9 @@
     if (!(px > 0)) return say("Could not check the current price. Please try again.");
     if (amount * px < MIN_WITHDRAW_USD - 1e-9)
       return say("Minimum withdrawal is $" + MIN_WITHDRAW_USD + " (about " + +(MIN_WITHDRAW_USD / px).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + ")");
-    if (amount > availAmt(sym) + 1e-12) return say("Not enough available balance");
-    window.ZenvyroTx.log({ id: newId("WD"), kind: "withdraw", sym, amount, status: "pending", sub: sym + " (" + a.net + ")", addr });
+    const hold = holdOf(amount);
+    if (amount + hold > availAmt(sym) + 1e-12) return say("Not enough available balance. You need the amount plus " + HOLD_PCT + "% (" + +(amount + hold).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + ")");
+    window.ZenvyroTx.log({ id: newId("WD"), kind: "withdraw", sym, amount, hold, status: "pending", sub: sym + " (" + a.net + ")", addr });
     window.closeModal(); say("Withdraw request sent");
   }
 
@@ -287,7 +305,9 @@
       if (!(v > 0)) return false;
       W().credit(t.sym, t.amount, v);
     } else if (t.kind === "withdraw") {
-      if (!W().debit(t.sym, t.amount)) return false;
+      const h = +t.hold || 0;
+      if (!W().debit(t.sym, t.amount + h)) return false;
+      if (h > 0) { holds[t.sym] = Math.round(((+holds[t.sym] || 0) + h) * 1e8) / 1e8; saveHolds(); } // moves to Hold Token for Airdrop
     } else return false;
     t.status = "completed"; saveTx(); render(); return true;
   }
@@ -305,7 +325,7 @@
       zvwAsset: assetDetail,
       zvwDepositForm: depositForm, zvwDepositAddr: depositAddr, zvwDeposit: submitDeposit,
       zvwWithdrawForm: withdrawForm, zvwWdInfo: wdInfo, zvwWithdraw: submitWithdraw,
-      zvwWdMax: () => { const sym = val("wdAsset"); $("wdAmt").value = availAmt(sym).toFixed(8); },
+      zvwWdMax: () => { const sym = val("wdAsset"); $("wdAmt").value = maxWd(sym).toFixed(8); wdBreak(); }, zvwWdBreak: wdBreak,
       zvwTransferForm: transferForm, zvwTrInfo: trInfo, zvwTransfer: submitTransfer,
       zvwCopy: () => {
         const el = document.querySelector("#dpAddr .ref-box");

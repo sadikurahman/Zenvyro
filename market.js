@@ -75,6 +75,7 @@
 .zs-c{border:1px solid #4a32a8;border-radius:16px;background:#120c40;padding:12px;min-width:0;color:#fff}
 .zs-c .zm-i{font-size:22px;color:#b28aff;margin-bottom:6px}.zs-c small{display:block;color:#c8b8ff;font-size:11.5px}.zs-c b{display:block;font-size:17px;margin-top:2px;overflow-wrap:anywhere}.zs-c em{display:block;font-style:normal;color:#aeb9ff;font-size:11.5px;margin-top:3px}
 .zs-c.fz .zm-i{color:#7ee8ff}.zs-c.av{border-color:#1fbf8f}.zs-c.av .zm-i,.zs-c.av b{color:#2bf0b0}
+.zs-c.hold{grid-column:1/-1;border-color:#d8a93a;background:linear-gradient(135deg,#2a1d08,#120c40)}.zs-c.hold .zm-i,.zs-c.hold b{color:#ffd36b}
 .zs-w{border:1px solid #4a32a8;border-radius:16px;background:#120c40;padding:12px;color:#fff}.zs-w .r{display:flex;justify-content:space-between;font-size:13px;color:#cfc4ff}.zs-w .r b{color:#fff}
 .zs-tr{height:8px;border-radius:8px;background:#0a0720;border:1px solid #2e1d7a;margin-top:8px;overflow:hidden}.zs-tr i{display:block;height:100%;background:linear-gradient(90deg,#6b32ff,#cda5ff)}
 #zvAccount .mrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -132,10 +133,12 @@
     const value = nfts.reduce((t, i) => t + i.price, 0) + packVal;
     const boost = LVL() ? LVL().boost() : 0, base = RATE[tier] || RATE.Free, total = base * (1 + boost / 100);
     const tx = jget(TXKEY, []), wds = Array.isArray(tx) ? tx.filter(t => t && t.kind === "withdraw" && t.sym === "TRX") : [];
-    const pend = wds.filter(t => t.status === "pending").reduce((a, t) => a + (+t.amount || 0), 0);
+    const pend = wds.filter(t => t.status === "pending").reduce((a, t) => a + (+t.amount || 0) + (+t.hold || 0), 0);
     const done = wds.filter(t => t.status === "completed").reduce((a, t) => a + (+t.amount || 0), 0);
     let held = 0; try { held = window.ZenvyroExchange.requests().filter(r => r.status === "pending").reduce((a, r) => a + (+r.zeny || 0), 0); } catch (e) {}
-    const avail = L.lvl < 1 ? 0 : Math.max(0, trxBal() - pend);
+    const AH = window.ZenvyroAirdropHold || { get: () => ({}), pct: 30 }, holds = AH.get(), hTrx = +holds.TRX || 0;
+    const hOthers = Object.keys(holds).filter(k => k !== "TRX" && +holds[k] > 0).map(k => fmt(holds[k], 8) + " " + k).join(", ");
+    const avail = L.lvl < 1 ? 0 : Math.max(0, (trxBal() - pend) / (1 + AH.pct / 100));
     const ms = new Date(); ms.setDate(1); ms.setHours(0, 0, 0, 0);
     const used = wds.filter(t => t.status !== "rejected" && (+t.ts || 0) >= ms.getTime()).length;
     const lim = LVL() ? LVL().wd() : 0, unl = lim === Infinity;
@@ -145,8 +148,9 @@
         <div class="zs-c">${ic("gem")}<small>NFT Holdings</small><b>${count}</b><em>${fmt(value)} TRX total</em></div>
         <div class="zs-c fz">${ic("snow")}<small>Frozen Balance</small><b>${fmt(pend, 6)} TRX</b><em>${fmt(held, 6)} ZENY on hold</em></div>
         <div class="zs-c">${ic("out")}<small>Total Withdrawal</small><b>${fmt(done, 6)} TRX</b><em>Withdrawn so far</em></div>
-        <div class="zs-c av">${ic("wallet")}<small>Available Withdrawal</small><b>${fmt(avail, 6)} TRX</b><em>${L.lvl < 1 ? "Unlocks at Level 1" : "Ready to withdraw"}</em></div></div>
-      <div class="zs-w"><div class="r"><span>Withdrawals this month</span><b>${used} / ${unl ? "Unlimited" : lim}</b></div>${unl ? "" : `<div class="zs-tr"><i style="width:${lim ? Math.min(100, used / lim * 100) : 0}%"></i></div>`}</div>
+        <div class="zs-c av">${ic("wallet")}<small>Available Withdrawal</small><b>${fmt(avail, 6)} TRX</b><em>${L.lvl < 1 ? "Unlocks at Level 1" : "After the " + AH.pct + "% Airdrop Hold"}</em></div>
+        <div class="zs-c hold">${ic("gem")}<small>Hold Token for Airdrop</small><b>${fmt(hTrx, 6)} TRX</b><em>${hOthers ? esc(hOthers) + " &middot; " : ""}Not withdrawable. The airdrop date and amount are not decided and are not guaranteed.</em></div></div>
+      <div class="zs-w"><div class="r"><span>Withdrawals this month</span><b>${lim === 0 ? "Locked (Level 1 needed)" : used + " / " + (unl ? "Unlimited" : lim)}</b></div>${unl ? "" : `<div class="zs-tr"><i style="width:${lim ? Math.min(100, used / lim * 100) : 0}%"></i></div>`}</div>
       ${nfts.length ? `<div class="zm-note">Your NFTs: ${nfts.map(i => esc(i.name)).join(", ")}</div>` : ""}`;
   }
   const openSummary = () => window.openModal("Summary", summaryBody());

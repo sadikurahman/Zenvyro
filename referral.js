@@ -64,7 +64,14 @@
     return [Math.floor(s / 3600), Math.floor(s % 3600 / 60), s % 60].map(n => String(n).padStart(2, "0")).join(":");
   };
 
+  const hasPack = () => { try { const t = window.ZenvyroMining.getState().tier; if (t && t !== "Free") return true; return !!(window.ZenvyroLevel && window.ZenvyroLevel.get().pack); } catch (e) { return false; } };
+  function packPopup() {
+    window.openModal("Buy a Pack to Claim", `<div class="modal-note">Your referral income is waiting for you. To claim it you need a pack. Buy any pack or NFT, then claim your pending income. Your pending income stays on your account.</div>
+      <button class="btn" style="width:100%;margin-top:12px" onclick="closeModal();showSection('membership')">View Packs</button>`);
+  }
+
   async function doClaim() {
+    if (hasPending() && !hasPack()) { packPopup(); return; }
     if (!canClaim()) { say(hasPending() ? "You can claim at the next 10 PM" : "Nothing to claim"); return; }
     let inc = claim.pendingIncome;
     const url = window.ZENVYRO_REFERRAL_CLAIM_ENDPOINT;
