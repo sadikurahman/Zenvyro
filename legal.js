@@ -10,124 +10,112 @@
   const TERMS = `
 <p class="lg-lead">Please read these Terms and Conditions carefully before you create an account or use Zenvyro. By ticking the agreement box when you register, and by continuing to use the app, you confirm that you have read, understood and accepted them, together with our Privacy Policy.</p>
 
-<h2>1. Acceptance and Scope</h2>
-<p>These Terms and Conditions (the "Terms") are a binding agreement between you and Zenvyro ("Zenvyro", "we", "us", "our"). They apply to the Zenvyro website and app, including mining, membership packs, referrals, Exchange, Wallet, Transfer and Account features (together, the "App"). If you do not agree with any part of these Terms, do not register and do not use the App.</p>
-<p>Registration is not possible unless you tick the box confirming that you agree to these Terms and the Privacy Policy. This is a deliberate safeguard so that every member has accepted the rules before taking part.</p>
+<h2>1. Acceptance and Scope of Terms</h2>
+<p>These Terms and Conditions (the "Terms") constitute a legally binding agreement between you and Zenvyro ("Zenvyro", "we", "us", or "our"). They govern your access to and use of the Zenvyro website and mobile application, including all features related to mining sessions, membership packs, referral programs, Exchange, Wallet, internal Transfers, and Account services (collectively, the "App").</p>
+<p>Express consent to these Terms and our Privacy Policy is a mandatory prerequisite for account registration. By ticking the agreement box during registration and continuing to access or use the App, you confirm that you have read, understood, and accepted all provisions set forth herein.</p>
 
-<h2>2. About Zenvyro and ZENY</h2>
-<p>Zenvyro is a digital rewards and community platform. Members run time-based mining sessions inside the App and receive ZENY, a digital reward unit issued and recorded by Zenvyro.</p>
+<h2>2. Nature of the Zenvyro Platform and ZENY</h2>
+<p>Zenvyro is a digital rewards and community-driven platform where eligible members participate in timed activity sessions to earn "ZENY," an internal digital reward unit issued and recorded by Zenvyro.</p>
 <ul>
-<li><b>What "mining" means here.</b> In Zenvyro, mining is an in-App, session-based reward process. A session lasts two hours. It does not use your phone's processing power to secure a public blockchain, and the figures shown on screen, such as Mining Power or Hash Rate, are informational values of the App and do not represent computing power contributed by your device.</li>
-<li><b>What ZENY is.</b> ZENY is a digital reward unit inside the App. It is not legal tender, not a bank deposit, not a share or security, and not a guaranteed claim on any asset. ZENY does not currently trade on a public exchange, and nothing in the App promises that it ever will.</li>
-<li><b>Reference rate.</b> The App shows a platform-set reference rate (currently 1 ZENY = 3 USDT) that is used for Exchange requests and for displaying approximate values. It is set by Zenvyro, it can be changed, and it is not a market price and not a promise that ZENY can be sold for that amount anywhere.</li>
+<li><b>Definition of the Mining Process:</b> Within the Zenvyro ecosystem, "mining" refers to an in-App, time-based reward distribution mechanism operating in two-hour sessions. This process does not utilize your device's hardware or computational processing power to validate a public blockchain. Metrics displayed on screen, such as "Mining Power" or "Hash Rate," serve solely as informational indicators of internal platform functionality.</li>
+<li><b>Nature of ZENY:</b> ZENY is a digital reward unit confined to the Zenvyro ecosystem. It does not represent legal tender, a bank deposit, a corporate share, or a financial security. Currently, ZENY operates within the platform's internal framework, and its future utility or expansion depends on the platform's ongoing development roadmap and operational policies.</li>
+<li><b>Internal Reference Rate:</b> The App displays a platform-determined reference rate (currently set at 1 ZENY = 3 USDT), which is utilized exclusively for processing internal Exchange requests and displaying approximate balance equivalents. Zenvyro reserves the right to calibrate or update this reference rate to maintain ecosystem balance, and such rate shall not be construed as an open-market valuation.</li>
 </ul>
 
-<h2>3. Our Mission and Goals</h2>
-<p>Our aim is to build an easy, welcoming digital rewards community where anyone can take part for free and where members who choose to do more can access additional features. Our goals include:</p>
+<h2>3. Mission, Strategic Objectives &amp; Exchange Listing Policy</h2>
+<p>Our primary mission is to foster an accessible, inclusive digital rewards community where eligible individuals can participate at no cost, while offering optional enhanced features for members seeking expanded utility. Our core objectives include:</p>
 <ul>
-<li>keeping a free way to earn ZENY open to every eligible member;</li>
-<li>rewarding genuine community growth through a clear, published referral program;</li>
-<li>providing simple, transparent Wallet, Exchange and Transfer tools, with fees shown before you confirm anything;</li>
-<li>keeping members informed through the Update News and Community sections of the App; and</li>
-<li>over the long term, working toward getting ZENY listed on recognised crypto exchanges, with Binance named as one of our target platforms.</li>
+<li>Maintaining a free-to-earn pathway for ZENY accessible to all eligible members;</li>
+<li>Recognizing genuine community expansion through a transparent and published referral structure;</li>
+<li>Providing straightforward Wallet, Exchange, and Transfer utilities with clear fee disclosures prior to transaction confirmation;</li>
+<li>Keeping members informed via the App's Update News and Community channels; and</li>
+<li>Working steadily over the long term toward listing ZENY on internationally recognized cryptocurrency exchanges, with Binance identified as one of our strategic target platforms.</li>
 </ul>
-<p><b>About exchange listings.</b> A listing is a goal, not a promise. Whether any exchange, including Binance, lists a token is decided only by that exchange under its own criteria and at its own discretion. No exchange has agreed to list ZENY unless we announce it officially in the App, and we cannot give any date or guarantee that a listing will happen. Binance and other exchanges are independent third parties; they are not affiliated with Zenvyro and do not sponsor or endorse it. Please do not buy a pack or deposit funds because you expect a listing or a rise in value.</p>
+<p><b>Exchange Listing Policy:</b> Pursuing public exchange listings for ZENY is a long-term strategic objective. The decision to list any digital asset on Binance or any other third-party exchange rests solely with the respective exchange authorities in accordance with their independent evaluation criteria and discretion. Unless officially announced within the App by Zenvyro, no exchange has entered into a listing agreement, nor can a specific timeline be established. Binance and other exchanges are independent third parties with no corporate affiliation, sponsorship, or endorsement relationship with Zenvyro. Members should base any decision to utilize platform features on current utility rather than expectations of future external market valuations.</p>
 
-<h2>4. Eligibility</h2>
-<p>To use the App you must:</p>
+<h2>4. Eligibility Criteria</h2>
+<p>To register for an account and utilize the App, you must satisfy the following conditions:</p>
 <ul>
-<li>be at least 18 years old and have the legal capacity to enter into a binding agreement;</li>
-<li>live in a place where using a service like this is lawful. You are responsible for checking and following the laws that apply to you, including rules about digital assets, taxes and online earnings;</li>
-<li>not have been previously suspended or removed from Zenvyro; and</li>
-<li>provide true, current and complete information when you register.</li>
-</ul>
-
-<h2>5. Registration, Account Security and the One-Account Rule</h2>
-<ul>
-<li><b>Registration details.</b> You must give your full name, a valid email address, a mobile number, a password and a referral code. The referral code is mandatory.</li>
-<li><b>One person, one account.</b> Each person may hold only one account. Each device may be used for one account. We use technical checks, such as a device identifier, to apply this rule. Trying to avoid the rule (for example, by clearing data, using several browsers, emulators or other people's devices to create extra accounts) is a breach of these Terms.</li>
-<li><b>Your password.</b> It must be strong: at least 8 characters with uppercase and lowercase letters, a number and a symbol. Keep it secret and do not reuse it elsewhere. You are responsible for everything that happens through your account. Tell us at once through Contact Support if you think someone else has access.</li>
-<li><b>Verification.</b> Identity verification (KYC) is optional at the moment. We may make it required for certain actions, such as withdrawals, to protect members and meet legal duties.</li>
-<li><b>Our staff will never ask for your password</b> or any one-time code. Never share them with anyone.</li>
+<li>You must be at least eighteen (18) years of age and possess the legal capacity to enter into a binding agreement under applicable law;</li>
+<li>You must reside in a jurisdiction where accessing and using digital reward platforms is lawful. You bear sole responsibility for verifying and complying with local laws governing digital assets, taxation, and online activities;</li>
+<li>You must not have been previously suspended, restricted, or removed from the Zenvyro platform for policy violations; and</li>
+<li>You must provide accurate, current, and complete information during the registration process.</li>
 </ul>
 
-<h2>6. Free Mining</h2>
-<p>Every member can mine for free on the Free Pack. No payment is required, now or later, to start mining or to keep your account.</p>
+<h2>5. Registration, Account Security &amp; Single-Account Policy</h2>
 <ul>
-<li><b>How a session works.</b> Tap the ZENY coin on the Home screen to start a two-hour session. You can tap the coin to pause; the time already completed is kept, and tapping again continues from the same point. When the full two hours are complete, the coin shows Claim, and tapping it adds the reward to your Mining Available Balance.</li>
-<li><b>Rewards are credited only on Claim</b> after a completed session. A session that you have not completed and claimed earns nothing.</li>
-<li><b>Daily Reward figure.</b> The "Daily Reward" number shown in the App is an illustration of what 12 completed two-hour sessions would produce at your pack's rate. It is not a guarantee and not a payment promise.</li>
-<li><b>Changes.</b> We may change rates, session rules or limits to keep the system fair and sustainable. Changes apply from the time we announce them in the App and do not reduce rewards you have already claimed.</li>
+<li><b>Registration Information:</b> Creating an account requires your full legal name, a valid email address, an active mobile number, a secure password, and a valid referral code. Entering a referral code is mandatory for registration.</li>
+<li><b>One Person, One Account Rule:</b> To preserve platform integrity, each individual is permitted to maintain only one account, and each device may be associated with a single account. Zenvyro employs technical verification mechanisms, including device identifiers, to enforce this standard. Any attempt to circumvent this rule—such as clearing application data, utilizing multiple browsers, employing emulators, or accessing external devices to operate duplicate accounts—constitutes a material breach of these Terms.</li>
+<li><b>Password &amp; Account Protection:</b> Your password must be at least eight (8) characters long and incorporate uppercase letters, lowercase letters, numbers, and special symbols. You are responsible for safeguarding your credentials and for all activities conducted through your account. If you suspect unauthorized access, notify us immediately via Contact Support.</li>
+<li><b>Identity Verification (KYC):</b> Know Your Customer (KYC) verification is currently optional. However, Zenvyro reserves the right to require identity verification for specific actions, such as withdrawals, to enhance member security and fulfill regulatory obligations.</li>
+<li><b>Confidentiality Notice:</b> Zenvyro personnel and representatives will never request your account password or one-time verification codes (OTPs). Never disclose sensitive security credentials to any party.</li>
 </ul>
-<table class="tb"><tr><th>Pack</th><th>ZENY per hour</th></tr>
-<tr><td>Free</td><td>0.001587</td></tr><tr><td>Standard</td><td>0.002222</td></tr><tr><td>Silver</td><td>0.006945</td></tr><tr><td>Gold</td><td>0.017361</td></tr><tr><td>Platinum</td><td>0.050505</td></tr></table>
 
-<h2>7. Membership Packs (Optional)</h2>
-<p>Members who want more can choose a paid pack. A pack raises the hourly mining rate and the referral commission rate and adds extra features such as reports and support levels. Packs are optional and are never needed to use the App.</p>
-<table class="tb"><tr><th>Pack</th><th>Price</th><th>Referral commission</th></tr>
+<h2>6. Membership Packs (Optional Enhancements)</h2>
+<p>Members seeking enhanced platform capabilities may optionally select a paid membership pack. Activating a pack increases hourly mining rates and referral commission tiers while unlocking supplementary reporting and support features. Purchasing a membership pack is entirely voluntary and is never required to access or use the App.</p>
+<table class="tb"><tr><th>Membership Pack</th><th>Designated Price</th><th>Direct Referral Commission Rate</th></tr>
 <tr><td>Free</td><td>0 TRX</td><td>2%</td></tr><tr><td>Standard</td><td>32 TRX</td><td>4%</td></tr><tr><td>Silver</td><td>80 TRX</td><td>6%</td></tr><tr><td>Gold</td><td>155 TRX</td><td>8%</td></tr><tr><td>Platinum</td><td>315 TRX</td><td>10%</td></tr></table>
 <ul>
-<li>You pay using the payment methods shown in the App at the time of purchase. We may verify a payment before activating a pack.</li>
-<li>Prices, features and rates may change. A change does not affect a pack you have already bought for the period it was sold for.</li>
-<li>Pack benefits and rewards are features of the App, not guaranteed earnings.</li>
-<li>Pack purchases are final once the pack is activated, except where the law gives you a right to a refund or where we fail to deliver the pack you paid for.</li>
+<li><b>Payment Methods:</b> Payments must be completed exclusively through the authorized payment channels displayed within the App at the time of purchase. Zenvyro reserves the right to verify payment confirmation prior to pack activation.</li>
+<li><b>Modification of Pricing &amp; Features:</b> Zenvyro may update pack pricing, features, or rates periodically. Any such modification shall not affect active packs already purchased for the remainder of their valid term.</li>
+<li><b>Nature of Pack Benefits:</b> Pack enhancements and reward multipliers constitute internal application features and do not represent guaranteed financial earnings.</li>
+<li><b>Refund Policy:</b> Once a membership pack is activated, the transaction is considered final and non-refundable, except where required by applicable statutory law or in the event of a verified technical failure by Zenvyro to deliver the activated pack.</li>
 </ul>
 
-<div class="lg-mid"><b>In short:</b> buying a pack is entirely your own choice. We are not responsible for any money you decide to invest, and you can always mine for free.</div>
-
-<h2>8. Participation, Investment and Risk</h2>
-<p>Please read this section with extra care, because it matters for your own money.</p>
+<h2>7. Participation, Financial Discretion &amp; Limitation of Liability</h2>
+<p>Members are advised to review the following principles carefully prior to engaging in any optional financial transactions on the platform:</p>
 <ul>
-<li><b>Everything paid is voluntary.</b> Nobody is required to buy a pack, deposit funds or spend any money. You can take part and earn ZENY entirely for free, for as long as you like.</li>
-<li><b>The decision is yours alone.</b> If you choose to buy a pack, deposit, exchange, transfer or hold digital assets, you do so of your own free will and at your own risk. Zenvyro does not pressure you, and no member, team leader or referrer speaks for Zenvyro when they encourage you to spend money.</li>
-<li><b>No guaranteed returns.</b> We do not promise any profit, income, price, interest, listing or future value. Rates, balances and examples in the App describe how the App works; they are not forecasts or promises.</li>
-<li><b>Digital assets are risky.</b> Prices of crypto assets such as BTC, TON, BNB, SOL and USDT can change sharply and can fall to zero. ZENY may never have a market value. Blockchain transactions cannot be reversed. You can lose some or all of any money you put in.</li>
-<li><b>Only use money you can afford to lose.</b> Do not borrow, do not use savings you need for living costs, and do not sell property to join.</li>
-<li><b>Do your own research.</b> Nothing in the App is financial, investment, legal or tax advice. Talk to a qualified professional if you are unsure.</li>
-<li><b>Our responsibility.</b> To the fullest extent the law allows, Zenvyro is not responsible or liable for any loss, cost or damage that results from your decision to invest or spend money, from market movements, from mistakes you make (such as a wrong address or network), or from the actions of other members or third parties.</li>
-<li><b>Be careful of scams.</b> Anyone who guarantees profit, asks for your password or one-time codes, or asks you to send funds outside the App is not acting for Zenvyro. Report them through Contact Support.</li>
+<li><b>Voluntary Participation:</b> Purchasing membership packs, depositing funds, or incurring any expenditure on the platform is strictly voluntary. Members may participate and earn ZENY completely free of charge indefinitely.</li>
+<li><b>Independent Decision-Making:</b> All decisions to purchase packs, deposit, exchange, transfer, or hold digital assets are made independently at the member's sole discretion. Statements or encouragement from individual members, team leaders, or referrers do not represent official commitments or endorsements by Zenvyro.</li>
+<li><b>Illustrative Metrics:</b> Rates, balances, and numerical examples displayed within the App are provided to demonstrate platform mechanics and shall not be interpreted as projections, interest commitments, or guarantees of future financial return.</li>
+<li><b>Characteristics of Digital Assets:</b> Digital assets such as TRX, BTC, TON, BNB, SOL, and USDT are subject to market volatility, and blockchain transactions are inherently irreversible. Members should maintain awareness of digital asset dynamics prior to participating.</li>
+<li><b>Prudent Resource Management:</b> Members should utilize only discretionary, surplus funds when engaging with digital platforms and refrain from using borrowed capital or funds allocated for essential living expenses.</li>
+<li><b>No Professional Advice:</b> Information provided within the App does not constitute financial, investment, legal, or tax advice. Members should consult qualified professionals where appropriate.</li>
+<li><b>Limitation of Liability:</b> To the maximum extent permitted by applicable law, Zenvyro shall not be liable for any losses, costs, or damages resulting from personal financial decisions, market fluctuations, user errors (such as entering incorrect wallet addresses or networks), or the actions of third parties.</li>
+<li><b>Anti-Fraud &amp; Security Compliance:</b> Any individual promising guaranteed financial returns, soliciting account passwords or OTPs, or requesting fund transfers outside official App channels is not an authorized representative of Zenvyro. Report such conduct immediately via Contact Support.</li>
 </ul>
 
-<h2>9. Referral Program</h2>
-<p>Each member has a personal referral code and link on the Refer &amp; Earn page. New members must enter a valid referral code when they register. Referral rewards work as follows:</p>
+<h2>8. Referral Program Guidelines</h2>
+<p>Each member is assigned a unique referral code and link on the Refer &amp; Earn page. New registrants must enter a valid referral code upon sign-up. Referral rewards operate under the following rules:</p>
 <ul>
-<li><b>Income Commission.</b> When one of your direct referrals claims mining rewards, you receive a percentage of the ZENY they claim. The percentage depends on the pack you hold when that person joins, and it is locked at that moment: Free 2%, Standard 4%, Silver 6%, Gold 8%, Platinum 10%.</li>
-<li><b>Purchase Bonus.</b> When a direct referral buys their first pack, you receive 5% of that pack's price, once per referral. The Purchase Bonus is credited straight to your Wallet.</li>
-<li><b>Direct referrals only.</b> Commission is paid on the people you personally refer. There are no multi-level payouts.</li>
-<li><b>Daily claim at 10:00 PM.</b> Income Commission builds up as a pending amount. You can claim it once a day after 10:00 PM Bangladesh time (Asia/Dhaka, UTC+6), and only when something is pending.</li>
-<li><b>Not guaranteed.</b> Commission exists only when real people join and take part. We do not promise any amount of referral income.</li>
+<li><b>Income Commission:</b> When a direct referral claims mining rewards, you earn a percentage of their claimed ZENY. The applicable commission rate is determined and permanently locked based on the membership pack you hold at the exact time that referral registers: Free (2%), Standard (4%), Silver (6%), Gold (8%), and Platinum (10%).</li>
+<li><b>Purchase Bonus:</b> When a direct referral completes their first paid membership pack purchase, you receive a one-time bonus equal to 5% of that pack's price, credited directly to your Wallet.</li>
+<li><b>Commission Structure and Level Progress:</b> Income Commission and Purchase Bonus are earned solely from members you personally refer. In addition, your Level progress recognizes qualifying NFT and pack purchases made by your direct referrals and by the members they introduce (two layers). The benefits attached to each Level are described within the App and do not constitute guaranteed income.</li>
+<li><b>Daily Claim Schedule:</b> Earned Income Commissions accumulate as a pending balance and may be claimed once daily after 10:00 PM Bangladesh Time (Asia/Dhaka, UTC+6), provided a pending balance is available.</li>
+<li><b>Performance Dependency:</b> Referral rewards arise strictly from genuine activity by real, active participants and are not guaranteed in fixed amounts.</li>
+<li><b>Referral Code of Conduct:</b> Members may share referral codes transparently. Self-referrals, creation of duplicate or automated accounts, bulk trading of referral codes, referral loops, spamming, or misrepresenting Zenvyro as a guaranteed income scheme are strictly prohibited. Violations may result in commission forfeiture, reward reversal, account suspension or closure, and balance adjustments in accordance with applicable law. Zenvyro may update referral rates or rules via official in-App announcements.</li>
 </ul>
-<p><b>Rules for referring.</b> You may share your code honestly. You may not refer yourself, create fake or duplicate accounts, trade referral codes in bulk, run referral loops, spam, or describe Zenvyro as a guaranteed way to make money. If we find abuse we may cancel commissions and bonuses, reverse rewards, suspend or close the accounts involved, and keep or remove related balances to the extent the law allows. We may change referral rates or rules by announcing the change in the App.</p>
 
-<h2>10. Exchange</h2>
-<p>Exchange lets you request to convert ZENY from your Mining Available Balance into USDT, BTC, TON, BNB or SOL.</p>
+<h2>9. Exchange Mechanism</h2>
+<p>The Exchange utility enables members to submit requests to convert ZENY from their Mining Available Balance into TRX, USDT, BTC, TON, BNB, or SOL.</p>
 <ul>
-<li><b>It is a request, not an instant trade.</b> When you send a request, the ZENY is put on hold. It is shown as On hold until an admin decides.</li>
-<li><b>Acceptance.</b> If an admin accepts, the converted amount is credited to your Wallet at the rate at the time of acceptance. If an admin rejects, the held ZENY is returned to you in full.</li>
-<li><b>Rates.</b> ZENY is valued at the platform reference rate. For BTC, TON, BNB and SOL, the market price at acceptance is taken from third-party price data, which can differ from other sources and can move between your request and acceptance.</li>
-<li><b>Total fee of 10%.</b> A fee is deducted before the amount is credited. It is made up of an Exchange fee of 3%, a Network fee of 2% and a Platform fee of 5%. The App shows the full breakdown before you send the request.</li>
-<li>We may limit, delay or pause Exchange for security, compliance, liquidity or maintenance reasons. Once a request has been accepted it cannot be cancelled.</li>
+<li><b>Request-Based Processing:</b> Exchange operates as a reviewed request system rather than an instant automated trade. Upon submission, the designated ZENY amount is placed "On Hold" pending administrative review.</li>
+<li><b>Approval &amp; Rejection:</b> Upon administrative approval, the converted digital asset is credited to your Wallet based on the applicable exchange rate at the moment of approval. If a request is rejected, the held ZENY balance is returned to you in full.</li>
+<li><b>Exchange Rate Calculation:</b> ZENY is valued using the platform's internal reference rate. For TRX, BTC, TON, BNB, and SOL, market conversion prices at the time of approval are sourced from third-party market data providers, which may fluctuate between request submission and administrative approval.</li>
+<li><b>Total 10% Service Fee:</b> A cumulative fee of 10% is deducted prior to crediting your Wallet, comprising a 3% Exchange Fee, a 2% Network Fee, and a 5% Platform Fee. A complete fee breakdown is displayed prior to request confirmation.</li>
+<li><b>Operational Controls:</b> Zenvyro may limit, delay, or pause Exchange functionality for security, compliance, liquidity management, or maintenance purposes. Once an Exchange request is approved, it becomes final and cannot be cancelled.</li>
 </ul>
 
-<h2>11. Wallet, Deposits, Withdrawals and Transfers</h2>
-<p>Your Wallet holds the assets credited to you (USDT, BTC, TON, BNB and SOL) and shows their approximate value in US dollars.</p>
+<h2>10. Wallet, Deposits, Withdrawals &amp; Internal Transfers</h2>
+<p>Your in-App Wallet stores credited digital assets (TRX, USDT, BTC, TON, BNB, and SOL) and displays their approximate value in US Dollars (USD).</p>
 <ul>
-<li><b>Deposits.</b> Send only the asset, on the network, to the address shown in the App (for example USDT on TRC20 or BNB on BEP20), then submit the deposit request with the transaction ID. An admin verifies the payment and credits your Wallet. Nothing is credited before it is verified. Funds sent on the wrong network, to the wrong address or in the wrong asset may be lost permanently.</li>
-<li><b>Withdrawals.</b> The minimum withdrawal is $10 (or the equivalent in the asset you choose) per request. Enter your own wallet address and choose the correct network. When you send a request, that amount is locked. An admin reviews it; if accepted, the funds are sent, and if rejected, the lock is released. We may ask for extra verification before approving a withdrawal. Blockchain transfers cannot be undone, so check the address carefully. If any additional network or processing charge applies, it will be shown in the App before you confirm.</li><li><b>Airdrop Hold on withdrawals.</b> For every withdrawal, an extra 30% of the amount you withdraw must also be available in your Wallet. When the withdrawal is completed, that extra 30% is moved to your Hold Token for Airdrop balance, which is shown in your Summary and cannot be withdrawn. The date, form and amount of any airdrop are not decided yet and are not guaranteed. This is shown on the withdrawal screen before you send a request.</li>
-<li><b>Processing time.</b> We aim to review requests promptly, but we do not promise a fixed time. Reviews can take longer during security checks, heavy demand, maintenance or holidays.</li>
-<li><b>Transfers.</b> You can send assets to another member using their ID. Transfers are instant, do not go through an admin and cannot be reversed by you or by us. Always check the recipient's ID. Transfers may not be used for fraud, harassment or to hide the source of funds.</li>
-<li><b>Holds and reviews.</b> We may hold or review any transaction we reasonably believe is mistaken, suspicious, unlawful or in breach of these Terms.</li>
+<li><b>Deposits:</b> Transfer only the specified asset on the designated blockchain network to the exact wallet address displayed in the App (e.g., TRX or USDT via TRC20, or BNB via BEP20), then submit a deposit request accompanied by the valid Transaction ID. Funds are credited only after administrative verification. Deposits sent via unsupported networks, incorrect addresses, or wrong assets may result in permanent loss.</li>
+<li><b>Withdrawals:</b> The minimum withdrawal threshold is $10 USD (or equivalent asset value) per request. Enter your personal wallet address and select the corresponding network. Upon submission, the requested amount is locked pending review. Approved withdrawals are dispatched to your external wallet, whereas rejected requests release the locked funds back to your Wallet. Additional verification may be requested prior to approval. Blockchain transfers are irreversible; verify destination details carefully. Any applicable processing or network charges are disclosed prior to confirmation.</li>
+<li><b>Airdrop Hold Requirement on Withdrawals:</b> For every withdrawal request, an additional 30% of the requested withdrawal amount must be available in your Wallet. Upon completion of the withdrawal, this 30% portion is automatically allocated to your "Hold Token for Airdrop" balance, visible in your Account Summary, and is non-withdrawable. The timeline, structure, and distribution volume of future airdrops remain subject to ongoing ecosystem development. This requirement is explicitly displayed on the withdrawal screen prior to confirmation.</li>
+<li><b>Processing Timelines:</b> Zenvyro endeavors to review all requests promptly; however, fixed processing times are not guaranteed. Reviews may require additional time during security audits, high transaction volumes, system maintenance, or public holidays.</li>
+<li><b>Internal Transfers:</b> Members may transfer assets instantly to other registered members using their unique Member ID. Internal transfers are automated, bypass administrative review, and are irreversible once executed. Verify the recipient's ID thoroughly before confirming. Transfers must not be used for fraudulent purposes, harassment, or obscuring the origin of funds.</li>
+<li><b>Transaction Holds &amp; Reviews:</b> Zenvyro reserves the right to hold, freeze, or audit any transaction reasonably suspected of error, unauthorized activity, unlawful conduct, or breach of these Terms.</li>
 </ul>
 
-<h2>12. Fees at a Glance</h2>
-<table class="tb"><tr><th>Item</th><th>Fee</th></tr>
-<tr><td>Free mining</td><td>No charge</td></tr>
-<tr><td>Membership pack</td><td>The price shown for the pack</td></tr>
-<tr><td>Exchange</td><td>10% in total (3% Exchange + 2% Network + 5% Platform)</td></tr>
-<tr><td>Referral commission</td><td>No fee to the member who earns it</td></tr>
-<tr><td>Deposits, withdrawals, transfers</td><td>Any Zenvyro fee is shown before you confirm. Charges made by blockchains or your own wallet or exchange are separate and outside our control.</td></tr></table>
+<h2>11. Summary of Platform Fees</h2>
+<table class="tb"><tr><th>Service / Action</th><th>Applicable Fee Structure</th></tr>
+<tr><td>Free Mining Sessions</td><td>No charge (Free)</td></tr>
+<tr><td>Membership Packs</td><td>Listed price corresponding to the selected pack</td></tr>
+<tr><td>Exchange Requests</td><td>10% Total (3% Exchange + 2% Network + 5% Platform Fee)</td></tr>
+<tr><td>Referral Commissions</td><td>No fee charged to the earning member</td></tr>
+<tr><td>Deposits, Withdrawals &amp; Transfers</td><td>Any applicable Zenvyro fee is disclosed prior to confirmation. External blockchain gas fees or third-party wallet/exchange charges operate independently outside Zenvyro's control.</td></tr></table>
 
-<h2>13. Prohibited Conduct</h2>
+<h2>12. Prohibited Conduct</h2>
 <p>You must not:</p>
 <ul>
 <li>create more than one account, or use another person's account or device to get around the one-account rule;</li>
@@ -140,43 +128,43 @@
 <li>harass, threaten or abuse members or our team.</li>
 </ul>
 
-<h2>14. Suspension, Termination and Forfeiture</h2>
+<h2>13. Suspension, Termination and Forfeiture</h2>
 <p>If we reasonably believe you have broken these Terms or the law, or that your account puts others at risk, we may warn you, limit features, freeze balances, cancel or reverse rewards and commissions, refuse withdrawals, and suspend or close your account. Where permitted by law, balances obtained through abuse, error or fraud may be forfeited. We will tell you the reason where we reasonably can, unless the law or security stops us from doing so. You may stop using the App at any time and may ask us to close your account through Contact Support; balances that are lawfully yours remain subject to review and to the withdrawal rules above.</p>
 
-<h2>15. Service Availability and Changes</h2>
+<h2>14. Service Availability and Changes</h2>
 <p>We work to keep the App running, but we do not promise that it will always be available, error-free or secure from attack. We may update, change, suspend or discontinue any feature, with notice where practical. Phones, networks, wallets and blockchains are outside our control, and delays or failures there are not our responsibility.</p>
 
-<h2>16. Third-Party Services and No Affiliation</h2>
-<p>The App relies on third parties, such as hosting providers, price data providers, blockchain networks and, when enabled, sign-in providers such as Google and Telegram. We are not responsible for their services, outages or terms. Names of other companies and assets (including Binance, Bitcoin, Tether, TON, BNB and Solana) are used only to identify them. Their owners are not affiliated with Zenvyro and do not endorse it.</p>
+<h2>15. Third-Party Services and No Affiliation</h2>
+<p>The App relies on third parties, such as hosting providers, price data providers, blockchain networks and, when enabled, sign-in providers such as Google and Telegram. We are not responsible for their services, outages or terms. Names of other companies and assets (including Binance, TRON, Bitcoin, Tether, TON, BNB and Solana) are used only to identify them. Their owners are not affiliated with Zenvyro and do not endorse it.</p>
 
-<h2>17. Intellectual Property</h2>
+<h2>16. Intellectual Property</h2>
 <p>The Zenvyro name, logo, coin design, text, layout and code belong to Zenvyro or its licensors. You may use the App for your own personal use. You may not copy, sell, reverse-engineer or use our brand in a way that suggests you are Zenvyro without our written permission.</p>
 
-<h2>18. Taxes</h2>
+<h2>17. Taxes</h2>
 <p>You are solely responsible for working out and paying any taxes that apply to your rewards, commissions, purchases, exchanges, withdrawals or other gains. We do not give tax advice and we do not collect or pay taxes for you unless the law requires it.</p>
 
-<h2>19. Disclaimers</h2>
+<h2>18. Disclaimers</h2>
 <p>The App is provided "as is" and "as available". To the fullest extent the law allows, we disclaim all warranties, whether express or implied, including fitness for a particular purpose, uninterrupted service, accuracy of displayed figures and the value of ZENY or any other asset.</p>
 
-<h2>20. Limitation of Liability</h2>
+<h2>19. Limitation of Liability</h2>
 <p>To the fullest extent the law allows, Zenvyro, its owners, team and partners are not liable for indirect, incidental, special or consequential loss, loss of profit, loss of opportunity, loss of data or loss of digital assets, however caused. Where liability cannot be excluded, our total liability to you for any claim is limited to the amount you paid to Zenvyro for packs in the three months before the event that caused the claim. Nothing in these Terms removes rights that the law says cannot be removed.</p>
 
-<h2>21. Indemnity</h2>
+<h2>20. Indemnity</h2>
 <p>You agree to compensate Zenvyro for loss or claims that result from your breach of these Terms, your unlawful use of the App, or your false promises made to others about Zenvyro, to the extent permitted by law.</p>
 
-<h2>22. Privacy</h2>
+<h2>21. Privacy</h2>
 <p>How we collect and use your information is explained in our Privacy Policy, which forms part of these Terms.</p>
 
-<h2>23. Changes to These Terms</h2>
+<h2>22. Changes to These Terms</h2>
 <p>We may update these Terms from time to time. We will show the new version in the App with a new "last updated" date, and where a change is important we will announce it in Update News. If you keep using the App after the change takes effect, you accept the new Terms. If you do not agree, stop using the App and ask us to close your account.</p>
 
-<h2>24. Governing Law and Disputes</h2>
+<h2>23. Governing Law and Disputes</h2>
 <p>These Terms are governed by the laws that apply in the place where Zenvyro operates, without regard to conflict-of-law rules. If you have a complaint, please contact us first so that we can try to resolve it fairly and quickly. If it cannot be resolved, it will be handled by the competent courts of that place, unless mandatory law gives you the right to go elsewhere.</p>
 
-<h2>25. General</h2>
+<h2>24. General</h2>
 <p>If any part of these Terms is found unenforceable, the rest stays in force. Our failure to enforce a right is not a waiver of it. You may not transfer your account or rights to anyone else; we may transfer ours as part of a business change. These Terms are the complete agreement about the App and replace earlier understandings. The English version is the official one. We are not liable for delays or failures caused by events beyond our reasonable control.</p>
 
-<h2>26. Contact</h2>
+<h2>25. Contact</h2>
 <p>For questions, complaints or requests, open Account, then Help &amp; Support, then Contact Support inside the App.</p>
 ${SHORT}`;
 
