@@ -267,6 +267,7 @@ textarea{min-height:96px;resize:vertical}
 <div class="toast" id="toast"></div>
 
 <script src="zenvyro-api.js"></script>
+<script src="site-settings.js"></script>
 <script>
 (() => {
   "use strict";
@@ -285,7 +286,7 @@ textarea{min-height:96px;resize:vertical}
     const pk = [0, 1, 0, 2, 0, 3, 0, 0, 4, 1, 0, 2, 0, 1], bal = [12.5, 0, 3.2, 45, 0, 120, .8, 0, 300, 9, 0, 60, 2, 15];
     return pk.map((p, i) => ({ id: "ZV-" + (20410 + i * 137), name: "zv_user_" + (20410 + i * 137), pack: PACKS[p][0], balance: bal[i], joined: Date.now() - (i + 1) * 86400000 * 4, ban: null }));
   }
-  let st = { pend: { wd: 12, dep: 8, ex: 6 }, set: { maint: false, reg: true, wdraw: true }, logs: [], users: null };
+  let st = { pend: { wd: 12, dep: 8, ex: 6 }, set: { maint: false, reg: true, wdraw: true, dep: true, exch: true, trans: true, mine: true, buy: true, nft: true }, logs: [], users: null };
   try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s) st = { ...st, ...s, pend: { ...st.pend, ...s.pend }, set: { ...st.set, ...s.set } }; } catch (e) {}
   if (!Array.isArray(st.users) || !st.users.length) st.users = seedUsers();
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
@@ -439,15 +440,69 @@ textarea{min-height:96px;resize:vertical}
     if ((b = q("[data-unb]"))) { if (confirm("Remove the restriction from " + b.dataset.unb + "?")) AP().adminUnban(b.dataset.unb).then(() => { log("Unbanned " + b.dataset.unb); openMem(); }); return true; }
     if ((b = q("[data-clr]"))) { if (confirm("Unban " + b.dataset.clr + " and clear all strikes and warnings?")) AP().adminUnban(b.dataset.clr, true).then(() => { log("Cleared record of " + b.dataset.clr); openMem(); }); return true; }
     if (q("[data-saveaddr]")) { saveAddr(); return true; }
+    if ((b = q("[data-ph]"))) { phAct(b.dataset.ph); return true; }
+    if ((b = q("[data-bx]"))) { bxAct(b.dataset.bx); return true; }
+    if ((b = q("[data-tc]"))) { trfCancel(b.dataset.tc); return true; }
     return false;
   }
 
+  const SS = () => window.ZenvyroSettings;
+  const dtl = ms => new Date(ms - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  const dur = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return Math.floor(s / 86400) + "d " + Math.floor(s % 86400 / 3600) + "h " + Math.floor(s % 3600 / 60) + "m"; };
+  const BX = [["income", "Total Income"], ["withdraw", "Total Withdraw"], ["normal", "Normal Users"], ["premium", "Premium Members"]];
+  const alt = ' style="background:#2a1a6a"';
+  const phasePage = () => { const p = SS().phase(); return ["Phase 1 Timer",
+    `<div class="li"><div>${p.paused ? "Paused" : "Running"}<small>Time left</small></div><b>${dur(p.left)}</b></div>
+    <div class="li"><div>Show on Home<small>The Phase 1 box</small></div><button class="tg ${p.show ? "on" : ""}" data-ph="show" aria-label="Show on Home"></button></div>
+    <div class="li"><div>Start<small>Date and time</small></div></div><input class="in" id="phS" type="datetime-local" value="${dtl(p.start)}">
+    <div class="li"><div>End<small>Date and time</small></div></div><input class="in" id="phE" type="datetime-local" value="${dtl(p.end)}">
+    <button class="pr" data-ph="save">Save Start and End</button>
+    <button class="pr" data-ph="${p.paused ? "resume" : "pause"}">${p.paused ? "Resume Time" : "Pause Time"}</button>
+    <div class="li"><div>Add or remove time<small>Days and hours</small></div></div>
+    <input class="in" id="phD" type="number" min="0" placeholder="Days"><input class="in" id="phH" type="number" min="0" placeholder="Hours">
+    <button class="pr" data-ph="add">Add Time</button><button class="pr"${alt} data-ph="sub">Remove Time</button><button class="pr"${alt} data-ph="reset">Reset to 120 days from 5 Nov 2026</button>
+    <p class="note">Saved on this device for now. It reaches every member once the backend is connected.</p>`]; };
+  function phAct(a) {
+    const S = SS(), p = S.phase();
+    if (a === "show") S.setPhase({ show: !p.show });
+    else if (a === "pause") S.pause(); else if (a === "resume") S.resume();
+    else if (a === "reset") { if (!confirm("Reset the timer to 120 days from 5 Nov 2026?")) return; S.reset(); }
+    else if (a === "save") { const s = Date.parse($("#phS").value), e = Date.parse($("#phE").value); if (!(s > 0) || !(e > s)) return toast("Enter a valid start and end"); S.setPhase({ start: s, end: e, paused: false }); }
+    else { const ms = (+$("#phD").value || 0) * 864e5 + (+$("#phH").value || 0) * 36e5; if (!(ms > 0)) return toast("Enter days or hours"); S.extend(a === "add" ? ms : -ms); }
+    log("Phase 1 timer: " + a); toast("Saved"); open("phase");
+  }
+  const boxesPage = () => ["Home Boxes", BX.map(([k, n]) => { const b = SS().box(k); return `<div class="li"><div>${n}<small>${b.mode === "manual" ? "Manual value" : "Automatic (real server data)"}</small></div><button class="tg ${b.show ? "on" : ""}" data-bx="show:${k}" aria-label="${n}"></button></div>
+    <div style="display:flex;gap:8px"><button class="pr"${b.mode === "auto" ? "" : alt} data-bx="auto:${k}">Automatic</button><button class="pr"${b.mode === "manual" ? "" : alt} data-bx="manual:${k}">Manual</button></div>
+    <input class="in" id="bv_${k}" type="number" min="0" step="any" value="${b.value}" placeholder="Manual value"><button class="pr" data-bx="save:${k}">Save ${n} value</button>`; }).join("") +
+    '<p class="note">Manual shows your number with an "Admin update" tag. Automatic shows real server data once the backend is connected.</p>'];
+  function bxAct(spec) {
+    const [a, k] = spec.split(":"), S = SS(), b = S.box(k); if (!b) return;
+    if (a === "show") S.setBox(k, { show: !b.show });
+    else if (a === "auto") S.setBox(k, { mode: "auto" });
+    else if (a === "manual") S.setBox(k, { mode: "manual", ts: Date.now() });
+    else { const v = parseFloat($("#bv_" + k).value); if (!(v >= 0)) return toast("Enter a valid number"); S.setBox(k, { value: v, mode: "manual", ts: Date.now() }); }
+    log("Home box " + k + ": " + a); toast("Saved"); open("boxes");
+  }
+  const txList = () => { try { const a = JSON.parse(localStorage.getItem("zenvyro_tx_v1") || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } };
+  const trfPage = () => { const tx = txList().filter(t => t && t.kind === "transfer");
+    return ["Transfers History", (tx.length ? tx.map(t => `<div class="li"><div>${esc(t.sub || "Transfer")} &middot; ${esc(String(t.amount))} ${esc(t.sym || "")}<small>${when(t.ts || Date.now())} &middot; ${esc(t.status || "")}${t.reason ? " &middot; " + esc(t.reason) : ""}</small></div>${t.status === "completed" ? `<button class="sm" data-tc="${esc(t.id)}">Cancel</button>` : ""}</div>`).join("") : '<div class="li">No transfers yet</div>') +
+      '<p class="note">This list shows transfers made on this device. Transfers of all members appear here once the backend is connected. Cancelling returns the amount to the sender.</p>']; };
+  function trfCancel(id) {
+    if (!confirm("Cancel this transfer and return the amount to the sender?")) return;
+    const reason = prompt("Reason (optional)"); if (reason === null) return;
+    const tx = txList(), t = tx.find(x => x && x.id === id); if (!t || t.status !== "completed") return;
+    t.status = "cancelled"; t.reason = reason.slice(0, 80);
+    try { localStorage.setItem("zenvyro_tx_v1", JSON.stringify(tx)); } catch (e) {}
+    log("Transfer cancelled: " + id); toast("Transfer cancelled, refund queued"); open("trf");
+  }
+
   const PAGES = {
+    phase: phasePage, boxes: boxesPage, trf: trfPage,
     req: () => ["Pending Requests", ROWS.map(r => `<div class="li" style="font-weight:700">${r[1]}<span class="bd ${st.pend[r[0]] ? "" : "z"}">${st.pend[r[0]]}</span></div>` + reqItems(r[0])).join("")],
     rep: () => ["Membership Report", `<div class="li"><div>Today's Sales<small>Demo figure</small></div><b>${fmt.m2(data.today)}</b></div><div class="li"><div>This Month<small>Demo figure</small></div><b>${fmt.m2(data.month)}</b></div>` + PACKS.slice(1).map((p, i) => `<div class="li"><div>${p[0]} Pack<small>$${p[1]} · ${[420, 260, 140, 60][i]} active members</small></div><b>$${(p[1] * [420, 260, 140, 60][i]).toLocaleString("en-US")}</b></div>`).join("")],
     ann: () => ["Send Announcement", '<textarea id="annT" maxlength="300" placeholder="Write your announcement"></textarea><button class="pr" id="annS">Send Announcement</button><p class="note">Saved on this device only. Connect the backend to deliver it to users.</p>'],
     mem: () => ["Manage Membership", ""],
-    set: () => ["System Settings", tg("maint", "Maintenance Mode", "Pause the app for all users") + tg("reg", "New Registrations", "Allow new accounts") + tg("wdraw", "Withdrawals", "Allow withdrawal requests") + '<p class="note">Settings are stored on this device until the backend is connected.</p>'],
+    set: () => ["System Settings", tg("maint", "Maintenance Mode", "Pause the app for all users") + tg("reg", "New Registrations", "Allow new accounts") + tg("wdraw", "Withdrawals", "Allow withdrawal requests") + tg("dep", "Deposits", "Allow deposit requests") + tg("exch", "Exchange", "Allow exchange requests") + tg("trans", "Transfers", "Allow member to member transfers") + tg("mine", "Mining", "Allow start and claim") + tg("buy", "Pack Purchases", "Allow voucher and crypto purchases") + tg("nft", "NFT Marketplace", "Allow NFT purchases") + [["phase", "Phase 1 Timer"], ["boxes", "Home Boxes"], ["trf", "Transfers History"]].map(a => `<div class="li"><a href="#" data-go="${a[0]}">${a[1]}</a></div>`).join("") + '<p class="note">Settings are stored on this device until the backend is connected.</p>'],
     log: () => ["Activity Logs", st.logs.length ? st.logs.map(l => `<div class="li"><div>${esc(l.t)}<small>${when(l.ts)}</small></div></div>`).join("") : '<div class="li">No activity yet</div>'],
     usr: () => ["Users", '<input class="in" id="uq" type="search" placeholder="Search by name or ID" autocomplete="off"><div id="ul" style="margin-top:6px">' + userRows("") + '</div><p class="note">Tap a user to ban, unban or send dollars. Sample users until the backend is connected.</p>'],
     txn: () => ["Transactions", [["Deposit", 100], ["Withdraw", 45], ["Exchange", 20], ["Deposit", 50], ["Withdraw", 15], ["Exchange", 8]].map((t, i) => `<div class="li"><div>${t[0]}<small>${when(Date.now() - i * 5400000)}</small></div><b>$${t[1]}.00</b></div>`).join("") + '<p class="note">Sample list. Real transactions appear after the backend is connected.</p>'],

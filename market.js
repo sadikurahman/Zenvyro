@@ -108,6 +108,7 @@
   const openMarket = () => { if (!root) return; render(); root.classList.add("open"); root.scrollTop = 0; };
   const closeMarket = () => { if (root) root.classList.remove("open"); };
   function buyForm(id) {
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("market")) return;
     const i = ITEMS.find(x => x.id === id); if (!i) return;
     window.openModal("Buy NFT", `<div class="zm-bm"><img src="${i.img}" alt=""><div><b>${esc(i.name)}</b><span>${fmt(i.price)} TRX</span></div></div>
       <div class="modal-list"><div><strong>Price</strong><span>${fmt(i.price)} TRX</span></div><div><strong>Your TRX balance</strong><span>${fmt(trxBal(), 6)} TRX</span></div></div>
@@ -115,6 +116,7 @@
       <button class="btn" style="width:100%;margin-top:12px" onclick="zvBuyOk('${i.id}')">Confirm purchase</button>`);
   }
   function buyOk(id) {
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("market")) return;
     const i = ITEMS.find(x => x.id === id); if (!i) return;
     if (!DEMO) { window.closeModal(); return say("Purchases are not connected yet"); }
     const h = holdings(); if (h.some(x => x.id === id)) { window.closeModal(); return say("You already own this NFT"); }

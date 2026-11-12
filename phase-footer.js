@@ -23,14 +23,17 @@
 
   function tick() {
     const box = $("zphBox"); if (!box) return;
-    const left = Math.max(0, Math.min(DAYS * DAY_MS, END - Date.now()));   // before the start it stays at the full 120 days
+    const P = window.ZenvyroSettings ? window.ZenvyroSettings.phase() : { show: true, paused: false, days: DAYS, left: Math.max(0, Math.min(DAYS * DAY_MS, END - Date.now())) };
+    box.style.display = P.show ? "" : "none";
+    const left = P.left;
     const s = Math.ceil(left / 1000), d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
     $("zphD").textContent = d; $("zphH").textContent = pad(h); $("zphM").textContent = pad(m); $("zphS").textContent = pad(sec);
-    if (sec !== last) { last = sec; const el = $("zphS"); el.classList.remove("zph-tick"); void el.offsetWidth; el.classList.add("zph-tick"); }
+    if (sec !== last && !P.paused) { last = sec; const el = $("zphS"); el.classList.remove("zph-tick"); void el.offsetWidth; el.classList.add("zph-tick"); }
     const done = left <= 0;
     box.classList.toggle("is-done", done);
-    $("zphName").textContent = done ? "Phase 1 Completed" : "Phase 1 Active Status";
-    $("zphLive").lastChild.textContent = done ? "ENDED" : "LIVE";
+    $("zphName").textContent = done ? "Phase 1 Completed" : (P.paused ? "Phase 1 Paused" : "Phase 1 Active Status");
+    $("zphLive").lastChild.textContent = done ? "ENDED" : (P.paused ? "PAUSED" : "LIVE");
+    const sub = document.querySelector(".zph-sub"); if (sub) sub.textContent = "Premium benefit distribution and native coin distribution will continue during this " + P.days + "-day initial phase.";
   }
   function startClock() {
     tick();

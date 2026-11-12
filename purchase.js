@@ -85,6 +85,7 @@ ${me.fails > 0 ? warn + '<div class="pu-msg" id="puMsg"></div>' : warn}
   }
 
   async function redeem() {
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("purchase")) return;
     if (busy) return; const inp = document.getElementById("puCode"), msg = document.getElementById("puMsg");
     const typed = inp.value, code = typed.replace(/[^A-Z0-9]/gi, "");
     if (code.length !== 16) { msg.className = "pu-msg err"; msg.textContent = "Enter the full 16-character code."; return; }
@@ -127,6 +128,7 @@ ${list.length ? '<div class="pu-list">' + list.map(p => `<div><span>${esc(p.pack
     el.textContent = a && a.address ? a.address : "Payment address not set yet"; if (pay) pay.disabled = !(a && a.address);
   }
   async function pay() {
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("purchase")) return;
     if (busy) return; const msg = document.getElementById("puMsg"), btn = document.getElementById("puPay");
     busy = true; btn.disabled = true; btn.textContent = "Submitting...";
     const r = await API().submitPayment({ pack, asset: document.getElementById("puAsset").value, txid: document.getElementById("puTx").value });

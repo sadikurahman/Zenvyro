@@ -203,6 +203,7 @@
       : `<div class="modal-note" style="margin-top:12px">⚠ The deposit address is not set yet (demo). Do not send any funds until a real address is shown.</div>`;
   }
   function submitDeposit() {
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("deposit")) return;
     const sym = val("dpAsset"), a = asset(sym), amount = parseFloat(val("dpAmt")), txid = val("dpTx");
     if (!(amount > 0)) return say("Enter a valid amount");
     if (txid.length < 6) return say("Enter the TXID");
@@ -240,6 +241,7 @@
   }
   const MIN_WITHDRAW_USD = 10; // minimum withdrawal per request (USD value). A server must enforce this too.
   async function submitWithdraw() {
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("withdraw")) return;
     const sym = val("wdAsset"), a = asset(sym), addr = val("wdAddr"), amount = parseFloat(val("wdAmt"));
     if (!/^[A-Za-z0-9:_-]{20,120}$/.test(addr)) return say("Enter a valid wallet address");
     if (!(amount > 0)) return say("Enter a valid amount");
@@ -273,12 +275,13 @@
     $("trInfo").textContent = "Available: " + availAmt(sym).toFixed(a.dec > 6 ? 8 : 6) + " " + sym;
   }
   function submitTransfer() {
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("transfer")) return;
     const sym = val("trAsset"), a = asset(sym), to = val("trTo"), amount = parseFloat(val("trAmt"));
     if (!/^[A-Za-z0-9_-]{3,32}$/.test(to)) return say("Enter a valid recipient ID");
     if (to.toLowerCase() === MY_ID.toLowerCase()) return say("You can't transfer to your own ID");
     if (!(amount > 0)) return say("Enter a valid amount");
     if (amount > availAmt(sym) + 1e-12) return say("Not enough available balance");
-    if (!window.confirm("Send " + amount + " " + sym + " to " + to + "?\n\nThis happens instantly and cannot be reversed.")) return;
+    if (!window.confirm("Send " + amount + " " + sym + " to " + to + "?\n\nThis happens instantly. Zenvyro can reverse a transfer only in cases of error or fraud.")) return;
     if (!W().debit(sym, amount)) return say("Transfer failed");
     window.ZenvyroTx.log({ id: newId("TR"), kind: "transfer", dir: "out", sym, amount, status: "completed", sub: "To " + to });
     window.closeModal(); say("Transfer completed");
@@ -317,7 +320,15 @@
     t.status = "rejected"; saveTx(); render(); return true; // a withdraw's lock is released automatically
   }
 
+  // A transfer cancelled by the admin is returned to the sender here.
+  function applyRefunds() {
+    let fresh; try { fresh = JSON.parse(localStorage.getItem(TXKEY) || "[]"); } catch (e) { return; }
+    if (!Array.isArray(fresh)) return; let n = 0;
+    fresh.forEach(t => { if (t && t.kind === "transfer" && t.status === "cancelled" && !t.refunded && W() && W().credit(t.sym, +t.amount || 0, 0)) { t.refunded = true; n++; } });
+    if (n) { txs.splice(0, txs.length, ...fresh); saveTx(); render(); say("A transfer was cancelled and refunded to your wallet"); }
+  }
   function init() {
+    setTimeout(applyRefunds, 400); addEventListener("storage", applyRefunds); document.addEventListener("visibilitychange", () => { if (!document.hidden) applyRefunds(); });
     Object.assign(window, {
       zvwClose: closeWallet,
       zvwEye: () => { hidden = !hidden; render(); },
@@ -356,4 +367,13 @@
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
+})();
+
+/* Switches from the Admin Panel: closed features cannot be opened. */
+(() => {
+  const wrap = () => [["Deposit", "deposit"], ["Withdraw", "withdraw"], ["Transfer", "transfer"]].forEach(([n, k]) => {
+    const f = window["zvw" + n + "Form"];
+    if (typeof f === "function") window["zvw" + n + "Form"] = function () { if (window.ZenvyroSettings && window.ZenvyroSettings.block(k)) return; return f.apply(this, arguments); };
+  });
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wrap); else wrap();
 })();

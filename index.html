@@ -118,19 +118,20 @@ function showSection(name){
 function selectPack(name,price){closeModal();toast(name==='Free Pack'?'Free Pack selected':`${name} selected (${price}). Payment is not connected.`)}
 function walletAction(action){toast(action+' is not available until payment integration is configured')}
 function copyReferral(){const code='ZENV-NEW-MEMBER';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>toast('Referral code copied')).catch(()=>toast('Referral code: '+code))}else{toast('Referral code: '+code)}}
-</script>  <script src="legal.js?v=20261111c" defer></script>
-<script src="auth.js?v=20261111c" defer></script>
-<script src="cooldown.js?v=20261111c" defer></script>
-<script src="phase-footer.js?v=20261111c" defer></script>
-<script src="zenvyro-api.js?v=20261111c" defer></script>
-<script src="purchase.js?v=20261111c" defer></script>
-<script src="mining.js?v=20261111c" defer></script>
-<script src="referral.js?v=20261111c" defer></script>
-<script src="exchange.js?v=20261111c" defer></script>
-<script src="wallet.js?v=20261111c" defer></script>
-<script src="account.js?v=20261111c" defer></script>
-<script src="levels.js?v=20261111c" defer></script>
-<script src="market.js?v=20261111c" defer></script>
+</script>  <script src="site-settings.js?v=20261112b" defer></script>
+<script src="legal.js?v=20261112b" defer></script>
+<script src="auth.js?v=20261112b" defer></script>
+<script src="cooldown.js?v=20261112b" defer></script>
+<script src="phase-footer.js?v=20261112b" defer></script>
+<script src="zenvyro-api.js?v=20261112b" defer></script>
+<script src="purchase.js?v=20261112b" defer></script>
+<script src="mining.js?v=20261112b" defer></script>
+<script src="referral.js?v=20261112b" defer></script>
+<script src="exchange.js?v=20261112b" defer></script>
+<script src="wallet.js?v=20261112b" defer></script>
+<script src="account.js?v=20261112b" defer></script>
+<script src="levels.js?v=20261112b" defer></script>
+<script src="market.js?v=20261112b" defer></script>
 <script>
 /* Home quick buttons: Update News, Community, Invite, Leaderboard (no backend -> nothing is invented) */
 (function(){

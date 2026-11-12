@@ -228,6 +228,7 @@
   }
 
   function openExchange() {
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("exchange")) return;
     window.openModal("Exchange", body());
     update(); loadPrices();
   }
@@ -252,6 +253,7 @@
     window.exMax = () => { const el = $("exAmount"); if (el) { el.value = zenyBalance().toFixed(6); update(); } };
     window.exConfirm = () => {
       const c = calc();
+      if (window.ZenvyroSettings && window.ZenvyroSettings.block("exchange")) return;
       if (!(c.amount > 0) || c.receive === null || c.receive <= 0) return;
       if (c.amount > zenyBalance() + 1e-12) { say("Not enough ZENY balance"); return; }
       const msg = "Request: " + c.amount.toFixed(6) + " ZENY → " + sel +

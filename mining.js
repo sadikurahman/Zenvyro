@@ -211,6 +211,7 @@
   }
 
   function startSession() {
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("mining")) return;
     state.sessionEnd = Date.now() + SESSION_MS;
     state.pausedRemaining = null;
     save(); render(); playStartAnimation();
@@ -225,12 +226,14 @@
     say("Mining paused");
   }
   function resumeSession() {
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("mining")) return;
     state.sessionEnd = Date.now() + state.pausedRemaining; // continues from the same point
     state.pausedRemaining = null;
     save(); render(); playStartAnimation();
     say("Mining resumed");
   }
   function claimReward() {
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("mining")) return;
     const reward = RATES[state.tier] * SESSION_HOURS; // reward = hourly rate x session hours
     state.balance = Math.round((state.balance + reward) * 1e8) / 1e8;
     state.totalMined = Math.round(((state.totalMined || 0) + reward) * 1e8) / 1e8;
