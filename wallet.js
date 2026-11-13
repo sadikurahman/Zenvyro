@@ -263,11 +263,12 @@
       <select class="modal-field" id="trAsset" onchange="zvwTrInfo()">${opts(sel)}</select>
       <div class="modal-note" id="trInfo" style="margin-top:10px"></div>
       <label class="modal-label" for="trTo">Recipient ID</label>
-      <input class="modal-field" id="trTo" type="text" placeholder="Recipient's user ID" autocapitalize="characters" autocorrect="off">
+      <input class="modal-field" id="trTo" type="text" placeholder="Recipient's user ID (e.g. ZNV-7K4M9XQ)" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="14" oninput="zvwTrTo(this)">
+      <div class="zid-card" id="trCard" aria-live="polite"></div>
       <label class="modal-label" for="trAmt">Amount</label>
       <input class="modal-field" id="trAmt" type="number" inputmode="decimal" step="any" min="0" placeholder="0.00">
       <button class="btn" style="width:100%;margin-top:14px" onclick="zvwTransfer()">Send</button>
-      <div class="modal-note">Transfers happen instantly and do not go through an admin, so they cannot be reversed once sent. Double-check the recipient's ID. In demo mode the recipient is not verified.</div>`);
+      <div class="modal-note">Transfers happen instantly and do not go through an admin, so they are final once sent, except in cases of error or fraud. Double-check the recipient's ID. In demo mode the recipient is not verified. Try a demo ID: ${window.ZenvyroId.demoMembers.map(m => m.id).join(", ")}</div>`);
     trInfo();
   }
   function trInfo() {
@@ -276,8 +277,9 @@
   }
   function submitTransfer() {
     if (window.ZenvyroSettings && window.ZenvyroSettings.block("transfer")) return;
-    const sym = val("trAsset"), a = asset(sym), to = val("trTo"), amount = parseFloat(val("trAmt"));
-    if (!/^[A-Za-z0-9_-]{3,32}$/.test(to)) return say("Enter a valid recipient ID");
+    const sym = val("trAsset"), a = asset(sym), to = window.ZenvyroId.norm(val("trTo")), amount = parseFloat(val("trAmt"));
+    if (!to || !window.ZenvyroId.valid(to)) return say("Enter a valid recipient ID");
+    if (window.ZENVYRO_LOOKUP_ENDPOINT && !window.ZenvyroId.lastFound(to)) return say("Recipient ID not found");
     if (to.toLowerCase() === MY_ID.toLowerCase()) return say("You can't transfer to your own ID");
     if (!(amount > 0)) return say("Enter a valid amount");
     if (amount > availAmt(sym) + 1e-12) return say("Not enough available balance");

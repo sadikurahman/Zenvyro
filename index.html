@@ -52,7 +52,7 @@
     <article class="cd-metric"><span class="cd-metric-icon">↗</span><span class="cd-metric-label">Total Income</span><strong><span id="cdIncome">0</span><small>ZENY</small></strong><em id="cdIncomeCaption">Illustrative estimate</em></article>
     <article class="cd-metric"><span class="cd-metric-icon">↘</span><span class="cd-metric-label">Total Withdraw</span><strong><span id="cdWithdraw">0</span><small>ZENY</small></strong><em>Deducted from balance</em></article>
     <article class="cd-metric"><span class="cd-metric-icon">♙</span><span class="cd-metric-label">Normal Users</span><strong id="cdNormalUsers">0</strong><em>Network count</em></article>
-    <article class="cd-metric"><span class="cd-metric-icon">✦</span><span class="cd-metric-label">Premium Members</span><strong id="cdPremiumUsers">0</strong><em>Network count</em></article>
+    <article class="cd-metric"><span class="cd-metric-icon">◎</span><span class="cd-metric-label">Covered Countries</span><strong id="cdCountries">70+</strong><em>Supported countries</em></article>
   </div>
 
   <div class="zph" id="zphBox">
@@ -118,20 +118,22 @@ function showSection(name){
 function selectPack(name,price){closeModal();toast(name==='Free Pack'?'Free Pack selected':`${name} selected (${price}). Payment is not connected.`)}
 function walletAction(action){toast(action+' is not available until payment integration is configured')}
 function copyReferral(){const code='ZENV-NEW-MEMBER';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>toast('Referral code copied')).catch(()=>toast('Referral code: '+code))}else{toast('Referral code: '+code)}}
-</script>  <script src="site-settings.js?v=20261112b" defer></script>
-<script src="legal.js?v=20261112b" defer></script>
-<script src="auth.js?v=20261112b" defer></script>
-<script src="cooldown.js?v=20261112b" defer></script>
-<script src="phase-footer.js?v=20261112b" defer></script>
-<script src="zenvyro-api.js?v=20261112b" defer></script>
-<script src="purchase.js?v=20261112b" defer></script>
-<script src="mining.js?v=20261112b" defer></script>
-<script src="referral.js?v=20261112b" defer></script>
-<script src="exchange.js?v=20261112b" defer></script>
-<script src="wallet.js?v=20261112b" defer></script>
-<script src="account.js?v=20261112b" defer></script>
-<script src="levels.js?v=20261112b" defer></script>
-<script src="market.js?v=20261112b" defer></script>
+</script>  <script src="countries.js?v=20261113a" defer></script>
+<script src="member-id.js?v=20261113a" defer></script>
+<script src="site-settings.js?v=20261113a" defer></script>
+<script src="legal.js?v=20261113a" defer></script>
+<script src="auth.js?v=20261113a" defer></script>
+<script src="cooldown.js?v=20261113a" defer></script>
+<script src="phase-footer.js?v=20261113a" defer></script>
+<script src="zenvyro-api.js?v=20261113a" defer></script>
+<script src="purchase.js?v=20261113a" defer></script>
+<script src="mining.js?v=20261113a" defer></script>
+<script src="referral.js?v=20261113a" defer></script>
+<script src="exchange.js?v=20261113a" defer></script>
+<script src="wallet.js?v=20261113a" defer></script>
+<script src="account.js?v=20261113a" defer></script>
+<script src="levels.js?v=20261113a" defer></script>
+<script src="market.js?v=20261113a" defer></script>
 <script>
 /* Home quick buttons: Update News, Community, Invite, Leaderboard (no backend -> nothing is invented) */
 (function(){

@@ -449,7 +449,7 @@ textarea{min-height:96px;resize:vertical}
   const SS = () => window.ZenvyroSettings;
   const dtl = ms => new Date(ms - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   const dur = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return Math.floor(s / 86400) + "d " + Math.floor(s % 86400 / 3600) + "h " + Math.floor(s % 3600 / 60) + "m"; };
-  const BX = [["income", "Total Income"], ["withdraw", "Total Withdraw"], ["normal", "Normal Users"], ["premium", "Premium Members"]];
+  const BX = [["income", "Total Income"], ["withdraw", "Total Withdraw"], ["normal", "Normal Users"], ["countries", "Covered Countries"]];
   const alt = ' style="background:#2a1a6a"';
   const phasePage = () => { const p = SS().phase(); return ["Phase 1 Timer",
     `<div class="li"><div>${p.paused ? "Paused" : "Running"}<small>Time left</small></div><b>${dur(p.left)}</b></div>
@@ -474,7 +474,7 @@ textarea{min-height:96px;resize:vertical}
   const boxesPage = () => ["Home Boxes", BX.map(([k, n]) => { const b = SS().box(k); return `<div class="li"><div>${n}<small>${b.mode === "manual" ? "Manual value" : "Automatic (real server data)"}</small></div><button class="tg ${b.show ? "on" : ""}" data-bx="show:${k}" aria-label="${n}"></button></div>
     <div style="display:flex;gap:8px"><button class="pr"${b.mode === "auto" ? "" : alt} data-bx="auto:${k}">Automatic</button><button class="pr"${b.mode === "manual" ? "" : alt} data-bx="manual:${k}">Manual</button></div>
     <input class="in" id="bv_${k}" type="number" min="0" step="any" value="${b.value}" placeholder="Manual value"><button class="pr" data-bx="save:${k}">Save ${n} value</button>`; }).join("") +
-    '<p class="note">Manual shows your number with an "Admin update" tag. Automatic shows real server data once the backend is connected.</p>'];
+    '<p class="note">Manual shows your number with an "Updated by admin" tag. Automatic shows real server data once the backend is connected.</p>'];
   function bxAct(spec) {
     const [a, k] = spec.split(":"), S = SS(), b = S.box(k); if (!b) return;
     if (a === "show") S.setBox(k, { show: !b.show });

@@ -31,7 +31,7 @@
   function memberId() {
     if (cfg().memberId || window.ZENVYRO_MEMBER_ID) return cfg().memberId || window.ZENVYRO_MEMBER_ID;
     let id = null; try { id = localStorage.getItem(IKEY); } catch (e) {}
-    if (!id) { id = "ZNV-" + String(Math.floor(100000 + Math.random() * 900000)); try { localStorage.setItem(IKEY, id); } catch (e) {} }
+    if (!id || !window.ZenvyroId.valid(id)) { id = window.ZenvyroId.make(); try { localStorage.setItem(IKEY, id); } catch (e) {} }
     return id;
   }
   function applyName() { const h = document.querySelector(".welcome h1"); if (h) h.textContent = profile().name + " ✦"; }
@@ -226,7 +226,7 @@
 
       <div class="card prof">
         <div class="pr"><div class="av" ${av ? `style="background-image:url(${av})"` : ""}>${av ? "" : SVG_AVATAR}<button class="cam" onclick="zvaPick()" aria-label="Change photo">${ic("camera")}</button></div>
-          <div class="who"><div class="nm"><span>${esc(p.name)}</span></div><div class="tt">${esc(p.title)}${premium ? SVG_TICK : ""}</div><div class="mrow"><span class="mid">Member ID: ${esc(memberId())}</span><button class="zv-sum" onclick="zvaSummary()">${ic("doc")}Summary</button></div></div>
+          <div class="who"><div class="nm"><span>${esc(p.name)}</span></div><div class="tt">${esc(p.title)}${premium ? SVG_TICK : ""}</div><div class="mrow"><span class="mid"><span class="mtx">ID: ${esc(memberId())}</span><button type="button" class="mcp" data-id="${esc(memberId())}" onclick="zvaCopyId(this)" aria-label="Copy Member ID">${window.ZenvyroId.copyIcon}</button></span><button class="zv-sum" onclick="zvaSummary()">${ic("doc")}Summary</button></div></div>
           <div class="pt"><button class="zv-lvb" onclick="zvaLevel()" aria-label="Level progress">${ic("star")}<span>Level <b>${window.ZenvyroLevel ? window.ZenvyroLevel.get().lvl : 0}</b></span></button><button class="prem" onclick="zvaPack()" aria-label="Membership benefits">${ic("crown")}<span>${esc(tier)} Pack</span><span class="ch2">${ic("chev")}</span></button></div></div>
         <div class="stats">
           <button class="stat" onclick="zvaRefer()"><span class="si">${ic("users")}</span><span><small>Referral</small><b>${refs}</b></span><span class="ch">${ic("chev")}</span></button>

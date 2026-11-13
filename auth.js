@@ -61,6 +61,8 @@
 #zvAuth .fl .li{width:52px;align-self:stretch;display:grid;place-items:center;font-size:24px;color:#d8c8ff;border-right:1px solid #2f2488;margin:10px 0;align-self:center;height:34px}
 #zvAuth .fl input{flex:1;min-width:0;height:52px;background:none;border:0;outline:0;color:#fff;font:inherit;font-size:16px;padding:0 12px}
 #zvAuth .fl input::placeholder{color:#b9aef0;opacity:1}
+#zvAuth .fl select{flex:1;min-width:0;height:52px;background:none url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d8c8ff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center/16px;border:0;outline:0;color:#fff;font:inherit;font-size:16px;padding:0 40px 0 12px;-webkit-appearance:none;appearance:none;text-overflow:ellipsis}
+#zvAuth .fl select option,#zvAuth .fl select optgroup{background:#0d0838;color:#fff}
 #zvAuth .fl .eye{width:46px;height:44px;background:none;border:0;color:#d8c8ff;font-size:23px;display:grid;place-items:center;padding:0}
 #zvAuth .fl.ref{min-height:64px;border-color:#d84bff;box-shadow:0 0 0 1px #ff4fd855,0 0 18px #c23cff55;background:linear-gradient(180deg,#1b0d5c,#0f0840)}
 #zvAuth .fl.ref .rb{flex:1;min-width:0;padding:6px 0}
@@ -132,6 +134,7 @@
     ${field("user", "rgName", "Full Name", "text", "name", 'maxlength="40"')}
     ${field("mail", "rgEmail", "Email Address", "email", "email", 'inputmode="email" autocapitalize="none" spellcheck="false"')}
     ${field("phone", "rgPhone", "Mobile Number", "tel", "tel", 'inputmode="tel" maxlength="20"')}
+    <div class="fl"><span class="li">${ic("globe")}</span><select id="rgCountry" aria-label="Country" autocomplete="country-name">${window.ZenvyroCountries.optionsHtml("Select Country")}</select></div>
     <div class="fl ref" id="rgRefBox"><span class="li">${ic("group")}</span><div class="rb"><div class="rr"><input id="rgRef" type="text" placeholder="Refer Code *" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="32" aria-label="Refer Code (required)"><button class="inf" type="button" id="rgInfo" aria-label="About referral code">${ic("info")}</button></div><span class="help">Referral Code is mandatory</span></div><span class="ok">${ic("check")}</span></div>
     ${field("lock", "rgPass", "Password", "password", "new-password")}
     <div class="pwm" id="rgPwm"><div class="bars"><i></i><i></i><i></i><i></i></div><span class="pwt" id="rgPwt">Use 8+ characters with uppercase, lowercase, a number and a symbol.</span></div>
@@ -182,7 +185,7 @@
     }
     return null;
   }
-  const newId = all => { let id; do { id = "ZNV-" + String(Math.floor(100000 + Math.random() * 900000)); } while (Object.values(all).some(u => u.memberId === id)); return id; };
+  const newId = all => window.ZenvyroId.make(id => Object.values(all).some(u => u.memberId === id));
   const deviceRec = () => { let d = jget(localStorage, DKEY, null); if (!d || !d.id) { d = { id: (crypto.getRandomValues ? hex(crypto.getRandomValues(new Uint8Array(8))) : String(Date.now())), user: null }; jset(localStorage, DKEY, d); } return d; };
 
 
@@ -226,9 +229,11 @@
   const clearSession = () => { try { localStorage.removeItem(SKEY); sessionStorage.removeItem(SKEY); } catch (e) {} };
   function startSession(key, remember) {
     const u = users()[key]; if (!u) return false;
+    const all0 = users(); // upgrade an old-format Member ID to the new 10-character ID
+    if (all0[key] && !window.ZenvyroId.valid(all0[key].memberId)) { all0[key].memberId = newId(all0); jset(localStorage, UKEY, all0); u.memberId = all0[key].memberId; }
     clearSession();
     jset(remember ? localStorage : sessionStorage, SKEY, { k: key, ts: Date.now() });
-    window.ZENVYRO_USER = Object.assign({}, window.ZENVYRO_USER, { name: u.name, title: "Member", memberId: u.memberId, email: u.email, phone: u.phone, verified: false });
+    window.ZENVYRO_USER = Object.assign({}, window.ZENVYRO_USER, { name: u.name, title: "Member", memberId: u.memberId, email: u.email, phone: u.phone, country: u.country || "", verified: false });
     const h = document.querySelector(".welcome h1"); if (h) h.textContent = u.name + " ✦";
     close();
     return true;
@@ -259,12 +264,13 @@
   async function register(e) {
     e.preventDefault();
     const name = $("rgName").value.trim().replace(/\s+/g, " "), email = $("rgEmail").value.trim().toLowerCase(),
-          phone = $("rgPhone").value.trim(), ref = $("rgRef").value.trim(), p1 = $("rgPass").value, p2 = $("rgPass2").value,
+          phone = $("rgPhone").value.trim(), country = $("rgCountry").value, ref = $("rgRef").value.trim(), p1 = $("rgPass").value, p2 = $("rgPass2").value,
           agreed = $("rgTerms").classList.contains("on");
     const err = m => { say("rgMsg", m); return false; };
     if (name.length < 2) return err("Please enter your full name.");
     if (!isEmail(email)) return err("Please enter a valid email address.");
     const pd = normPhone(phone); if (pd.length < 10 || pd.length > 15) return err("Please enter a valid mobile number.");
+    if (!window.ZenvyroCountries.list.some(c => c.name === country)) return err("Please select your country.");
     if (!/^[A-Za-z0-9_-]{3,32}$/.test(ref)) return err("A valid Referral Code is required.");
     const pi = passwordIssue(p1, { name, email }); if (pi) return err(pi);
     if (p1 !== p2) return err("Passwords do not match.");
@@ -276,7 +282,7 @@
     try {
       const h = await hashPw(p1);
       const key = "u" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
-      all[key] = { name, email, phone, salt: h.salt, hash: h.hash, memberId: newId(all), refCode: ref, createdAt: Date.now() };
+      all[key] = { name, email, phone, salt: h.salt, hash: h.hash, memberId: newId(all), country, refCode: ref, createdAt: Date.now() };
       if (!jset(localStorage, UKEY, all)) throw new Error("store");
       dev.user = key; jset(localStorage, DKEY, dev);
       try { localStorage.setItem(REF_KEY, ref); } catch (x) {}
