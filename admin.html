@@ -268,6 +268,7 @@ textarea{min-height:96px;resize:vertical}
 
 <script src="zenvyro-api.js"></script>
 <script src="site-settings.js"></script>
+<script src="member-id.js"></script>
 <script>
 (() => {
   "use strict";
@@ -443,6 +444,7 @@ textarea{min-height:96px;resize:vertical}
     if ((b = q("[data-ph]"))) { phAct(b.dataset.ph); return true; }
     if ((b = q("[data-bx]"))) { bxAct(b.dataset.bx); return true; }
     if ((b = q("[data-tc]"))) { trfCancel(b.dataset.tc); return true; }
+    if ((b = q("[data-rf]"))) { rfAct(b.dataset.rf); return true; }
     return false;
   }
 
@@ -496,13 +498,93 @@ textarea{min-height:96px;resize:vertical}
     log("Transfer cancelled: " + id); toast("Transfer cancelled, refund queued"); open("trf");
   }
 
+  // ---------- Referrals, Promo Codes and Flags (demo data until the backend is connected) ----------
+  const PK = { Free: 0, Standard: 32, Silver: 80, Gold: 155, Platinum: 315 };
+  const n2 = x => Number(x || 0).toLocaleString("en-US", { maximumFractionDigits: 2 });
+  const jg = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; } catch (e) { return d; } };
+  const js = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  const PKEY = "zenvyro_promo_v1", BKEY = "zenvyro_bonus_v1";
+  const promos = () => { let p = jg(PKEY, null); if (!Array.isArray(p)) { p = [["INFL-RAHIM", "Rahim (YouTube)"], ["INFL-TECHBD", "TechBD (Facebook)"], ["INFL-NADIA", "Nadia (TikTok)"]].map(a => ({ code: a[0], name: a[1], on: true, start: 0, end: 0, max: 0, used: 0, note: "", created: Date.now() })); js(PKEY, p); } return p; };
+  const RF = (() => {
+    let s = 20261114; const R = () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const FN = ["Rafi", "Nusrat", "Imran", "Maria", "Arif", "Sadia", "Kamal", "Jannat", "Omar", "Layla", "Joel", "Grace", "Ali", "Mina", "Samir", "Tania", "Noor", "Rizal"], LN = ["Hossain", "Akter", "Khan", "Santos", "Rahman", "Ahmed", "Reyes", "Islam", "Okoye", "Sharma", "Abdullah", "Begum"];
+    const CT = ["Bangladesh", "Bangladesh", "Bangladesh", "India", "Pakistan", "Nepal", "Philippines", "Indonesia", "Malaysia", "United Arab Emirates", "Qatar", "Nigeria", "Kenya", "United Kingdom"];
+    const AL = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ", pick = a => a[Math.floor(R() * a.length)];
+    const mkId = () => { let b = ""; for (let i = 0; i < 6; i++) b += AL[Math.floor(R() * 32)]; return "ZNV-" + b + (window.ZenvyroId ? window.ZenvyroId.check(b) : "X"); };
+    const defs = [["Rohan Ahmed", "member", 18], ["Tanvir Islam", "member", 12], ["Hasan Mahmud", "member", 9], ["Sakib Hossain", "member", 6], ["Habib Rahman", "member", 4], ["INFL-RAHIM", "promo", 74, "Rahim (YouTube)"], ["INFL-TECHBD", "promo", 52, "TechBD (Facebook)"], ["INFL-NADIA", "promo", 31, "Nadia (TikTok)"]];
+    const now = Date.now(), devs = ["DV-" + Math.floor(R() * 1e5), "DV-" + Math.floor(R() * 1e5)];
+    return defs.map(d => {
+      const code = d[1] === "member" ? mkId() : d[0], users = [];
+      for (let i = 0; i < d[2]; i++) {
+        const age = Math.floor(Math.pow(R(), 1.6) * 60), r = R(), pack = r < .62 ? "Free" : r < .78 ? "Standard" : r < .88 ? "Silver" : r < .95 ? "Gold" : "Platinum";
+        let nfts = 0, trx = 0; if (R() < (pack === "Free" ? .05 : .45)) { nfts = 1 + Math.floor(R() * 3); for (let k = 0; k < nfts; k++) trx += pick([160, 240, 315, 200]); }
+        users.push({ id: mkId(), name: pick(FN) + " " + pick(LN), country: pick(CT), ts: now - age * 864e5 - R() * 864e5, pack, nfts, nftTrx: trx, dev: (d[0] === "INFL-NADIA" && i < 6) ? devs[i % 2] : "DV-" + Math.floor(R() * 1e7), self: d[0] === "Hasan Mahmud" && i === 0 });
+      }
+      return { code, name: d[3] || d[0], type: d[1], users };
+    });
+  })();
+  const RS = { per: "all", sort: "total", view: null };
+  const PER = [["today", "Today"], ["7", "7 days"], ["30", "30 days"], ["all", "All"]], SORT = [["total", "Total"], ["premium", "Premium"], ["nft", "NFT holders"], ["vol", "Volume"]];
+  const lim = () => RS.per === "all" ? 0 : RS.per === "today" ? new Date().setHours(0, 0, 0, 0) : Date.now() - (+RS.per) * 864e5;
+  const inPer = l => { const m = lim(); return l.filter(u => u.ts >= m); };
+  const stat = l => { const o = { total: l.length, normal: 0, premium: 0, holders: 0, nfts: 0, nftTrx: 0, vol: 0, packs: { Standard: 0, Silver: 0, Gold: 0, Platinum: 0 } }; l.forEach(u => { if (u.pack === "Free") o.normal++; else { o.premium++; o.packs[u.pack]++; } if (u.nfts > 0) o.holders++; o.nfts += u.nfts; o.nftTrx += u.nftTrx; o.vol += PK[u.pack] + u.nftTrx; }); o.conv = o.total ? o.premium / o.total * 100 : 0; return o; };
+  const css = document.createElement("style");
+  css.textContent = ".rfc{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.chip{padding:8px 14px;border-radius:20px;border:1px solid #6a3cff88;background:#0f0634;color:#e0d2ff;font-size:13px;font-weight:600;text-decoration:none}.chip.on{background:linear-gradient(135deg,#8a3dff,#4a1fb0);border-color:#b78bff;color:#fff}.rfg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.rfg>div{border:1px solid #6a3cff55;border-radius:12px;padding:10px;background:#0f0634}.rfg small{display:block;color:#b9b2f5;font-size:11.5px}.rfg b{font-size:18px}.rfd{color:#ffd36b;font-size:12px;margin:6px 0}.rfrow{cursor:pointer}.rfr{text-align:right}.rfr small,.li small{display:block;color:#b9b2f5;font-size:11.5px}.tag{display:inline-block;border:1px solid #8b57ff;border-radius:8px;padding:0 6px;font-size:10.5px;margin-left:6px;color:#cfc4ff}.tag.pm{border-color:#ffd36b;color:#ffd36b}.sev{font-size:11px;font-weight:700;border-radius:8px;padding:2px 8px}.sev.h{background:#5a1630;color:#ff8fae}.sev.m{background:#4a3a0a;color:#ffd36b}";
+  document.head.appendChild(css);
+  const DEMO_NOTE = '<p class="rfd">Demo data. Real numbers appear once the backend is connected.</p>';
+  const chips = (arr, cur, a) => '<div class="rfc">' + arr.map(([k, l]) => `<button class="chip${k === cur ? " on" : ""}" data-rf="${a}:${k}">${l}</button>`).join("") + "</div>";
+  const links = (a) => '<div class="rfc">' + a.map(([k, l]) => `<a href="#" class="chip" data-go="${k}">${l}</a>`).join("") + "</div>";
+  const refsPage = () => { const rows = RF.map((r, i) => ({ r, i, s: stat(inPer(r.users)) })).sort((a, b) => ({ total: b.s.total - a.s.total, premium: b.s.premium - a.s.premium, nft: b.s.holders - a.s.holders, vol: b.s.vol - a.s.vol })[RS.sort] || 0);
+    return ["Referrals", DEMO_NOTE + links([["promo", "Promo codes"], ["rflags", "Flags"]]) + chips(PER, RS.per, "per") + chips(SORT, RS.sort, "sort") +
+      rows.map((x, k) => `<div class="li rfrow" data-rf="view:${x.i}"><div><b>${k + 1}. ${esc(x.r.name)}</b><span class="tag${x.r.type === "promo" ? " pm" : ""}">${x.r.type === "promo" ? "Promo" : "Member"}</span><small>${esc(x.r.code)}</small></div><div class="rfr"><b>${x.s.total}</b><small>${x.s.premium} premium &middot; ${x.s.holders} NFT &middot; ${n2(x.s.vol)} TRX</small></div></div>`).join("") +
+      '<button class="pr" data-rf="csv:top">Download CSV</button>']; };
+  const findRef = c => RF.find(r => r.code === c);
+  const viewPage = () => { const c = RS.view, r = findRef(c), pm = promos().find(p => p.code === c), users = r ? inPer(r.users) : [], s = stat(users);
+    const ct = {}; users.forEach(u => { ct[u.country] = (ct[u.country] || 0) + 1; });
+    const top = Object.entries(ct).sort((a, b) => b[1] - a[1]).slice(0, 5).map(a => a[0] + " " + a[1]).join(" &middot; ") || "-";
+    const days = 14, bars = Array.from({ length: days }, (_, i) => { const d0 = new Date(); d0.setHours(0, 0, 0, 0); const a = d0.getTime() - (days - 1 - i) * 864e5; return (r ? r.users : []).filter(u => u.ts >= a && u.ts < a + 864e5).length; }), mx = Math.max(1, ...bars);
+    const svg = `<svg viewBox="0 0 280 60" style="width:100%;height:60px"><g fill="#8a3dff">${bars.map((v, i) => `<rect x="${i * 20 + 2}" y="${58 - v / mx * 54}" width="16" height="${Math.max(1, v / mx * 54)}" rx="3"/>`).join("")}</g></svg>`;
+    const bl = jg(BKEY, []).filter(b => b.code === c);
+    return [r ? r.name : (pm ? pm.name : c), DEMO_NOTE + `<a href="#" class="chip" data-go="${pm && !r ? "promo" : "refs"}">&larr; Back</a><div class="li"><div><b>${esc(c)}</b><small>${r ? (r.type === "promo" ? "Promo code" : "Member code") : "Promo code"}</small></div></div>` + chips(PER, RS.per, "vper") +
+      `<div class="rfg"><div><small>Total sign-ups</small><b>${s.total}</b></div><div><small>Normal (Free)</small><b>${s.normal}</b></div><div><small>Premium</small><b>${s.premium}</b></div><div><small>Conversion</small><b>${s.conv.toFixed(1)}%</b></div><div><small>NFT holders</small><b>${s.holders}</b></div><div><small>NFTs held</small><b>${s.nfts}</b></div><div><small>NFT value</small><b>${n2(s.nftTrx)} TRX</b></div><div><small>Total purchases</small><b>${n2(s.vol)} TRX</b></div></div>` +
+      `<div class="li"><div>Packs<small>Standard ${s.packs.Standard} &middot; Silver ${s.packs.Silver} &middot; Gold ${s.packs.Gold} &middot; Platinum ${s.packs.Platinum}</small></div></div><div class="li"><div>Top countries<small>${top}</small></div></div><div class="li"><div>Last 14 days<small>New sign-ups per day</small></div></div>${svg}` +
+      '<button class="pr" data-rf="csv:view">Download CSV</button><button class="pr" style="background:#2a1a6a" data-rf="bonus:' + esc(c) + '">Give bonus</button>' +
+      (bl.length ? '<div class="li" style="font-weight:700">Bonuses given</div>' + bl.map(b => `<div class="li"><div>${esc(b.id)}<small>${esc(b.reason)} &middot; ${when(b.ts)}</small></div><b>${n2(b.amt)} TRX</b></div>`).join("") : "") +
+      '<div class="li" style="font-weight:700">Members</div>' + (users.length ? users.slice().sort((a, b) => b.ts - a.ts).slice(0, 60).map(u => `<div class="li"><div>${esc(u.id)}<small>${esc(u.name)} &middot; ${esc(u.country)} &middot; ${when(u.ts)}</small></div><div class="rfr"><b>${u.pack}</b><small>${u.nfts ? u.nfts + " NFT" : "No NFT"}</small></div></div>`).join("") + (users.length > 60 ? '<p class="note">Showing the latest 60. Download the CSV for all.</p>' : "") : '<div class="li">No sign-ups in this period.</div>')]; };
+  const promoPage = () => { const ps = promos(); return ["Promo Codes", DEMO_NOTE + links([["refs", "Top referrers"], ["rflags", "Flags"]]) +
+    (ps.length ? ps.map(p => { const r = findRef(p.code), s = stat(r ? r.users : []), rng = (p.start ? new Date(p.start).toLocaleDateString("en-GB") : "any") + " to " + (p.end ? new Date(p.end).toLocaleDateString("en-GB") : "no end");
+      return `<div class="li"><div><b>${esc(p.code)}</b><span class="tag${p.on ? " pm" : ""}">${p.on ? "Active" : "Off"}</span><small>${esc(p.name)} &middot; ${rng}${p.max ? " &middot; max " + p.max : ""} &middot; used ${Math.max(p.used || 0, s.total)}</small></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="sm" data-rf="pview:${esc(p.code)}">View</button><button class="sm" data-rf="ptog:${esc(p.code)}">${p.on ? "Turn off" : "Turn on"}</button><button class="sm" data-rf="pdel:${esc(p.code)}">Delete</button></div></div>`; }).join("") : '<div class="li">No promo codes yet</div>') +
+    '<div class="li" style="font-weight:700">New promo code</div><input class="in" id="pcCode" placeholder="Code, e.g. INFL-ALI (4-20 letters, digits, dash)" maxlength="20" autocapitalize="characters"><input class="in" id="pcName" placeholder="Influencer name" maxlength="40" style="margin-top:8px"><input class="in" id="pcStart" type="date" aria-label="Start date" style="margin-top:8px"><input class="in" id="pcEnd" type="date" aria-label="End date" style="margin-top:8px"><input class="in" id="pcMax" type="number" min="0" placeholder="Max uses (0 = unlimited)" style="margin-top:8px"><button class="pr" data-rf="pnew:x">Create promo code</button><p class="note">Promo codes work in the same Refer Code field at registration. They only track sign-ups; extra bonuses are given by you with Give bonus.</p>']; };
+  const flagsPage = () => { const f = [], seen = {};
+    RF.forEach(r => r.users.forEach(u => { (seen[u.dev] = seen[u.dev] || []).push({ r, u }); if (u.self) f.push(["h", "Self-referral", r.name + " &middot; " + u.id]); }));
+    Object.values(seen).filter(a => a.length > 2).forEach(a => f.push(["h", a.length + " accounts on one device", esc(a[0].r.code) + " &middot; " + a.slice(0, 3).map(x => x.u.id).join(", ")]));
+    RF.forEach(r => { const d = {}; r.users.forEach(u => { const k = new Date(u.ts).toDateString(); d[k] = (d[k] || 0) + 1; }); const m = Math.max(0, ...Object.values(d)); if (m >= 12) f.push(["m", m + " sign-ups in one day", esc(r.code) + " &middot; check the quality"]); });
+    return ["Flags", DEMO_NOTE + links([["refs", "Top referrers"], ["promo", "Promo codes"]]) + (f.length ? f.map(x => `<div class="li"><div><span class="sev ${x[0]}">${x[0] === "h" ? "High" : "Medium"}</span> <b>${x[1]}</b><small>${x[2]}</small></div></div>`).join("") : '<div class="li">No flags</div>') + '<p class="note">Flags are hints for a manual check, not proof. The same device, the same person referring themselves, or a sudden burst of sign-ups need a look before bonuses are paid.</p>']; };
+  function csv(name, rows) { const t = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(",")).join("\n"); try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([t], { type: "text/csv" })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); toast("CSV downloaded"); } catch (e) { toast("Could not download"); } }
+  function rfAct(spec) {
+    const i = spec.indexOf(":"), a = spec.slice(0, i), v = spec.slice(i + 1);
+    if (a === "per") { RS.per = v; open("refs"); } else if (a === "vper") { RS.per = v; open("refView"); } else if (a === "sort") { RS.sort = v; open("refs"); }
+    else if (a === "view") { RS.view = RF[+v].code; open("refView"); } else if (a === "pview") { RS.view = v; open("refView"); }
+    else if (a === "csv") { if (v === "top") csv("referrals.csv", [["Name", "Code", "Type", "Total", "Normal", "Premium", "NFT holders", "NFT value TRX", "Purchases TRX"]].concat(RF.map(r => { const s = stat(inPer(r.users)); return [r.name, r.code, r.type, s.total, s.normal, s.premium, s.holders, s.nftTrx, s.vol]; })));
+      else { const r = findRef(RS.view); csv("referrals-" + RS.view + ".csv", [["Member ID", "Name", "Country", "Date", "Pack", "NFTs", "NFT value TRX"]].concat(inPer(r ? r.users : []).map(u => [u.id, u.name, u.country, new Date(u.ts).toISOString().slice(0, 10), u.pack, u.nfts, u.nftTrx]))); } }
+    else if (a === "bonus") { const r = findRef(v); let to = prompt("Member ID to receive the bonus" + (r && r.type === "member" ? " (this member: " + v + ")" : ""), r && r.type === "member" ? v : ""); if (to === null) return; to = (window.ZenvyroId ? window.ZenvyroId.norm(to) : to); if (!to || !window.ZenvyroId.valid(to)) return toast("Enter a valid Member ID");
+      const amt = parseFloat(prompt("Bonus amount in TRX", "")); if (!(amt > 0) || amt > 1e6) return toast("Enter a valid amount"); const reason = (prompt("Reason", "Influencer bonus") || "").slice(0, 80); if (!reason) return toast("A reason is required");
+      const b = jg(BKEY, []); b.unshift({ code: v, id: to, amt, reason, ts: Date.now() }); js(BKEY, b.slice(0, 200)); log("Bonus " + amt + " TRX to " + to + " (" + reason + ")"); toast("Bonus recorded. The wallet is credited once the backend is connected."); open("refView"); }
+    else if (a === "ptog") { const p = promos(); const x = p.find(q => q.code === v); if (x) { x.on = !x.on; js(PKEY, p); log("Promo " + v + (x.on ? " on" : " off")); } open("promo"); }
+    else if (a === "pdel") { if (!confirm("Delete the promo code " + v + "?")) return; js(PKEY, promos().filter(q => q.code !== v)); log("Promo deleted: " + v); open("promo"); }
+    else if (a === "pnew") { const code = $("#pcCode").value.trim().toUpperCase(), name = $("#pcName").value.trim(), sd = $("#pcStart").value, ed = $("#pcEnd").value, mx = Math.max(0, Math.floor(+$("#pcMax").value || 0));
+      if (!/^[A-Z0-9-]{4,20}$/.test(code)) return toast("Code: 4-20 letters, digits or dash"); if (name.length < 2) return toast("Enter the influencer name"); const p = promos(); if (p.some(q => q.code === code)) return toast("This code already exists");
+      const s0 = sd ? Date.parse(sd + "T00:00:00") : 0, e0 = ed ? Date.parse(ed + "T23:59:59") : 0; if (s0 && e0 && e0 < s0) return toast("End date is before the start date");
+      p.unshift({ code, name, on: true, start: s0, end: e0, max: mx, used: 0, note: "", created: Date.now() }); js(PKEY, p); log("Promo created: " + code); toast("Promo code created"); open("promo"); }
+  }
+
   const PAGES = {
-    phase: phasePage, boxes: boxesPage, trf: trfPage,
+    phase: phasePage, boxes: boxesPage, trf: trfPage, refs: refsPage, refView: viewPage, promo: promoPage, rflags: flagsPage,
     req: () => ["Pending Requests", ROWS.map(r => `<div class="li" style="font-weight:700">${r[1]}<span class="bd ${st.pend[r[0]] ? "" : "z"}">${st.pend[r[0]]}</span></div>` + reqItems(r[0])).join("")],
     rep: () => ["Membership Report", `<div class="li"><div>Today's Sales<small>Demo figure</small></div><b>${fmt.m2(data.today)}</b></div><div class="li"><div>This Month<small>Demo figure</small></div><b>${fmt.m2(data.month)}</b></div>` + PACKS.slice(1).map((p, i) => `<div class="li"><div>${p[0]} Pack<small>$${p[1]} · ${[420, 260, 140, 60][i]} active members</small></div><b>$${(p[1] * [420, 260, 140, 60][i]).toLocaleString("en-US")}</b></div>`).join("")],
     ann: () => ["Send Announcement", '<textarea id="annT" maxlength="300" placeholder="Write your announcement"></textarea><button class="pr" id="annS">Send Announcement</button><p class="note">Saved on this device only. Connect the backend to deliver it to users.</p>'],
     mem: () => ["Manage Membership", ""],
-    set: () => ["System Settings", tg("maint", "Maintenance Mode", "Pause the app for all users") + tg("reg", "New Registrations", "Allow new accounts") + tg("wdraw", "Withdrawals", "Allow withdrawal requests") + tg("dep", "Deposits", "Allow deposit requests") + tg("exch", "Exchange", "Allow exchange requests") + tg("trans", "Transfers", "Allow member to member transfers") + tg("mine", "Mining", "Allow start and claim") + tg("buy", "Pack Purchases", "Allow voucher and crypto purchases") + tg("nft", "NFT Marketplace", "Allow NFT purchases") + [["phase", "Phase 1 Timer"], ["boxes", "Home Boxes"], ["trf", "Transfers History"]].map(a => `<div class="li"><a href="#" data-go="${a[0]}">${a[1]}</a></div>`).join("") + '<p class="note">Settings are stored on this device until the backend is connected.</p>'],
+    set: () => ["System Settings", tg("maint", "Maintenance Mode", "Pause the app for all users") + tg("reg", "New Registrations", "Allow new accounts") + tg("wdraw", "Withdrawals", "Allow withdrawal requests") + tg("dep", "Deposits", "Allow deposit requests") + tg("exch", "Exchange", "Allow exchange requests") + tg("trans", "Transfers", "Allow member to member transfers") + tg("mine", "Mining", "Allow start and claim") + tg("buy", "Pack Purchases", "Allow voucher and crypto purchases") + tg("nft", "NFT Marketplace", "Allow NFT purchases") + [["phase", "Phase 1 Timer"], ["boxes", "Home Boxes"], ["trf", "Transfers History"], ["refs", "Referrals and Promo Codes"]].map(a => `<div class="li"><a href="#" data-go="${a[0]}">${a[1]}</a></div>`).join("") + '<p class="note">Settings are stored on this device until the backend is connected.</p>'],
     log: () => ["Activity Logs", st.logs.length ? st.logs.map(l => `<div class="li"><div>${esc(l.t)}<small>${when(l.ts)}</small></div></div>`).join("") : '<div class="li">No activity yet</div>'],
     usr: () => ["Users", '<input class="in" id="uq" type="search" placeholder="Search by name or ID" autocomplete="off"><div id="ul" style="margin-top:6px">' + userRows("") + '</div><p class="note">Tap a user to ban, unban or send dollars. Sample users until the backend is connected.</p>'],
     txn: () => ["Transactions", [["Deposit", 100], ["Withdraw", 45], ["Exchange", 20], ["Deposit", 50], ["Withdraw", 15], ["Exchange", 8]].map((t, i) => `<div class="li"><div>${t[0]}<small>${when(Date.now() - i * 5400000)}</small></div><b>$${t[1]}.00</b></div>`).join("") + '<p class="note">Sample list. Real transactions appear after the backend is connected.</p>'],
