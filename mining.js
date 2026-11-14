@@ -1,4 +1,4 @@
-/* Zenvyro — Step 1: Mining session (2 hours) + Claim Reward
+/* Zenvyro — Step 1: Mining session (4 hours) + Claim Reward
    JavaScript logic only. No changes to the HTML/CSS design.
    Data is kept in localStorage for now (demo/testing). It is editable in the browser,
    so real balances and payments must be verified on a backend. */
@@ -12,7 +12,7 @@
     Gold: 0.017361,
     Platinum: 0.050505
   };
-  const SESSION_HOURS = 2;                      // claim interval (hours)
+  const SESSION_HOURS = 4;                      // claim interval (hours)
   const SESSION_MS = SESSION_HOURS * 60 * 60 * 1000;
   const STORE_KEY = "zenvyro_mining_v1";
   const ZENY_TO_USDT = 3; // reference only
@@ -27,12 +27,12 @@
   }
 
   function load() {
-    const base = { v: 2, tier: "Free", balance: 0, sessionEnd: null, pausedRemaining: null, totalMined: 0 };
+    const base = { v: 3, tier: "Free", balance: 0, sessionEnd: null, pausedRemaining: null, totalMined: 0 };
     try {
       const s = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
       if (!s) return base;
       const o = {
-        v: 2,
+        v: 3,
         tier: normTier(window.ZENVYRO_TIER || s.tier),
         balance: Number.isFinite(+s.balance) && +s.balance >= 0 ? +s.balance : 0,
         sessionEnd: Number.isFinite(+s.sessionEnd) && +s.sessionEnd > 0 ? +s.sessionEnd : null,
@@ -40,10 +40,11 @@
         totalMined: Number.isFinite(+s.totalMined) && +s.totalMined >= 0 ? +s.totalMined
           : (Number.isFinite(+s.balance) && +s.balance > 0 ? +s.balance : 0)
       };
-      // Old 1-hour session saved before the 2-hour update: finish it cleanly so the new 2-hour timer starts fresh
-      if (s.v !== 2 && (o.sessionEnd || o.pausedRemaining)) {
+      // Session saved before the 4-hour update (v1 = 1-hour, v2 = 2-hour): finish it cleanly so the 4-hour timer starts fresh.
+      // A completed old session is credited once at its OLD length; an unfinished one is reset.
+      if (s.v !== 3 && (o.sessionEnd || o.pausedRemaining)) {
         if (o.sessionEnd && o.sessionEnd <= Date.now()) {
-          const r = RATES[o.tier];                       // the completed 1-hour session is credited once
+          const r = RATES[o.tier] * (s.v === 2 ? 2 : 1);
           o.balance = Math.round((o.balance + r) * 1e8) / 1e8;
           o.totalMined = Math.round((o.totalMined + r) * 1e8) / 1e8;
         }
@@ -63,7 +64,7 @@
   const say = msg => { if (typeof window.toast === "function") window.toast(msg); };
   const mmss = ms => {
     const s = Math.max(0, Math.ceil(ms / 1000));
-    return Math.floor(s / 3600) + ":" + String(Math.floor(s % 3600 / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); // H:MM:SS, e.g. 2:00:00
+    return Math.floor(s / 3600) + ":" + String(Math.floor(s % 3600 / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); // H:MM:SS, e.g. 4:00:00
   };
 
   function status() {
@@ -123,7 +124,10 @@
   }
 
 
-  /* ---------- ZENY coin (orb): Start / timer / Pause inside the circle ---------- */
+  /* ---------- ZENY coin (orb): Start / timer / Pause inside the circle ----------
+     Animation notes (CPU friendly): only transform + opacity are animated (these run on the GPU,
+     no repaint/layout), via the Web Animations API. No box-shadow / filter / mask animation.
+     The glow loop pauses when the tab is hidden or the coin is off-screen. */
   const ORB_CSS = `
   .orb{cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;outline:none}
   .orb-core{z-index:2;padding:0 6px}
@@ -131,32 +135,36 @@
   .orb-core .zv-time{display:block;font-size:30px;font-weight:900;letter-spacing:1px;font-variant-numeric:tabular-nums;line-height:1;text-shadow:0 0 18px #c98bff}
   .orb-core .zv-sub{display:block;font-size:10px;font-weight:800;letter-spacing:2.2px;margin-top:8px;color:#e4c9ff;text-transform:uppercase}
   @media(max-width:650px){.orb-core .zv-cta{font-size:11px;margin-top:5px}.orb-core .zv-time{font-size:24px}.orb-core .zv-sub{font-size:9px;margin-top:6px}}
-  .zv-spin{position:absolute;inset:-6px;border-radius:50%;pointer-events:none;opacity:0;transition:opacity .5s;
-    background:conic-gradient(from 0deg,transparent 0 55%,#8b3dff 72%,#e3aaff 90%,#fff 100%);
-    -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));
-            mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));
-    filter:drop-shadow(0 0 7px #b46dff)}
-  .zv-burst{position:absolute;inset:0;border-radius:50%;pointer-events:none;border:2px solid #e3aaff;opacity:0;animation:zvBurst 1.3s cubic-bezier(.15,.7,.3,1) forwards}
-  .zv-burst.b2{animation-delay:.22s;border-color:#9a42ff}
-  .orb.zv-run .zv-spin{opacity:1;animation:zvSpin 2.8s linear infinite}
-  .orb.zv-run{animation:zvBreath 2.6s ease-in-out infinite}
-  .orb.zv-run:before{animation:zvRing 2.6s ease-in-out infinite}
-  .orb.zv-run:after{animation:zvRing 2.6s ease-in-out .9s infinite}
-  .orb.zv-run .orb-core{animation:zvCore 2.6s ease-in-out infinite}
-  .orb.zv-run .spark{animation:zvTwinkle 1.8s ease-in-out infinite}
-  .orb.zv-pop{animation:zvPop .75s cubic-bezier(.2,.9,.3,1.3)}
-  .orb.zv-ready{animation:zvReady 1.6s ease-in-out infinite}
-  @keyframes zvSpin{to{transform:rotate(360deg)}}
-  @keyframes zvBreath{0%,100%{box-shadow:inset 0 0 0 3px #d5a0ff,0 0 0 12px #5b31ff12,0 0 0 21px #6739ff12,0 0 45px #8b2cff70}50%{box-shadow:inset 0 0 0 3px #f0c8ff,0 0 0 14px #5b31ff1f,0 0 0 24px #6739ff1a,0 0 78px #a43cffb0}}
-  @keyframes zvRing{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.045);opacity:.25}}
-  @keyframes zvCore{0%,100%{background:#6d24e82b}50%{background:#8a3cff55}}
-  @keyframes zvTwinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.88)}}
-  @keyframes zvBurst{0%{transform:scale(.9);opacity:.95}100%{transform:scale(1.75);opacity:0}}
-  @keyframes zvPop{0%{transform:scale(1)}30%{transform:scale(.93)}65%{transform:scale(1.07)}100%{transform:scale(1)}}
-  @keyframes zvReady{0%,100%{box-shadow:inset 0 0 0 3px #ffe08a,0 0 0 12px #e5c16c14,0 0 0 21px #e5c16c10,0 0 40px #e5c16c80}50%{box-shadow:inset 0 0 0 3px #fff0b8,0 0 0 15px #e5c16c22,0 0 0 26px #e5c16c18,0 0 70px #ffd466b0}}
-  @media (prefers-reduced-motion:reduce){.orb.zv-run,.orb.zv-run:before,.orb.zv-run:after,.orb.zv-run .orb-core,.orb.zv-run .spark,.orb.zv-ready{animation:none}.orb.zv-run .zv-spin{animation-duration:9s}}`;
+  .zv-glow,.zv-ripple{position:absolute;border-radius:50%;pointer-events:none;opacity:0;will-change:transform,opacity}
+  .zv-glow{inset:-12px;background:radial-gradient(circle,transparent 62%,rgba(164,60,255,.55) 76%,rgba(139,44,255,0) 100%)}
+  .zv-glow.zv-gold{background:radial-gradient(circle,transparent 62%,rgba(255,212,102,.55) 76%,rgba(229,193,108,0) 100%)}
+  .zv-ripple{inset:0;border:2px solid #e3aaff}`;
 
   let orbEl = null, coreEl = null, orbMode = "";
+  let glowEl = null, rippleEl = null, glowAnim = null, glowOn = false, orbInView = true;
+  const REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const CAN_ANIMATE = typeof Element !== "undefined" && typeof Element.prototype.animate === "function";
+
+  // Run the glow loop only while it can actually be seen
+  function syncGlow() {
+    if (!glowAnim) return;
+    if (glowOn && !document.hidden && orbInView) glowAnim.play(); else glowAnim.pause();
+  }
+
+  function setGlow(on, gold) {
+    if (!glowEl) return;
+    glowEl.classList.toggle("zv-gold", !!gold);
+    glowOn = on;
+    if (glowAnim) { glowAnim.cancel(); glowAnim = null; }
+    if (!on) { glowEl.style.opacity = "0"; return; }
+    if (!CAN_ANIMATE || REDUCED) { glowEl.style.opacity = ".6"; return; }  // static glow, no motion
+    glowEl.style.opacity = "";
+    glowAnim = glowEl.animate(
+      [{ transform: "scale(.97)", opacity: 0.3 }, { transform: "scale(1.07)", opacity: 0.85 }],
+      { duration: 2400, direction: "alternate", iterations: Infinity, easing: "ease-in-out" }
+    );
+    syncGlow();
+  }
 
   function setupOrb() {
     orbEl = document.querySelector("#miningPanel .orb");
@@ -165,15 +173,22 @@
     const st = document.createElement("style");
     st.textContent = ORB_CSS;
     document.head.appendChild(st);
-    const spin = document.createElement("div");
-    spin.className = "zv-spin";
-    orbEl.appendChild(spin);
+    glowEl = document.createElement("div");
+    glowEl.className = "zv-glow";
+    rippleEl = document.createElement("div");
+    rippleEl.className = "zv-ripple";
+    orbEl.appendChild(glowEl);
+    orbEl.appendChild(rippleEl);
     orbEl.setAttribute("role", "button");
     orbEl.setAttribute("tabindex", "0");
     orbEl.addEventListener("click", orbTap);
     orbEl.addEventListener("keydown", e => {
       if (e.key === "Enter" || e.key === " ") { e.preventDefault(); orbTap(); }
     });
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(es => { orbInView = es[es.length - 1].isIntersecting; syncGlow(); }).observe(orbEl);
+    }
+    document.addEventListener("visibilitychange", () => { syncGlow(); if (!document.hidden) render(); });
   }
 
   function renderOrb(st, remaining) {
@@ -186,8 +201,7 @@
       else if (st === "ready") html = spark + '<span class="zv-cta">CLAIM<br>REWARD</span>';
       else html = '<span class="zv-time"></span><span class="zv-sub">' + (st === "paused" ? "Paused · Tap" : "Mining") + '</span>';
       coreEl.innerHTML = html;
-      orbEl.classList.toggle("zv-run", st === "running");
-      orbEl.classList.toggle("zv-ready", st === "ready");
+      setGlow(st === "running" || st === "ready", st === "ready");
       orbEl.setAttribute("aria-label",
         st === "idle" ? "Start mining" : st === "running" ? "Pause mining" :
         st === "paused" ? "Resume mining" : "Claim reward");
@@ -196,18 +210,17 @@
     if (t) t.textContent = mmss(remaining);
   }
 
+  // Tap feedback: a quick press-and-release on the coin plus one ripple ring (transform/opacity only)
   function playStartAnimation() {
-    if (!orbEl) return;
-    orbEl.classList.remove("zv-pop");
-    void orbEl.offsetWidth;
-    orbEl.classList.add("zv-pop");
-    ["", "b2"].forEach(c => {
-      const b = document.createElement("span");
-      b.className = "zv-burst " + c;
-      orbEl.appendChild(b);
-      setTimeout(() => b.remove(), 1700);
-    });
-    setTimeout(() => orbEl && orbEl.classList.remove("zv-pop"), 800);
+    if (!orbEl || !CAN_ANIMATE || REDUCED) return;
+    orbEl.animate(
+      [{ transform: "scale(1)" }, { transform: "scale(.94)", offset: 0.28 }, { transform: "scale(1.04)", offset: 0.62 }, { transform: "scale(1)" }],
+      { duration: 520, easing: "ease-out" }
+    );
+    if (rippleEl) rippleEl.animate(
+      [{ transform: "scale(.95)", opacity: 0.8 }, { transform: "scale(1.55)", opacity: 0 }],
+      { duration: 850, easing: "ease-out" }
+    );
   }
 
   function startSession() {
@@ -222,7 +235,7 @@
     if (left <= 0) { render(); return; }
     state.pausedRemaining = left;   // the time already mined is kept
     state.sessionEnd = null;
-    save(); render();
+    save(); render(); playStartAnimation();
     say("Mining paused");
   }
   function resumeSession() {
@@ -239,7 +252,7 @@
     state.totalMined = Math.round(((state.totalMined || 0) + reward) * 1e8) / 1e8;
     state.sessionEnd = null;
     state.pausedRemaining = null;
-    save(); render();
+    save(); render(); playStartAnimation();
     say("+" + reward.toFixed(6) + " ZENY added");
   }
 
@@ -292,7 +305,7 @@
     };
 
     render();
-    setInterval(render, 500);
+    setInterval(() => { if (!document.hidden) render(); }, 500);  // skip work while the tab is hidden
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
