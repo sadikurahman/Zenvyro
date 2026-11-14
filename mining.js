@@ -124,75 +124,219 @@
   }
 
 
-  /* ---------- ZENY coin (orb): Start / timer / Pause inside the circle ----------
-     Animation notes (CPU friendly): only transform + opacity are animated (these run on the GPU,
-     no repaint/layout), via the Web Animations API. No box-shadow / filter / mask animation.
-     The glow loop pauses when the tab is hidden or the coin is off-screen. */
+  /* ---------- ZENY core animation: fills the whole orb area (canvas, GPU-friendly, pauses off-screen) ----------
+     Circuit board + core sprite are drawn once; per frame only a few cheap draws run.
+     Idle / running / paused / ready run at ~30 fps; the start burst runs at full rate for ~3 s. */
   const ORB_CSS = `
-  .orb{cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;outline:none}
-  .orb-core{z-index:2;padding:0 6px}
-  .orb-core .zv-cta{display:block;font-size:13px;font-weight:900;letter-spacing:1.4px;line-height:1.35;margin-top:7px;text-align:center}
-  .orb-core .zv-time{display:block;font-size:30px;font-weight:900;letter-spacing:1px;font-variant-numeric:tabular-nums;line-height:1;text-shadow:0 0 18px #c98bff}
-  .orb-core .zv-sub{display:block;font-size:10px;font-weight:800;letter-spacing:2.2px;margin-top:8px;color:#e4c9ff;text-transform:uppercase}
-  @media(max-width:650px){.orb-core .zv-cta{font-size:11px;margin-top:5px}.orb-core .zv-time{font-size:24px}.orb-core .zv-sub{font-size:9px;margin-top:6px}}
-  .zv-glow,.zv-ripple{position:absolute;border-radius:50%;pointer-events:none;opacity:0;will-change:transform,opacity}
-  .zv-glow{inset:-12px;background:radial-gradient(circle,transparent 62%,rgba(164,60,255,.55) 76%,rgba(139,44,255,0) 100%)}
-  .zv-glow.zv-gold{background:radial-gradient(circle,transparent 62%,rgba(255,212,102,.55) 76%,rgba(229,193,108,0) 100%)}
-  .zv-ripple{inset:0;border:2px solid #e3aaff}`;
+  .orb-area{position:relative;overflow:hidden;border-radius:18px;border:1px solid #2a2468;background:radial-gradient(ellipse at 50% 50%,#2b1275 0,#120a3a 48%,#0a0720 100%)}
+  .zv-cv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+  #zvBg{opacity:.55;transition:opacity 1s}
+  .zv-fl{position:absolute;inset:0;pointer-events:none;z-index:3;opacity:0;background:radial-gradient(circle,rgba(255,236,210,.95),rgba(186,83,255,.55) 28%,rgba(69,56,255,0) 62%)}
+  .orb{z-index:1;background:none!important;box-shadow:none!important;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;outline:none}
+  .orb:before,.orb:after{display:none!important}
+  .orb-core{z-index:2;padding:0 6px;background:none!important;border:0!important;width:auto!important;height:auto!important}
+  .orb-core .zv-cta{display:block;font-size:clamp(10px,calc(var(--zr,70px)*.17),15px);font-weight:900;letter-spacing:1.4px;line-height:1.35;margin-top:5px;text-align:center}
+  .orb-core .zv-time{display:block;font-size:clamp(15px,calc(var(--zr,70px)*.28),30px);font-weight:900;letter-spacing:1px;font-variant-numeric:tabular-nums;line-height:1;text-shadow:0 0 18px #c98bff}
+  .orb-core .zv-sub{display:block;font-size:clamp(8px,calc(var(--zr,70px)*.125),10px);font-weight:800;letter-spacing:2.2px;margin-top:6px;color:#e4c9ff;text-transform:uppercase}`;
 
-  let orbEl = null, coreEl = null, orbMode = "";
-  let glowEl = null, rippleEl = null, glowAnim = null, glowOn = false, orbInView = true;
-  const REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const TAU = Math.PI * 2, REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   const CAN_ANIMATE = typeof Element !== "undefined" && typeof Element.prototype.animate === "function";
+  const COL = { or: "255,138,43", or2: "255,193,90", bl: "58,160,255", vi: "192,123,255", gold: "255,212,102" };
+  const STREAK = ["255,138,43", "58,160,255", "192,123,255"];
+  const DIRS = [[1,0],[.7071,.7071],[0,1],[-.7071,.7071],[-1,0],[-.7071,-.7071],[0,-1],[.7071,-.7071]];
+  let orbEl = null, coreEl = null, orbMode = "", areaEl = null, cvB = null, cvF = null, bctx = null, ctx = null, flEl = null;
+  let fw = 0, fh = 0, fcx = 0, fcy = 0, fR = 0, fMax = 0, fd = 1, fN = 60, prog = 0, energy = 0, pulseK = 0, lastT = 0, burstA = 0, burstB = 0, rafId = 0, inView = true;
+  let shocks = [], traces = [], parts = [], pls = [], lights = [], sprCore, sprGlow, sprHeat, dotO, dotB, rot = [0, 0, 0], px = 0, py = 0;
 
-  // Run the glow loop only while it can actually be seen
-  function syncGlow() {
-    if (!glowAnim) return;
-    if (glowOn && !document.hidden && orbInView) glowAnim.play(); else glowAnim.pause();
+  const mk = (w, h) => { const c = document.createElement("canvas"); c.width = Math.ceil(w); c.height = Math.ceil(h); return c; };
+  function rng(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function dotSpr(rgb) { const c = mk(32, 32), g = c.getContext("2d"), r = g.createRadialGradient(16, 16, 0, 16, 16, 16); r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(.25, "rgba(" + rgb + ",.9)"); r.addColorStop(1, "rgba(" + rgb + ",0)"); g.fillStyle = r; g.fillRect(0, 0, 32, 32); return c; }
+
+  function fxTraces() {
+    const r = rng(7), n = Math.round(Math.max(18, Math.min(44, fw * fh / 2600)));
+    traces = [];
+    for (let i = 0; i < n; i++) {
+      const a = r() * TAU, s = fR * (1.55 + r() * 1.1);
+      let x = fcx + Math.cos(a) * s, y = fcy + Math.sin(a) * s, d = Math.round(a / (TAU / 8)) % 8;
+      const pts = [[x, y]];
+      for (let k = 0; k < 14; k++) {
+        const L = 16 + r() * 60; x += DIRS[d][0] * L; y += DIRS[d][1] * L; pts.push([x, y]);
+        if (x < -20 || y < -20 || x > fw + 20 || y > fh + 20) break;
+        if (r() < .6) {
+          const turn = r() < .5 ? 1 : -1; let nd = (d + turn + 8) % 8;
+          if (DIRS[nd][0] * (x - fcx) + DIRS[nd][1] * (y - fcy) < 0) nd = (d - turn + 8) % 8;
+          d = nd;
+        }
+      }
+      const q = r(), cum = [0];
+      for (let j = 1; j < pts.length; j++) cum.push(cum[j - 1] + Math.hypot(pts[j][0] - pts[j - 1][0], pts[j][1] - pts[j - 1][1]));
+      traces.push({ pts, cum, len: cum[cum.length - 1], col: q < .22 ? "or" : q < .6 ? "bl" : "vi", w: q < .22 ? 1.6 : 1 });
+    }
   }
+  function fxBg() {
+    const c = bctx; c.setTransform(fd, 0, 0, fd, 0, 0); c.clearRect(0, 0, fw, fh); c.lineJoin = "round";
+    for (const t of traces) {
+      c.beginPath(); t.pts.forEach((p, i) => i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]));
+      if (t.col === "or") { c.strokeStyle = "rgba(" + COL.or + ",.14)"; c.lineWidth = 5; c.stroke(); c.strokeStyle = "rgba(" + COL.or2 + ",.85)"; }
+      else c.strokeStyle = "rgba(" + COL[t.col] + ",.42)";
+      c.lineWidth = t.w; c.stroke();
+      c.fillStyle = c.strokeStyle; c.beginPath(); c.arc(t.pts[0][0], t.pts[0][1], 1.8, 0, TAU); c.fill();
+    }
+    c.strokeStyle = "rgba(200,170,255,.35)"; c.lineWidth = 1; c.beginPath();
+    for (let i = 0; i < 72; i++) { const a = i / 72 * TAU, u = Math.cos(a), v = Math.sin(a), e = fR * (1.46 + (i % 3) * .03); c.moveTo(fcx + u * fR * 1.4, fcy + v * fR * 1.4); c.lineTo(fcx + u * e, fcy + v * e); }
+    c.stroke();
+  }
+  function fxSprites() {
+    const R = fR, S = R * 2 + 12, k = fd;
+    sprCore = mk(S * k, S * k); let c = sprCore.getContext("2d"); c.scale(k, k); c.translate(S / 2, S / 2);
+    let g = c.createRadialGradient(-R * .36, -R * .54, 0, 0, 0, R);
+    [[0, "#e3aaff"], [.16, "#a947ff"], [.48, "#6123e4"], [.72, "#210b70"], [1, "#090625"]].forEach(a => g.addColorStop(a[0], a[1]));
+    c.fillStyle = g; c.beginPath(); c.arc(0, 0, R, 0, TAU); c.fill();
+    c.strokeStyle = "#d5a0ff"; c.lineWidth = 3; c.beginPath(); c.arc(0, 0, R - 1.5, 0, TAU); c.stroke();
+    c.fillStyle = "rgba(9,6,37,.66)"; c.strokeStyle = "rgba(255,255,255,.3)"; c.lineWidth = 1; c.beginPath(); c.arc(0, 0, R * .76, 0, TAU); c.fill(); c.stroke();
+    c.strokeStyle = "rgba(255,150,70,.45)"; c.beginPath();
+    for (let i = 0; i < 8; i++) { const a = i * TAU / 8 + TAU / 16, u = Math.cos(a), v = Math.sin(a); c.moveTo(u * R * .76, v * R * .76); c.lineTo(u * R * .66, v * R * .66); }
+    c.stroke();
+    for (let i = 0; i < 8; i++) { const a = i * TAU / 8 + TAU / 16, q = R * .05; c.save(); c.translate(Math.cos(a) * R * .66, Math.sin(a) * R * .66); c.fillStyle = "#ff9a3c"; c.fillRect(-q, -q, q * 2, q * 2); c.strokeStyle = "rgba(255,190,110,.8)"; c.beginPath(); c.moveTo(-q * 1.7, 0); c.lineTo(-q, 0); c.moveTo(q, 0); c.lineTo(q * 1.7, 0); c.stroke(); c.restore(); }
+    sprGlow = mk(S * 2 * k, S * 2 * k); c = sprGlow.getContext("2d");
+    g = c.createRadialGradient(S * k, S * k, R * .7 * k, S * k, S * k, S * k);
+    g.addColorStop(0, "rgba(186,83,255,.75)"); g.addColorStop(.45, "rgba(120,60,255,.25)"); g.addColorStop(1, "rgba(69,56,255,0)");
+    c.fillStyle = g; c.fillRect(0, 0, S * 2 * k, S * 2 * k);
+    sprHeat = mk(S * k, S * k); c = sprHeat.getContext("2d");
+    g = c.createRadialGradient(S * k / 2, S * k / 2, 0, S * k / 2, S * k / 2, R * k);
+    g.addColorStop(0, "rgba(255,190,110,.55)"); g.addColorStop(.7, "rgba(186,83,255,.4)"); g.addColorStop(1, "rgba(186,83,255,0)");
+    c.fillStyle = g; c.fillRect(0, 0, S * k, S * k);
+    dotO = dotSpr(COL.or); dotB = dotSpr(COL.bl);
+    const r = rng(3), cols = ["255,170,80", "90,170,255", "255,255,255"];
+    lights = Array.from({ length: 28 }, () => { const a = r() * TAU, d = R * (.58 + r() * .14); return { x: Math.cos(a) * d, y: Math.sin(a) * d, c: cols[r() * 3 | 0], ph: r() * TAU, sp: 2 + r() * 4 }; });
+  }
+  function layoutFx() {
+    const w = areaEl.clientWidth, h = areaEl.clientHeight; if (w < 40 || h < 40) return;
+    fw = w; fh = h; fd = Math.min(devicePixelRatio || 1, 2);
+    fR = Math.max(40, (Math.min(w, h) / 2 - 6) / 1.4); fcx = w / 2; fcy = h / 2; fMax = Math.hypot(w, h) / 2 + 10;
+    fN = Math.max(45, Math.min(120, Math.round(w * h / 1400)));
+    [cvB, cvF].forEach(c => { c.width = w * fd; c.height = h * fd; });
+    orbEl.style.width = orbEl.style.height = fR * 2 + "px"; areaEl.style.setProperty("--zr", fR + "px");
+    fxTraces(); fxBg(); fxSprites();
+    parts = Array.from({ length: fN }, () => ({ u: -1 }));
+    pls = Array.from({ length: 24 }, () => { const t = Math.random() * traces.length | 0; return { t, s: Math.random() * traces[t].len, v: 60 + Math.random() * 50 }; });
+    wake();
+  }
+  function spawn(p, burst) {
+    p.a = Math.random() * TAU; p.c = Math.cos(p.a); p.s = Math.sin(p.a);
+    p.r0 = fMax * (.3 + .7 * Math.random()); p.dur = .9 + Math.random() * 1.1; p.u = burst ? Math.random() * .45 : 0;
+    p.k = Math.random() < .45 ? 0 : Math.random() < .6 ? 1 : 2; p.w = Math.random() < .3 ? 1 : 0;
+  }
+  function at(t, s) {
+    const c = t.cum; s = Math.max(0, Math.min(t.len, s)); let i = 1;
+    while (i < c.length - 1 && s > c[i]) i++;
+    const f = Math.max(0, Math.min(1, (s - c[i - 1]) / (c[i] - c[i - 1] || 1))), a = t.pts[i - 1], b = t.pts[i];
+    px = a[0] + (b[0] - a[0]) * f; py = a[1] + (b[1] - a[1]) * f;
+  }
+  function ring(r, w, rgb, dash, ang, a) {
+    ctx.save(); ctx.translate(fcx, fcy); ctx.rotate(ang); ctx.setLineDash(dash);
+    ctx.lineWidth = w * 3; ctx.strokeStyle = "rgba(" + rgb + "," + a * .18 + ")"; ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.stroke();
+    ctx.lineWidth = w; ctx.strokeStyle = "rgba(" + rgb + "," + a + ")"; ctx.stroke(); ctx.restore();
+  }
+  function flash(peak) { if (flEl && CAN_ANIMATE && !REDUCED) flEl.animate([{ opacity: 0 }, { opacity: peak, offset: .15 }, { opacity: 0 }], { duration: 700, easing: "ease-out" }); }
+  function burst(now) {
+    burstA = now; burstB = now + 3200; shocks.push(now, now + 130, now + 260); flash(.9);
+    parts.forEach((p, i) => { if (i < fN * .7) spawn(p, true); });
+  }
+  function wake() { if (!rafId && inView && cvF && fw) rafId = requestAnimationFrame(loop); }
 
-  function setGlow(on, gold) {
-    if (!glowEl) return;
-    glowEl.classList.toggle("zv-gold", !!gold);
-    glowOn = on;
-    if (glowAnim) { glowAnim.cancel(); glowAnim = null; }
-    if (!on) { glowEl.style.opacity = "0"; return; }
-    if (!CAN_ANIMATE || REDUCED) { glowEl.style.opacity = ".6"; return; }  // static glow, no motion
-    glowEl.style.opacity = "";
-    glowAnim = glowEl.animate(
-      [{ transform: "scale(.97)", opacity: 0.3 }, { transform: "scale(1.07)", opacity: 0.85 }],
-      { duration: 2400, direction: "alternate", iterations: Infinity, easing: "ease-in-out" }
-    );
-    syncGlow();
+  function loop(ts) {
+    rafId = requestAnimationFrame(loop);
+    const now = performance.now(), bursting = now < burstB;
+    if (ts - lastT < (bursting || shocks.length ? 0 : 32)) return;
+    const dt = Math.min(.05, (ts - lastT) / 1000 || .016); lastT = ts;
+    const T = now / 1000, st = orbMode, ready = st === "ready";
+    const tgtE = st === "idle" ? .08 : st === "running" ? .3 + .6 * prog : st === "paused" ? .2 + .4 * prog : 1;
+    energy += (tgtE - energy) * (1 - Math.exp(-dt * 3)); pulseK *= Math.exp(-dt * 5);
+    const sp = REDUCED ? 0 : (st === "paused" ? .12 : st === "idle" ? .6 : 1.1) + (bursting ? 2.4 : 0);
+    rot[0] += dt * .8 * sp; rot[1] -= dt * 1.1 * sp; rot[2] += dt * .35 * sp;
+
+    ctx.setTransform(fd, 0, 0, fd, 0, 0); ctx.clearRect(0, 0, fw, fh);
+    ctx.globalCompositeOperation = "lighter"; ctx.lineCap = "round";
+
+    shocks = shocks.filter(s => now - s < 1200);
+    for (const s of shocks) {
+      const p = (now - s) / 1200; if (p < 0) continue;
+      const r = fR * 1.1 + (fMax - fR * 1.1) * (1 - Math.pow(1 - p, 3));
+      ctx.lineWidth = 2 + 8 * (1 - p); ctx.strokeStyle = "rgba(235,190,255," + .85 * (1 - p) + ")"; ctx.beginPath(); ctx.arc(fcx, fcy, r, 0, TAU); ctx.stroke();
+      ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(255,150,60," + .8 * (1 - p) + ")"; ctx.beginPath(); ctx.arc(fcx, fcy, r * .96, 0, TAU); ctx.stroke();
+    }
+
+    if (!REDUCED) {
+      const tgt = bursting ? fN * (.3 + .7 * Math.min(1, (now - burstA) / 1200)) : (st === "running" ? 10 : 0), rE = fR * .9;
+      let alive = 0, made = 0; const P = Array.from({ length: 6 }, () => new Path2D());
+      for (const p of parts) {
+        if (p.u >= 0) { p.u += dt / p.dur; if (p.u >= 1) { pulseK = Math.min(1, pulseK + .05); p.u = -1; } }
+        if (p.u < 0 && alive + made < tgt && made < 12) { spawn(p, false); made++; }
+        if (p.u < 0) continue;
+        alive++;
+        const u = p.u, u2 = Math.max(0, u - .08), r1 = rE + (p.r0 - rE) * (1 - u * u), r2 = rE + (p.r0 - rE) * (1 - u2 * u2), b = P[p.k * 2 + p.w];
+        b.moveTo(fcx + p.c * r1, fcy + p.s * r1); b.lineTo(fcx + p.c * r2, fcy + p.s * r2);
+      }
+      for (let i = 0; i < 6; i++) { ctx.lineWidth = i % 2 ? 2.2 : 1.2; ctx.strokeStyle = "rgba(" + STREAK[i >> 1] + ",.85)"; ctx.stroke(P[i]); }
+
+      const n = bursting ? 24 : st === "running" ? 12 : st === "paused" ? 3 : ready ? 8 : 6, mul = bursting ? 3 : st === "paused" ? .3 : 1;
+      for (let i = 0; i < n; i++) {
+        const p = pls[i], t = traces[p.t]; p.s -= p.v * mul * dt;
+        if (p.s <= 0) { p.t = Math.random() * traces.length | 0; p.s = traces[p.t].len; continue; }
+        const spr = t.col === "or" ? dotO : dotB;
+        for (let j = 0; j < 3; j++) { at(t, p.s + j * 10); const z = 13 - j * 3.5; ctx.globalAlpha = 1 - j * .3; ctx.drawImage(spr, px - z / 2, py - z / 2, z, z); }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    const S = fR * 2 + 12, br = 1 + .025 * Math.sin(T * 1.8);
+    ctx.globalAlpha = Math.min(1, .3 + .5 * energy + .2 * pulseK); ctx.drawImage(sprGlow, fcx - S * br, fcy - S * br, S * 2 * br, S * 2 * br); ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over"; ctx.drawImage(sprCore, fcx - S / 2, fcy - S / 2, S, S);
+    ctx.globalCompositeOperation = "lighter";
+    const lit = .25 + .75 * energy;
+    for (const l of lights) { ctx.fillStyle = "rgba(" + l.c + "," + (.5 + .5 * Math.sin(T * l.sp + l.ph)) * lit + ")"; ctx.fillRect(fcx + l.x, fcy + l.y, fR * .04, fR * .04); }
+    ctx.globalAlpha = Math.min(1, .06 + .5 * energy + .3 * pulseK); ctx.drawImage(sprHeat, fcx - S / 2, fcy - S / 2, S, S); ctx.globalAlpha = 1;
+
+    const main = ready ? COL.gold : COL.or2;
+    ring(fR * 1.08, 2, main, [24, 11, 5, 11], rot[0], .9);
+    ring(fR * 1.17, 1.4, COL.vi, [3, 8], rot[1], .8);
+    ring(fR * 1.26, 1, COL.bl, [55, 18], rot[2], .7);
+    ctx.setLineDash([]); ctx.lineWidth = 4; ctx.strokeStyle = "rgba(200,170,255,.15)"; ctx.beginPath(); ctx.arc(fcx, fcy, fR * 1.34, 0, TAU); ctx.stroke();
+    if (st !== "idle" && prog > 0) {
+      const end = -Math.PI / 2 + TAU * Math.min(1, prog), rgb = ready ? COL.gold : "255,150,60";
+      ctx.lineWidth = 10; ctx.strokeStyle = "rgba(" + (ready ? COL.gold : "186,83,255") + ",.22)"; ctx.beginPath(); ctx.arc(fcx, fcy, fR * 1.34, -Math.PI / 2, end); ctx.stroke();
+      ctx.lineWidth = 4; ctx.strokeStyle = "rgba(" + rgb + ",.95)"; ctx.stroke();
+      ctx.drawImage(dotO, fcx + Math.cos(end) * fR * 1.34 - 11, fcy + Math.sin(end) * fR * 1.34 - 11, 22, 22);
+    }
+    ctx.globalCompositeOperation = "source-over";
   }
 
   function setupOrb() {
     orbEl = document.querySelector("#miningPanel .orb");
     if (!orbEl) return;
+    areaEl = orbEl.closest(".orb-area") || orbEl.parentElement;
     coreEl = orbEl.querySelector(".orb-core");
-    const st = document.createElement("style");
-    st.textContent = ORB_CSS;
-    document.head.appendChild(st);
-    glowEl = document.createElement("div");
-    glowEl.className = "zv-glow";
-    rippleEl = document.createElement("div");
-    rippleEl.className = "zv-ripple";
-    orbEl.appendChild(glowEl);
-    orbEl.appendChild(rippleEl);
-    orbEl.setAttribute("role", "button");
-    orbEl.setAttribute("tabindex", "0");
+    const st = document.createElement("style"); st.textContent = ORB_CSS; document.head.appendChild(st);
+    cvB = document.createElement("canvas"); cvB.id = "zvBg"; cvB.className = "zv-cv";
+    cvF = document.createElement("canvas"); cvF.id = "zvFx"; cvF.className = "zv-cv";
+    flEl = document.createElement("div"); flEl.className = "zv-fl";
+    areaEl.insertBefore(cvB, areaEl.firstChild); areaEl.insertBefore(cvF, orbEl); areaEl.appendChild(flEl);
+    bctx = cvB.getContext("2d"); ctx = cvF.getContext("2d");
+    orbEl.setAttribute("role", "button"); orbEl.setAttribute("tabindex", "0");
     orbEl.addEventListener("click", orbTap);
-    orbEl.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); orbTap(); }
-    });
-    if ("IntersectionObserver" in window) {
-      new IntersectionObserver(es => { orbInView = es[es.length - 1].isIntersecting; syncGlow(); }).observe(orbEl);
-    }
-    document.addEventListener("visibilitychange", () => { syncGlow(); if (!document.hidden) render(); });
+    orbEl.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); orbTap(); } });
+    if ("ResizeObserver" in window) new ResizeObserver(layoutFx).observe(areaEl); else window.addEventListener("resize", layoutFx);
+    if ("IntersectionObserver" in window) new IntersectionObserver(es => {
+      inView = es[es.length - 1].isIntersecting;
+      if (inView) wake(); else if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+    }).observe(areaEl);
+    layoutFx();
   }
 
   function renderOrb(st, remaining) {
     if (!orbEl || !coreEl) return;
+    prog = st === "idle" ? 0 : st === "ready" ? 1 : Math.max(0, Math.min(1, 1 - remaining / SESSION_MS));
     if (orbMode !== st) {
       orbMode = st;
       const spark = '<div class="spark">✧</div>';
@@ -201,26 +345,20 @@
       else if (st === "ready") html = spark + '<span class="zv-cta">CLAIM<br>REWARD</span>';
       else html = '<span class="zv-time"></span><span class="zv-sub">' + (st === "paused" ? "Paused · Tap" : "Mining") + '</span>';
       coreEl.innerHTML = html;
-      setGlow(st === "running" || st === "ready", st === "ready");
-      orbEl.setAttribute("aria-label",
-        st === "idle" ? "Start mining" : st === "running" ? "Pause mining" :
-        st === "paused" ? "Resume mining" : "Claim reward");
+      if (cvB) cvB.style.opacity = (st === "running" || st === "ready") ? "1" : ".55";
+      orbEl.setAttribute("aria-label", st === "idle" ? "Start mining" : st === "running" ? "Pause mining" : st === "paused" ? "Resume mining" : "Claim reward");
+      wake();
     }
     const t = coreEl.querySelector(".zv-time");
     if (t) t.textContent = mmss(remaining);
   }
 
-  // Tap feedback: a quick press-and-release on the coin plus one ripple ring (transform/opacity only)
+  // Called after a tap changed the session: start/resume = energy burst, pause/claim = one shockwave
   function playStartAnimation() {
-    if (!orbEl || !CAN_ANIMATE || REDUCED) return;
-    orbEl.animate(
-      [{ transform: "scale(1)" }, { transform: "scale(.94)", offset: 0.28 }, { transform: "scale(1.04)", offset: 0.62 }, { transform: "scale(1)" }],
-      { duration: 520, easing: "ease-out" }
-    );
-    if (rippleEl) rippleEl.animate(
-      [{ transform: "scale(.95)", opacity: 0.8 }, { transform: "scale(1.55)", opacity: 0 }],
-      { duration: 850, easing: "ease-out" }
-    );
+    if (!orbEl || REDUCED || !fw) return;
+    const now = performance.now();
+    if (orbMode === "running") burst(now); else { shocks.push(now); if (orbMode === "idle") flash(.45); }
+    wake();
   }
 
   function startSession() {
