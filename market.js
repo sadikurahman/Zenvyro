@@ -1,19 +1,11 @@
-/* Zenvyro — NFT Marketplace, Home banner and Profile Summary (frontend UI, demo purchases).
-   DEMO = true: "Buy NFT" only records the NFT in this browser and adds it to Level progress.
+/* Zenvyro — NFT Marketplace, My NFTs (claims), Home banner and Profile Summary. NFT list and terms come from nft-catalog.js (set in Admin > Market Place).
+   DEMO = true: "Buy NFT" only records the NFT in this browser and adds it to Level progress (no TRX is taken).
    Real purchases, ownership and balances must be verified on the server. */
 (() => {
   "use strict";
   const DEMO = true;
   const HKEY = "zenvyro_nft_v1", TXKEY = "zenvyro_tx_v1";
-  // price in TRX (sample prices: edit freely). Replace the image files with your own NFT art.
-  const ITEMS = [
-    { id: "N001", name: "Cyber Knight #001", price: 160, img: "nft-knight.jpg", badge: ["Hot", "hot"], tags: ["Trending"] },
-    { id: "N009", name: "Royal Lion #009", price: 240, img: "nft-lion.jpg", badge: ["Premium", "pre"], tags: ["Legendary", "Limited"] },
-    { id: "N023", name: "Crypto Ape #023", price: 315, img: "nft-ape.jpg", badge: ["Popular", "pop"], tags: ["Trending", "Limited"] },
-    { id: "N017", name: "Space Explorer #017", price: 200, img: "nft-astro.jpg", badge: ["New", "new"], tags: ["Limited"] }
-  ];
   const RATE = { Free: 0.001587, Standard: 0.002222, Silver: 0.006945, Gold: 0.017361, Platinum: 0.050505 };
-  const TABS = ["All NFTs", "Limited", "Legendary", "Trending", "My NFTs"];
   const P = {
     gem: '<path d="M6 4h12l4 5-10 11L2 9z"/><path d="M2 9h20M9 4l-2 5 5 11 5-11-2-5"/>',
     back: '<path d="M15 5l-7 7 7 7"/>', search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
@@ -27,7 +19,41 @@
   const fmt = (n, d) => (+n || 0).toLocaleString("en-US", { maximumFractionDigits: d == null ? 2 : d });
   const say = m => { if (typeof window.toast === "function") window.toast(m); };
   const jget = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; } catch (e) { return d; } };
-  const holdings = () => { const a = jget(HKEY, []); return Array.isArray(a) ? a.filter(h => h && ITEMS.some(i => i.id === h.id)) : []; };
+  const DAY = 864e5, HK2 = "zenvyro_nft_v2";
+  const C = () => window.ZenvyroNftCatalog;
+  const r6 = x => Math.round(x * 1e6) / 1e6, r8 = x => Math.round(x * 1e8) / 1e8;
+  const active = (h, t) => h.exp == null || t < h.exp;
+  // A holding keeps the terms the NFT had when it was bought (later admin changes do not touch it).
+  function mkHolding(i, paid, ts) {
+    const daily = i.btype === "trx" ? r6(i.bval) : i.btype === "comm" ? r6(paid * i.bval / 100) : 0;
+    return { hid: "H" + ts + Math.floor(Math.random() * 1e4), id: i.id, name: i.name, img: i.img, paid, ts, exp: i.durDays ? ts + i.durDays * DAY : null, bt: i.btype, bv: i.bval, daily, cur: C().slotOf(ts), pendTrx: 0, pendZeny: 0 };
+  }
+  const store = a => { try { localStorage.setItem(HK2, JSON.stringify(a)); } catch (e) {} };
+  function load() {
+    const a = jget(HK2, null); if (Array.isArray(a)) return a.filter(h => h && h.hid);
+    const old = jget(HKEY, []), cat = C().get(), out = [];   // one-time move of the earlier demo list
+    if (Array.isArray(old)) old.forEach(o => { const i = cat.items.find(x => x.id === o.id); if (i) out.push(mkHolding(i, +o.price || i.price, +o.ts || Date.now())); });
+    store(out); return out;
+  }
+  // Daily rewards (fixed TRX / commission NFTs): +1 day at every 10 PM Bangladesh time while the NFT is active. Unclaimed days pile up.
+  function settle() {
+    const a = load(), t = Date.now(), cs = C().slotOf(t); let ch = false;
+    a.forEach(h => {
+      if (!(h.daily > 0)) return;
+      const last = h.exp == null ? cs : Math.min(cs, C().slotOf(h.exp)), n = Math.max(0, last - h.cur);
+      if (n > 0) { h.pendTrx = r6(h.pendTrx + n * h.daily); ch = true; }
+      if (cs > h.cur) { h.cur = cs; ch = true; }
+    });
+    if (ch) store(a);
+    return a;
+  }
+  // Mining NFTs: every main mining claim adds bv% of that claim to each ACTIVE mining NFT (claimed later from My NFTs).
+  function onMiningClaim(reward) {
+    reward = +reward; if (!(reward > 0)) return;
+    const a = load(), t = Date.now(); let ch = false;
+    a.forEach(h => { if (h.bt === "mining" && active(h, t)) { h.pendZeny = r8(h.pendZeny + reward * h.bv / 100); ch = true; } });
+    if (ch) store(a);
+  }
   const LVL = () => window.ZenvyroLevel;
   const tierName = () => { try { return (window.ZenvyroMining && window.ZenvyroMining.getState().tier) || "Free"; } catch (e) { return "Free"; } };
   const trxBal = () => { try { const b = window.ZenvyroWallet.balances().TRX; return b ? b.amount : 0; } catch (e) { return 0; } };
@@ -79,60 +105,129 @@
 .zs-w{border:1px solid #4a32a8;border-radius:16px;background:#120c40;padding:12px;color:#fff}.zs-w .r{display:flex;justify-content:space-between;font-size:13px;color:#cfc4ff}.zs-w .r b{color:#fff}
 .zs-tr{height:8px;border-radius:8px;background:#0a0720;border:1px solid #2e1d7a;margin-top:8px;overflow:hidden}.zs-tr i{display:block;height:100%;background:linear-gradient(90deg,#6b32ff,#cda5ff)}
 #zvAccount .mrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-#zvAccount .zv-sum{display:inline-flex;align-items:center;gap:4px;border:1px solid #6b45d8;border-radius:16px;background:linear-gradient(135deg,#2a1475,#1a1058);color:#e0d2ff;padding:5px 10px;font-size:11.5px;font-weight:700;box-shadow:0 0 10px #8a3dff44}`;
+#zvAccount .zv-sum{display:inline-flex;align-items:center;gap:4px;border:1px solid #6b45d8;border-radius:16px;background:linear-gradient(135deg,#2a1475,#1a1058);color:#e0d2ff;padding:5px 10px;font-size:11.5px;font-weight:700;box-shadow:0 0 10px #8a3dff44}
+.zm-card .ch{position:absolute;top:8px;left:8px;border-radius:10px;padding:3px 8px;font-size:11px;font-weight:800;background:#e0306a;color:#fff}
+.zm-old{text-decoration:line-through;color:#9d93e0;font-size:11.5px;margin-right:4px}
+.zm-bf{padding:0 10px 6px;color:#2bf0b0;font-size:11.5px;font-weight:700;line-height:1.35}
+.zm-mt{padding:6px 10px 0;color:#aeb9ff;font-size:11px;line-height:1.45}
+.zm-st{position:absolute;bottom:8px;left:8px;border-radius:10px;padding:3px 9px;font-size:11px;font-weight:800;background:#0a2b2bcc;color:#2bf0b0;border:1px solid #2bf0b0}
+.zm-st.ex{background:#2b0a0acc;color:#ff8a8a;border-color:#ff8a8a}
+.zm-cl{display:block;width:calc(100% - 20px);margin:8px 10px 0;border:0;border-radius:14px;padding:9px;font-weight:800;font-size:13px;color:#06231c;background:linear-gradient(180deg,#5dffd0,#1fbf8f)}
+.zm-cl:disabled{background:#1a1058;color:#9d93e0}
+.zm-all{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #1fbf8f;border-radius:16px;background:#0a2b2b;padding:12px 14px;color:#cfeee6;font-size:13px}
+.zm-all .zm-cl{width:auto;margin:0;padding:9px 16px;flex-shrink:0}`;
   const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
 
   // ---- Marketplace ----
   const S = { tab: "All NFTs", q: "", s: false };
   let root = null;
-  const cardHtml = (i, owned) => `<article class="zm-card"><div class="im"><img src="${i.img}" alt="${esc(i.name)}" loading="lazy"><span class="zm-bd ${i.badge[1]}">${i.badge[0]}</span></div><b>${esc(i.name)}</b>
-    <div class="zm-pr"><span>${ic("gem")}${fmt(i.price)} TRX</span><button class="zm-buy" ${owned ? "disabled" : ""} onclick="zvBuy('${i.id}')">${owned ? "Owned" : "Buy Now"}</button></div></article>`;
+  const dleft = (ts, t) => { const d = Math.max(1, Math.ceil((ts - t) / DAY)); return d + (d === 1 ? " day" : " days"); };
+  const durText = d => d ? d + " days" : "Permanent";
+  const benefitFor = (i, p) => i.btype === "mining" ? "+" + fmt(i.bval, 2) + "% extra ZENY on every mining claim" : i.btype === "trx" ? fmt(i.bval, 6) + " TRX every day" : fmt(i.bval, 2) + "% of the price = " + fmt(r6(p * i.bval / 100), 6) + " TRX every day";
+  const mstate = (i, a, t) => a.some(h => h.id === i.id && active(h, t)) ? "owned" : C().left(i) <= 0 ? "sold" : !C().saleOpen(i, t) ? "closed" : "buy";
+  const cardHtml = (i, s, t) => {
+    const pct = C().discPct(i, t), p = C().priceNow(i, t), lf = C().left(i), se = C().saleEnd(i), b = C().BADGES[i.badge];
+    const lab = s === "owned" ? "Owned" : s === "sold" ? "Sold Out" : s === "closed" ? "Closed" : "Buy Now";
+    return `<article class="zm-card"><div class="im"><img src="${esc(i.img)}" alt="${esc(i.name)}" loading="lazy">${b ? `<span class="zm-bd ${b[1]}">${b[0]}</span>` : ""}${pct ? `<span class="ch">-${fmt(pct, 0)}%</span>` : ""}</div><b>${esc(i.name)}</b>
+    <div class="zm-bf">${esc(benefitFor(i, p))}</div>
+    <div class="zm-pr"><span>${ic("gem")}${pct ? `<s class="zm-old">${fmt(i.price)}</s>` : ""}${fmt(p)} TRX</span><button class="zm-buy" ${s !== "buy" ? "disabled" : ""} onclick="zvBuy('${esc(i.id)}')">${lab}</button></div>
+    <div class="zm-mt">${durText(i.durDays)} &middot; ${lf === Infinity ? "Unlimited stock" : lf + " left"}${se && s === "buy" ? " &middot; Sale ends in " + dleft(se, t) : ""}</div></article>`;
+  };
+  const myCard = (h, t) => {
+    const act = active(h, t), mining = h.bt === "mining", pend = mining ? h.pendZeny : h.pendTrx, unit = mining ? "ZENY" : "TRX";
+    const st = h.exp == null ? "Permanent" : act ? dleft(h.exp, t) + " left" : "Expired";
+    const info = mining ? "+" + fmt(h.bv, 2) + "% extra ZENY on every mining claim" : h.bt === "trx" ? fmt(h.daily, 6) + " TRX every day" : fmt(h.bv, 2) + "% of " + fmt(h.paid) + " TRX = " + fmt(h.daily, 6) + " TRX every day";
+    const none = !(pend > 0), why = act ? (mining ? "Grows with your mining claims" : "Next reward at 10 PM") : "Nothing to claim";
+    return `<article class="zm-card"><div class="im"><img src="${esc(h.img)}" alt="${esc(h.name)}" loading="lazy"><span class="zm-st ${act ? "" : "ex"}">${st}</span></div><b>${esc(h.name)}</b>
+    <div class="zm-bf">${esc(info)}</div><div class="zm-mt">Ready to claim: <strong style="color:#fff">${fmt(pend, 8)} ${unit}</strong></div>
+    <button class="zm-cl" ${none ? "disabled" : ""} onclick="zvNftClaim('${h.hid}')">${none ? why : "Claim " + fmt(pend, 6) + " " + unit}</button></article>`;
+  };
   function gridHtml() {
-    const own = holdings(), ids = own.map(h => h.id), q = S.q.trim().toLowerCase();
+    const t = Date.now(), q = S.q.trim().toLowerCase();
     if (S.tab === "My NFTs") {
-      const mine = ITEMS.filter(i => ids.includes(i.id));
-      return mine.length ? mine.map(i => cardHtml(i, true)).join("") : '<div class="zm-empty">You do not hold any NFT yet. Buy one to see it here.</div>';
+      const a = settle().slice().sort((x, y) => (active(y, t) - active(x, t)) || y.ts - x.ts);
+      if (!a.length) return '<div class="zm-empty">You do not hold any NFT yet. Buy one to see it here.</div>';
+      const tr = a.reduce((s, h) => s + h.pendTrx, 0), zn = a.reduce((s, h) => s + h.pendZeny, 0);
+      return `<div class="zm-all"><span>Ready: <strong>${fmt(tr, 6)} TRX</strong> &middot; <strong>${fmt(zn, 8)} ZENY</strong><br><small>A new day starts at 10 PM Bangladesh time.</small></span><button class="zm-cl" ${tr > 0 || zn > 0 ? "" : "disabled"} onclick="zvNftClaimAll()">Claim all</button></div>` + a.map(h => myCard(h, t)).join("");
     }
-    const list = ITEMS.filter(i => (S.tab === "All NFTs" || i.tags.includes(S.tab)) && (!q || i.name.toLowerCase().includes(q)));
-    return list.length ? list.map(i => cardHtml(i, ids.includes(i.id))).join("") : '<div class="zm-empty">No NFT found.</div>';
+    const own = load(), list = C().get().items.filter(i => !i.hidden && (S.tab === "All NFTs" || i.cats.includes(S.tab)) && (!q || i.name.toLowerCase().includes(q)));
+    return list.length ? list.map(i => cardHtml(i, mstate(i, own, t), t)).join("") : '<div class="zm-empty">No NFT found.</div>';
   }
   function render() {
+    const tabs = ["All NFTs", ...C().get().cats, "My NFTs"]; if (!tabs.includes(S.tab)) S.tab = "All NFTs";
     root.innerHTML = `<div class="in"><div class="hd"><button class="ib" onclick="zvmClose()" aria-label="Back">${ic("back")}</button><b>${ic("store")}NFT Marketplace</b><button class="ib" onclick="zvmSearch()" aria-label="Search">${ic("search")}</button></div>
       ${S.s ? `<input class="sr" id="zmQ" placeholder="Search NFTs" value="${esc(S.q)}" oninput="zvmQ(this.value)">` : ""}
       <div class="hero"><div><h2>Discover<span>Premium NFTs</span></h2><p>Own &amp; Collect</p><button class="zm-go" onclick="document.getElementById('zmGrid').scrollIntoView({behavior:'smooth'})">Browse NFTs ${ic("go")}</button></div><img src="nft-hero.jpg" alt=""></div>
-      <div class="tabs">${TABS.map(t => `<button class="${t === S.tab ? "on" : ""}" onclick="zvmTab('${t}')">${t}</button>`).join("")}</div>
+      <div class="tabs">${tabs.map(t => `<button class="${t === S.tab ? "on" : ""}" onclick="zvmTab('${esc(t)}')">${esc(t)}</button>`).join("")}</div>
       <div class="grid" id="zmGrid">${gridHtml()}</div>
       <div class="zm-bonus">${ic("gift")}<div><b>5% Bonus for your referrer</b><small>When you buy your first pack or NFT, the member who invited you earns a 5% Purchase Bonus.</small></div></div>
-      <div class="zm-note">Every NFT you buy counts toward your Level progress. NFTs are not a promise of profit or income.${DEMO ? " Demo mode: purchases are samples only." : ""}</div></div>`;
+      <div class="zm-note">Every NFT you buy counts toward your Level progress. NFT rewards follow the active period shown on each NFT. NFTs are not a promise of profit or income.${DEMO ? " Demo mode: purchases are samples only." : ""}</div></div>`;
   }
+  const refresh = () => { if (!root || !root.classList.contains("open")) return; const g = document.getElementById("zmGrid"); if (g) g.innerHTML = gridHtml(); };
   const openMarket = () => { if (!root) return; render(); root.classList.add("open"); root.scrollTop = 0; };
   const closeMarket = () => { if (root) root.classList.remove("open"); };
   function buyForm(id) {
     if (window.ZenvyroSettings && window.ZenvyroSettings.block("market")) return;
-    const i = ITEMS.find(x => x.id === id); if (!i) return;
-    window.openModal("Buy NFT", `<div class="zm-bm"><img src="${i.img}" alt=""><div><b>${esc(i.name)}</b><span>${fmt(i.price)} TRX</span></div></div>
-      <div class="modal-list"><div><strong>Price</strong><span>${fmt(i.price)} TRX</span></div><div><strong>Your TRX balance</strong><span>${fmt(trxBal(), 6)} TRX</span></div></div>
-      <div class="modal-note">${DEMO ? "Demo mode: payment is not connected. Confirming only adds this NFT to your list and your Level progress here." : "Purchases are not connected yet."}</div>
-      <button class="btn" style="width:100%;margin-top:12px" onclick="zvBuyOk('${i.id}')">Confirm purchase</button>`);
+    const t = Date.now(), i = C().get().items.find(x => x.id === id); if (!i) return;
+    const pct = C().discPct(i, t), p = C().priceNow(i, t), lf = C().left(i), se = C().saleEnd(i);
+    window.openModal("Buy NFT", `<div class="zm-bm"><img src="${esc(i.img)}" alt=""><div><b>${esc(i.name)}</b><span>${fmt(p)} TRX</span></div></div>
+      <div class="modal-list"><div><strong>Price</strong><span>${pct ? "<s>" + fmt(i.price) + "</s> " : ""}${fmt(p)} TRX${pct ? " (-" + fmt(pct, 0) + "%)" : ""}</span></div>
+      <div><strong>Benefit</strong><span>${esc(benefitFor(i, p))}</span></div><div><strong>Active for</strong><span>${durText(i.durDays)}</span></div>
+      <div><strong>Stock</strong><span>${lf === Infinity ? "Unlimited" : lf + " left"}</span></div>${se ? `<div><strong>Sale ends in</strong><span>${dleft(se, t)}</span></div>` : ""}
+      <div><strong>Your TRX balance</strong><span>${fmt(trxBal(), 6)} TRX</span></div></div>
+      <div class="modal-note">Daily rewards are added at 10 PM Bangladesh time and wait for you to claim. When the active period ends, new rewards stop but what you already earned can still be claimed. ${DEMO ? "Demo mode: payment is not connected, so confirming adds this NFT without taking TRX." : "The price is taken from your TRX Wallet."}</div>
+      <button class="btn" style="width:100%;margin-top:12px" onclick="zvBuyOk('${esc(i.id)}')">Confirm purchase</button>`);
   }
   function buyOk(id) {
     if (window.ZenvyroSettings && window.ZenvyroSettings.block("market")) return;
-    const i = ITEMS.find(x => x.id === id); if (!i) return;
-    if (!DEMO) { window.closeModal(); return say("Purchases are not connected yet"); }
-    const h = holdings(); if (h.some(x => x.id === id)) { window.closeModal(); return say("You already own this NFT"); }
-    h.push({ id, price: i.price, ts: Date.now() });
-    try { localStorage.setItem(HKEY, JSON.stringify(h)); } catch (e) {}
-    if (LVL()) { LVL().addOwn(i.price); LVL().markPack(); }
+    const cat = C().get(), t = Date.now(), i = cat.items.find(x => x.id === id), W = window.ZenvyroWallet;
+    const stop = m => { window.closeModal(); say(m); };
+    if (!i || i.hidden) return stop("This NFT is not available");
+    if (!C().saleOpen(i, t)) return stop("The sale of this NFT has ended");
+    if (C().left(i) <= 0) return stop("This NFT is sold out");
+    const a = load(); if (a.some(h => h.id === id && active(h, t))) return stop("You already own this NFT");
+    const paid = C().priceNow(i, t);
+    if (!DEMO) {   // real payment: TRX from the Wallet (on the real server this check and debit happen there)
+      if (trxBal() + 1e-9 < paid) return stop("Not enough TRX in your Wallet");
+      if (!W || !W.debit("TRX", paid)) return stop("Payment failed");
+    }
+    i.sold = (i.sold || 0) + 1; C().save(cat);
+    a.push(mkHolding(i, paid, t)); store(a);
+    if (LVL()) { LVL().addOwn(paid); LVL().markPack(); }
     window.closeModal(); say(i.name + " added to My NFTs");
     if (root && root.classList.contains("open")) render();
+  }
+  function claimOne(hid) {
+    const a = settle(), h = a.find(x => x.hid === hid), M = window.ZenvyroMining, W = window.ZenvyroWallet; if (!h) return;
+    if (h.bt === "mining") {
+      const n = h.pendZeny; if (!(n > 0)) return;
+      if (!M || !M.addZeny) return say("Mining is not ready");
+      M.addZeny(n); h.pendZeny = 0; store(a); say("+" + fmt(n, 8) + " ZENY added");
+    } else {
+      const n = h.pendTrx; if (!(n > 0)) return;
+      if (!W || !W.credit("TRX", n, 0)) return say("Claim failed");
+      h.pendTrx = 0; store(a); say("+" + fmt(n, 6) + " TRX added to your Wallet");
+    }
+    refresh();
+  }
+  function claimAll() {
+    const a = settle(), M = window.ZenvyroMining, W = window.ZenvyroWallet; let tr = 0, zn = 0;
+    a.forEach(h => { tr += h.pendTrx; zn += h.pendZeny; }); tr = r6(tr); zn = r8(zn);
+    if (!(tr > 0 || zn > 0)) return;
+    if (zn > 0 && !(M && M.addZeny)) return say("Mining is not ready");
+    if (tr > 0 && !(W && W.credit("TRX", tr, 0))) return say("Claim failed");
+    if (zn > 0) M.addZeny(zn);
+    a.forEach(h => { h.pendTrx = 0; h.pendZeny = 0; }); store(a);
+    say("Claimed " + (tr > 0 ? fmt(tr, 6) + " TRX" : "") + (tr > 0 && zn > 0 ? " and " : "") + (zn > 0 ? fmt(zn, 8) + " ZENY" : ""));
+    refresh();
   }
 
   // ---- Profile Summary ----
   function summaryBody() {
     const L = LVL() ? LVL().get() : { lvl: 0 };
     const tier = tierName(), PK = (window.ZenvyroAPI && window.ZenvyroAPI.PACKS) || {}, packVal = PK[tier] || 0;
-    const nfts = holdings().map(h => ITEMS.find(i => i.id === h.id)), count = nfts.length + (packVal ? 1 : 0);
-    const value = nfts.reduce((t, i) => t + i.price, 0) + packVal;
+    const nfts = load().filter(h => active(h, Date.now())), count = nfts.length + (packVal ? 1 : 0);
+    const value = nfts.reduce((t, i) => t + (+i.paid || 0), 0) + packVal;
     const boost = LVL() ? LVL().boost() : 0, base = RATE[tier] || RATE.Free, total = base * (1 + boost / 100);
     const tx = jget(TXKEY, []), wds = Array.isArray(tx) ? tx.filter(t => t && t.kind === "withdraw" && t.sym === "TRX") : [];
     const pend = wds.filter(t => t.status === "pending").reduce((a, t) => a + (+t.amount || 0) + (+t.hold || 0), 0);
@@ -163,10 +258,12 @@
     if (q && !document.getElementById("zmBan")) q.insertAdjacentHTML("afterend", `<section class="zm-ban" id="zmBan" role="button" tabindex="0" onclick="zvOpenMarket()"><div><h3>Explore Premium<br>NFT Collection</h3><p>Collect &bull; Own &bull; Hold</p><span class="zm-go">Go to Marketplace ${ic("go")}</span></div><img src="nft-hero.jpg" alt=""></section>`);
     Object.assign(window, {
       zvOpenMarket: openMarket, zvmClose: closeMarket, zvBuy: buyForm, zvBuyOk: buyOk, zvaSummary: openSummary,
+      zvNftClaim: claimOne, zvNftClaimAll: claimAll,
       zvmTab: t => { S.tab = t; render(); },
       zvmSearch: () => { S.s = !S.s; if (!S.s) S.q = ""; render(); const e = document.getElementById("zmQ"); if (e) e.focus(); },
       zvmQ: v => { S.q = v; const g = document.getElementById("zmGrid"); if (g) g.innerHTML = gridHtml(); }
     });
+    window.ZenvyroNft = { onMiningClaim, holdings: () => load() };
     const o = window.showSection;
     if (typeof o === "function") window.showSection = function () { closeMarket(); return o.apply(this, arguments); };
   }

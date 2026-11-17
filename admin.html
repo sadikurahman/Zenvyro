@@ -119,7 +119,7 @@ svg{display:block}
 .qa .row svg{width:3.6rem;height:3.6rem;fill:#d2b6ff}
 .qa .sh{height:3.4rem;padding:.8rem 0 0 .7rem}
 /* nav */
-.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + .6rem);width:83.6rem;height:13.2rem;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;padding:0 1rem;border-radius:3.2rem;border:.3rem solid transparent;background:linear-gradient(#0e0536f2,#0a0430f2) padding-box,linear-gradient(135deg,#9a55ff,#3a1b9a 50%,#b78cff) border-box;box-shadow:0 0 2.4rem rgba(125,60,255,.5);z-index:20}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + .6rem);width:83.6rem;height:13.2rem;display:grid;grid-template-columns:repeat(6,1fr);align-items:center;padding:0 1rem;border-radius:3.2rem;border:.3rem solid transparent;background:linear-gradient(#0e0536f2,#0a0430f2) padding-box,linear-gradient(135deg,#9a55ff,#3a1b9a 50%,#b78cff) border-box;box-shadow:0 0 2.4rem rgba(125,60,255,.5);z-index:20}
 .nav button{height:10.6rem;border-radius:2.4rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.9rem;font-size:2.1rem;color:#ece9ff;border:.2rem solid transparent}
 .nav svg{width:3.8rem;height:3.8rem;fill:#fff}
 .nav button.on{background:linear-gradient(135deg,#8a38ff,#4a1fb0);border-color:#c9a2ff;box-shadow:0 0 1.8rem #8b3dffaa,inset 0 0 1.4rem #ffffff22;color:#fff;font-weight:600}
@@ -261,6 +261,7 @@ textarea{min-height:96px;resize:vertical}
   <button data-nav="txn"><svg viewBox="0 0 24 24"><use href="#i-doc"/></svg>Transactions</button>
   <button data-nav="set"><svg viewBox="0 0 24 24"><use href="#i-gear"/></svg>Settings</button>
   <button data-nav="rep"><svg viewBox="0 0 40 30"><use href="#i-crown"/></svg>Reports</button>
+  <button data-nav="mkt"><svg viewBox="0 0 24 24"><use href="#i-cash"/></svg>Market Place</button>
 </nav>
 
 <div class="sheet" id="sheet"><div class="box"><div class="hd"><b id="shT"></b><button class="x" id="shX" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button></div><div id="shB"></div></div></div>
@@ -269,6 +270,8 @@ textarea{min-height:96px;resize:vertical}
 <script src="zenvyro-api.js"></script>
 <script src="site-settings.js"></script>
 <script src="member-id.js"></script>
+<script src="nft-catalog.js"></script>
+<script src="admin-market.js"></script>
 <script>
 (() => {
   "use strict";
@@ -590,7 +593,8 @@ textarea{min-height:96px;resize:vertical}
     log: () => ["Activity Logs", st.logs.length ? st.logs.map(l => `<div class="li"><div>${esc(l.t)}<small>${when(l.ts)}</small></div></div>`).join("") : '<div class="li">No activity yet</div>'],
     usr: () => ["Users", '<input class="in" id="uq" type="search" placeholder="Search by name or ID" autocomplete="off"><div id="ul" style="margin-top:6px">' + userRows("") + '</div><p class="note">Tap a user to ban, unban or send dollars. Sample users until the backend is connected.</p>'],
     txn: () => ["Transactions", [["Deposit", 100], ["Withdraw", 45], ["Exchange", 20], ["Deposit", 50], ["Withdraw", 15], ["Exchange", 8]].map((t, i) => `<div class="li"><div>${t[0]}<small>${when(Date.now() - i * 5400000)}</small></div><b>$${t[1]}.00</b></div>`).join("") + '<p class="note">Sample list. Real transactions appear after the backend is connected.</p>'],
-    menu: () => ["Menu", [["dash", "Dashboard"], ["usr", "Users"], ["txn", "Transactions"], ["set", "Settings"], ["rep", "Reports"]].map(a => `<div class="li"><a href="#" data-go="${a[0]}">${a[1]}</a></div>`).join("") + '<div class="li"><a href="index.html">Back to Zenvyro app</a></div>'],
+    menu: () => ["Menu", [["dash", "Dashboard"], ["usr", "Users"], ["txn", "Transactions"], ["set", "Settings"], ["rep", "Reports"], ["mkt", "Market Place"]].map(a => `<div class="li"><a href="#" data-go="${a[0]}">${a[1]}</a></div>`).join("") + '<div class="li"><a href="index.html">Back to Zenvyro app</a></div>'],
+    mkt: () => window.ZVAdminMarket ? window.ZVAdminMarket.page() : ["Market Place", '<div class="li">Market module not loaded</div>'],
     me: () => ["Admin Account", '<div class="li"><div>Administrator<small>Full access (demo)</small></div></div><div class="li"><a href="index.html">Back to Zenvyro app</a></div>']
   };
   function show(t, h, k) { $("#shT").textContent = t; $("#shB").innerHTML = h; $("#sheet").classList.add("on"); $("#sheet").dataset.k = k; }

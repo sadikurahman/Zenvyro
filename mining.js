@@ -390,6 +390,7 @@
     state.totalMined = Math.round(((state.totalMined || 0) + reward) * 1e8) / 1e8;
     state.sessionEnd = null;
     state.pausedRemaining = null;
+    try { if (window.ZenvyroNft) window.ZenvyroNft.onMiningClaim(reward); } catch (e) {}   // mining NFTs earn a share of this claim
     save(); render(); playStartAnimation();
     say("+" + reward.toFixed(6) + " ZENY added");
   }
