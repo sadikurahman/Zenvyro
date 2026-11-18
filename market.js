@@ -115,7 +115,18 @@
 .zm-cl{display:block;width:calc(100% - 20px);margin:8px 10px 0;border:0;border-radius:14px;padding:9px;font-weight:800;font-size:13px;color:#06231c;background:linear-gradient(180deg,#5dffd0,#1fbf8f)}
 .zm-cl:disabled{background:#1a1058;color:#9d93e0}
 .zm-all{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #1fbf8f;border-radius:16px;background:#0a2b2b;padding:12px 14px;color:#cfeee6;font-size:13px}
-.zm-all .zm-cl{width:auto;margin:0;padding:9px 16px;flex-shrink:0}`;
+.zm-all .zm-cl{width:auto;margin:0;padding:9px 16px;flex-shrink:0}
+.zm-fx{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:42px;background:radial-gradient(ellipse at 50% 45%,#2b1275 0,#120a3a 45%,#04040e 100%);opacity:0;color:#fff;overflow:hidden}
+.zm-fx-c{position:relative;width:150px;height:150px;display:grid;place-items:center}
+.zm-fx-c img{width:112px;height:112px;object-fit:cover;border-radius:50%;border:3px solid #d5a0ff;position:relative;z-index:2;will-change:transform}
+.zm-fx-c .r{position:absolute;inset:0;border-radius:50%;border:2px dashed #ba53ff;will-change:transform}
+.zm-fx-c .r2{inset:-16px;border:2px dotted #ff9a3c}
+.zm-fx-c .r3{inset:-32px;border:1px solid #3aa0ff}
+.zm-fx-c .s{position:absolute;left:50%;top:50%;width:26px;height:2px;margin:-1px 0 0 -13px;border-radius:2px;opacity:0;will-change:transform,opacity}
+.zm-fx-t{margin:0;font-size:15px;font-weight:800;letter-spacing:.5px;color:#e4c9ff}
+.zm-fx-f{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 45%,rgba(255,236,210,.95),rgba(186,83,255,.5) 30%,rgba(69,56,255,0) 65%)}
+.zm-ok{width:76px;height:76px;margin:6px auto 0;color:#2bf0b0;animation:zmpop .5s ease-out both}.zm-ok svg{width:100%;height:100%;display:block}
+@keyframes zmpop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}`;
   const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
 
   // ---- Marketplace ----
@@ -148,7 +159,7 @@
       const a = settle().slice().sort((x, y) => (active(y, t) - active(x, t)) || y.ts - x.ts);
       if (!a.length) return '<div class="zm-empty">You do not hold any NFT yet. Buy one to see it here.</div>';
       const tr = a.reduce((s, h) => s + h.pendTrx, 0), zn = a.reduce((s, h) => s + h.pendZeny, 0);
-      return `<div class="zm-all"><span>Ready: <strong>${fmt(tr, 6)} TRX</strong> &middot; <strong>${fmt(zn, 8)} ZENY</strong><br><small>A new day starts at 10 PM Bangladesh time.</small></span><button class="zm-cl" ${tr > 0 || zn > 0 ? "" : "disabled"} onclick="zvNftClaimAll()">Claim all</button></div>` + a.map(h => myCard(h, t)).join("");
+      return `<div class="zm-all"><span>Ready: <strong>${fmt(tr, 6)} TRX</strong> &middot; <strong>${fmt(zn, 8)} ZENY</strong><br><small>A new day starts at 10 PM.</small></span><button class="zm-cl" ${tr > 0 || zn > 0 ? "" : "disabled"} onclick="zvNftClaimAll()">Claim all</button></div>` + a.map(h => myCard(h, t)).join("");
     }
     const own = load(), list = C().get().items.filter(i => !i.hidden && (S.tab === "All NFTs" || i.cats.includes(S.tab)) && (!q || i.name.toLowerCase().includes(q)));
     return list.length ? list.map(i => cardHtml(i, mstate(i, own, t), t)).join("") : '<div class="zm-empty">No NFT found.</div>';
@@ -175,18 +186,55 @@
       <div><strong>Benefit</strong><span>${esc(benefitFor(i, p))}</span></div><div><strong>Active for</strong><span>${durText(i.durDays)}</span></div>
       <div><strong>Stock</strong><span>${lf === Infinity ? "Unlimited" : lf + " left"}</span></div>${se ? `<div><strong>Sale ends in</strong><span>${dleft(se, t)}</span></div>` : ""}
       <div><strong>Your TRX balance</strong><span>${fmt(trxBal(), 6)} TRX</span></div></div>
-      <div class="modal-note">Daily rewards are added at 10 PM Bangladesh time and wait for you to claim. When the active period ends, new rewards stop but what you already earned can still be claimed. ${DEMO ? "Demo mode: payment is not connected, so confirming adds this NFT without taking TRX." : "The price is taken from your TRX Wallet."}</div>
+      <div class="modal-note">Daily rewards are added at 10 PM and wait for you to claim. When the active period ends, new rewards stop but what you already earned can still be claimed. ${DEMO ? "Demo mode: payment is not connected, so confirming adds this NFT without taking TRX." : "The price is taken from your TRX Wallet."}</div>
       <button class="btn" style="width:100%;margin-top:12px" onclick="zvBuyOk('${esc(i.id)}')">Confirm purchase</button>`);
   }
+  // Purchase animation (~3.6 s): only transform/opacity are animated (GPU, light on CPU), then the success popup opens.
+  let buying = false;
+  function successPop(i, paid) {
+    window.openModal("Purchase Successful", `<div style="text-align:center"><div class="zm-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.5l3 3 6-6.5"/></svg></div>
+      <b style="display:block;font-size:19px;margin:10px 0 12px">Your NFT purchase was successful</b></div>
+      <div class="zm-bm"><img src="${esc(i.img)}" alt=""><div><b>${esc(i.name)}</b><span>${fmt(paid)} TRX paid</span></div></div>
+      <div class="modal-list"><div><strong>Benefit</strong><span>${esc(benefitFor(i, paid))}</span></div><div><strong>Active for</strong><span>${durText(i.durDays)}</span></div></div>
+      <button class="btn" style="width:100%;margin-top:12px" onclick="zvBuyDone()">View My NFTs</button>`);
+  }
+  function buyFx(i, paid) {
+    const done = () => { buying = false; successPop(i, paid); };
+    const red = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    const ov = document.createElement("div"); ov.className = "zm-fx";
+    ov.innerHTML = `<div class="zm-fx-c"><i class="r"></i><i class="r r2"></i><i class="r r3"></i><img src="${esc(i.img)}" alt=""></div><p class="zm-fx-t">Confirming your purchase...</p>`;
+    if (red || typeof ov.animate !== "function") return done();
+    document.body.appendChild(ov);
+    const c = ov.firstChild, rg = c.querySelectorAll(".r"), tx = ov.querySelector(".zm-fx-t");
+    ov.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 250, fill: "forwards" });
+    [[5200, 0], [3800, 1], [7000, 0]].forEach((r, k) => rg[k].animate([{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], { duration: r[0], iterations: Infinity, direction: r[1] ? "reverse" : "normal" }));
+    c.querySelector("img").animate([{ transform: "scale(.84)" }, { transform: "scale(1.05)" }], { duration: 850, direction: "alternate", iterations: Infinity, easing: "ease-in-out" });
+    const cols = ["#ff8a2b", "#3aa0ff", "#c07bff"];
+    for (let k = 0; k < 18; k++) {   // energy streaks pulled into the NFT
+      const s = document.createElement("i"); s.className = "s"; s.style.background = cols[k % 3]; c.appendChild(s);
+      const a = k * 20 + Math.random() * 12;
+      s.animate([{ transform: `rotate(${a}deg) translateX(260px) scaleX(.4)`, opacity: 0 }, { opacity: 1, offset: .5 }, { transform: `rotate(${a}deg) translateX(80px) scaleX(1.4)`, opacity: 0 }],
+        { duration: 700 + Math.random() * 500, delay: Math.random() * 600, iterations: Infinity, easing: "ease-in" });
+    }
+    setTimeout(() => { tx.textContent = "Adding it to your collection..."; }, 1700);
+    setTimeout(() => {   // final flash + shockwave
+      const f = document.createElement("div"); f.className = "zm-fx-f"; ov.appendChild(f);
+      f.animate([{ opacity: 0 }, { opacity: .9, offset: .25 }, { opacity: 0 }], { duration: 500, easing: "ease-out" });
+      c.animate([{ transform: "scale(1)" }, { transform: "scale(1.18)", offset: .3 }, { transform: "scale(1)" }], { duration: 500, easing: "ease-out" });
+    }, 3100);
+    setTimeout(() => { if (ov.parentNode) ov.parentNode.removeChild(ov); done(); }, 3600);
+  }
   function buyOk(id) {
+    if (buying) return;
     if (window.ZenvyroSettings && window.ZenvyroSettings.block("market")) return;
     const cat = C().get(), t = Date.now(), i = cat.items.find(x => x.id === id), W = window.ZenvyroWallet;
-    const stop = m => { window.closeModal(); say(m); };
+    const stop = m => { buying = false; window.closeModal(); say(m); };
     if (!i || i.hidden) return stop("This NFT is not available");
     if (!C().saleOpen(i, t)) return stop("The sale of this NFT has ended");
     if (C().left(i) <= 0) return stop("This NFT is sold out");
     const a = load(); if (a.some(h => h.id === id && active(h, t))) return stop("You already own this NFT");
     const paid = C().priceNow(i, t);
+    buying = true;
     if (!DEMO) {   // real payment: TRX from the Wallet (on the real server this check and debit happen there)
       if (trxBal() + 1e-9 < paid) return stop("Not enough TRX in your Wallet");
       if (!W || !W.debit("TRX", paid)) return stop("Payment failed");
@@ -194,8 +242,9 @@
     i.sold = (i.sold || 0) + 1; C().save(cat);
     a.push(mkHolding(i, paid, t)); store(a);
     if (LVL()) { LVL().addOwn(paid); LVL().markPack(); }
-    window.closeModal(); say(i.name + " added to My NFTs");
+    window.closeModal();
     if (root && root.classList.contains("open")) render();
+    buyFx(i, paid);
   }
   function claimOne(hid) {
     const a = settle(), h = a.find(x => x.hid === hid), M = window.ZenvyroMining, W = window.ZenvyroWallet; if (!h) return;
@@ -259,6 +308,7 @@
     Object.assign(window, {
       zvOpenMarket: openMarket, zvmClose: closeMarket, zvBuy: buyForm, zvBuyOk: buyOk, zvaSummary: openSummary,
       zvNftClaim: claimOne, zvNftClaimAll: claimAll,
+      zvBuyDone: () => { window.closeModal(); S.tab = "My NFTs"; if (root && !root.classList.contains("open")) openMarket(); else render(); },
       zvmTab: t => { S.tab = t; render(); },
       zvmSearch: () => { S.s = !S.s; if (!S.s) S.q = ""; render(); const e = document.getElementById("zmQ"); if (e) e.focus(); },
       zvmQ: v => { S.q = v; const g = document.getElementById("zmGrid"); if (g) g.innerHTML = gridHtml(); }
