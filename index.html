@@ -118,23 +118,24 @@ function showSection(name){
 function selectPack(name,price){closeModal();toast(name==='Free Pack'?'Free Pack selected':`${name} selected (${price}). Payment is not connected.`)}
 function walletAction(action){toast(action+' is not available until payment integration is configured')}
 function copyReferral(){const code='ZENV-NEW-MEMBER';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>toast('Referral code copied')).catch(()=>toast('Referral code: '+code))}else{toast('Referral code: '+code)}}
-</script>  <script src="countries.js?v=20261114g" defer></script>
-<script src="member-id.js?v=20261114g" defer></script>
-<script src="site-settings.js?v=20261114g" defer></script>
-<script src="legal.js?v=20261114g" defer></script>
-<script src="auth.js?v=20261114g" defer></script>
-<script src="cooldown.js?v=20261114g" defer></script>
-<script src="phase-footer.js?v=20261114g" defer></script>
-<script src="zenvyro-api.js?v=20261114g" defer></script>
-<script src="purchase.js?v=20261114g" defer></script>
-<script src="mining.js?v=20261114g" defer></script>
-<script src="referral.js?v=20261114g" defer></script>
-<script src="exchange.js?v=20261114g" defer></script>
-<script src="wallet.js?v=20261114g" defer></script>
-<script src="account.js?v=20261114g" defer></script>
-<script src="levels.js?v=20261114g" defer></script>
-<script src="nft-catalog.js?v=20261114g" defer></script>
-<script src="market.js?v=20261114g" defer></script>
+</script>  <script src="countries.js?v=20261114h" defer></script>
+<script src="member-id.js?v=20261114h" defer></script>
+<script src="site-settings.js?v=20261114h" defer></script>
+<script src="legal.js?v=20261114h" defer></script>
+<script src="auth.js?v=20261114h" defer></script>
+<script src="cooldown.js?v=20261114h" defer></script>
+<script src="phase-footer.js?v=20261114h" defer></script>
+<script src="zenvyro-api.js?v=20261114h" defer></script>
+<script src="purchase.js?v=20261114h" defer></script>
+<script src="mining.js?v=20261114h" defer></script>
+<script src="referral.js?v=20261114h" defer></script>
+<script src="exchange.js?v=20261114h" defer></script>
+<script src="wallet.js?v=20261114h" defer></script>
+<script src="account.js?v=20261114h" defer></script>
+<script src="levels.js?v=20261114h" defer></script>
+<script src="nft-catalog.js?v=20261114h" defer></script>
+<script src="market.js?v=20261114h" defer></script>
+<script src="leaderboard.js?v=20261114h" defer></script>
 <script>
 /* Home quick buttons: Update News, Community, Invite, Leaderboard (no backend -> nothing is invented) */
 (function(){
@@ -153,6 +154,7 @@ function copyReferral(){const code='ZENV-NEW-MEMBER';if(navigator.clipboard&&nav
  };
  window.zvhInvite=function(){ if(typeof window.openReferral==='function')window.openReferral(); else showSection('account'); };
  window.zvhBoard=function(){
+  if(typeof window.zvOpenBoard==='function')return window.zvOpenBoard();
   var m=window.ZenvyroMining&&window.ZenvyroMining.getState?window.ZenvyroMining.getState():null,r=window.ZenvyroReferral&&window.ZenvyroReferral.count?window.ZenvyroReferral.count():0;
   openModal('Leaderboard','<div class="modal-list"><div><strong>Your total mined</strong><span>'+((m&&+m.totalMined||0).toFixed(3))+' ZENY</span></div><div><strong>Your referrals</strong><span>'+r+'</span></div></div><div class="modal-note">Rankings of all members need server data and will appear here once a backend is connected. No sample ranks are shown.</div>');
  };

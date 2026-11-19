@@ -314,7 +314,7 @@
       zvmSearch: () => { S.s = !S.s; if (!S.s) S.q = ""; render(); const e = document.getElementById("zmQ"); if (e) e.focus(); },
       zvmQ: v => { S.q = v; const g = document.getElementById("zmGrid"); if (g) g.innerHTML = gridHtml(); }
     });
-    window.ZenvyroNft = { onMiningClaim, holdings: () => load() };
+    window.ZenvyroNft = { onMiningClaim, holdings: () => load(), totalPaid: () => load().reduce((t, h) => t + (+h.paid || 0), 0) };   // every NFT ever bought counts, expired ones too
     const o = window.showSection;
     if (typeof o === "function") window.showSection = function () { closeMarket(); return o.apply(this, arguments); };
   }
