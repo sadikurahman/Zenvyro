@@ -127,7 +127,10 @@
 .zm-fx-t{margin:0;font-size:15px;font-weight:800;letter-spacing:.5px;color:#e4c9ff}
 .zm-fx-f{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 45%,rgba(255,236,210,.95),rgba(186,83,255,.5) 30%,rgba(69,56,255,0) 65%)}
 .zm-ok{width:76px;height:76px;margin:6px auto 0;color:#2bf0b0;animation:zmpop .5s ease-out both}.zm-ok svg{width:100%;height:100%;display:block}
-@keyframes zmpop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}`;
+@keyframes zmpop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+.zm-bn2{position:relative;border-radius:3.3%/8.8%;overflow:hidden;margin-bottom:14px;line-height:0;box-shadow:0 0 26px #8a3dff44}
+.zm-bn2 img{display:block;width:100%;height:auto}
+.zm-bgo{position:absolute;left:3.4%;top:81.5%;width:27.2%;height:14.8%;border:0;background:transparent;border-radius:999px;cursor:pointer;-webkit-tap-highlight-color:transparent;padding:0}`;
   const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st);
 
   // ---- Marketplace ----
@@ -169,7 +172,7 @@
     const tabs = ["All NFTs", ...C().get().cats, "My NFTs"]; if (!tabs.includes(S.tab)) S.tab = "All NFTs";
     root.innerHTML = `<div class="in"><div class="hd"><button class="ib" onclick="zvmClose()" aria-label="Back">${ic("back")}</button><b>${ic("store")}NFT Marketplace</b><button class="ib" onclick="zvmSearch()" aria-label="Search">${ic("search")}</button></div>
       ${S.s ? `<input class="sr" id="zmQ" placeholder="Search NFTs" value="${esc(S.q)}" oninput="zvmQ(this.value)">` : ""}
-      <div class="hero"><div><h2>Discover<span>Premium NFTs</span></h2><p>Own &amp; Collect</p><button class="zm-go" onclick="document.getElementById('zmGrid').scrollIntoView({behavior:'smooth'})">Browse NFTs ${ic("go")}</button></div><img src="nft-hero.jpg" alt=""></div>
+      <div class="zm-bn2"><img src="nft-banner.jpg" alt="Discover Premium NFTs. Own and collect."><button class="zm-bgo" aria-label="Browse NFTs" onclick="document.getElementById('zmGrid').scrollIntoView({behavior:'smooth'})"></button></div</div>
       <div class="tabs">${tabs.map(t => `<button class="${t === S.tab ? "on" : ""}" onclick="zvmTab('${esc(t)}')">${esc(t)}</button>`).join("")}</div>
       <div class="grid" id="zmGrid">${gridHtml()}</div>
       <div class="zm-bonus">${ic("gift")}<div><b>5% Bonus for your referrer</b><small>When you buy your first pack or NFT, the member who invited you earns a 5% Purchase Bonus.</small></div></div>
