@@ -32,12 +32,14 @@
   const head = () => `<div class="pu-head"><span class="pu-ic">${IC.crown}</span><div><b>${pack} Pack</b><small>${API().PACKS[pack]} TRX &middot; ${RATE[pack]} ZENY / hour</small></div></div>`;
   const backBtn = to => `<button type="button" class="pu-back" data-pu="${to}">${IC.back}Back</button>`;
 
+  const availTrx = () => { try { const I = window.ZenvyroWalletInfo; return I ? I.avail("TRX") : (window.ZenvyroWallet.balances().TRX || { amount: 0 }).amount; } catch (e) { return 0; } };
   function chooser() {
     flow++;
     document.getElementById("modalTitle").textContent = "Upgrade Membership";
     body(head() + `<p class="pu-lead">Choose how you want to pay.</p>
 <button type="button" class="pu-opt" data-pu="voucher"><span class="pu-ic">${IC.ticket}</span><span><b>Voucher Code</b><small>Redeem a prepaid ${API().PACKS[pack]} TRX code. Your pack is activated instantly.</small></span>${IC.next}</button>
 <button type="button" class="pu-opt" data-pu="crypto"><span class="pu-ic">${IC.coin}</span><span><b>Crypto Payment</b><small>Pay with TRX (TRC20). Our team verifies your transaction.</small></span>${IC.next}</button>
+<button type="button" class="pu-opt" data-pu="balance"><span class="pu-ic">${IC.coin}</span><span><b>Pay with Wallet Balance</b><small>Use your TRX balance (available: ${availTrx().toFixed(2)} TRX). Activated instantly.</small></span>${IC.next}</button>
 ${DEMO_NOTE()}`);
   }
 
@@ -63,12 +65,12 @@ ${me.fails > 0 ? warn + '<div class="pu-msg" id="puMsg"></div>' : warn}
   }
 
   /* ---------- processing (5 to 6 seconds) and the success celebration (about 3 seconds) ---------- */
-  function loading(ms) {
+  function loading(ms, stepsIn) {
     flow++;
     document.getElementById("modalTitle").textContent = "Processing";
-    body(`<div class="pu-load"><div class="pu-spinw"><div class="pu-spin"></div><span class="pu-lic">${IC.crown}</span></div><b id="puStep">Verifying your code...</b><div class="pu-bar"><i id="puFill" style="--d:${ms}ms"></i></div><small>Please keep this window open.</small></div>`);
+    body(`<div class="pu-load"><div class="pu-spinw"><div class="pu-spin"></div><span class="pu-lic">${IC.crown}</span></div><b id="puStep">${stepsIn ? stepsIn[0] : "Verifying your code..."}</b><div class="pu-bar"><i id="puFill" style="--d:${ms}ms"></i></div><small>Please keep this window open.</small></div>`);
     requestAnimationFrame(() => requestAnimationFrame(() => { const f = document.getElementById("puFill"); if (f) f.style.width = "100%"; }));
-    const steps = ["Verifying your code...", "Checking pack eligibility...", "Activating your membership..."], my = flow;
+    const steps = stepsIn || ["Verifying your code...", "Checking pack eligibility...", "Activating your membership..."], my = flow;
     steps.forEach((t, i) => setTimeout(() => { const e = document.getElementById("puStep"); if (e && my === flow) e.textContent = t; }, ms * i / 3));
   }
   function celebrate(tier) {
@@ -82,6 +84,31 @@ ${me.fails > 0 ? warn + '<div class="pu-msg" id="puMsg"></div>' : warn}
     body(`<div class="pu-cel zt-${tier}"><span class="pu-ring"></span><span class="pu-ring" style="animation-delay:.3s"></span>${parts}
 <div class="pu-medal">${EMB[tier]}</div><h3>${esc(tier)} Pack Activated</h3><p>Your mining rate has been upgraded.<br>Your profile now shows the ${esc(tier)} emblem.</p>
 <button type="button" class="btn" id="puDone" style="width:100%;margin-top:18px">Done</button></div>`);
+  }
+
+  function balanceView() {
+    flow++;
+    document.getElementById("modalTitle").textContent = "Pay with Wallet Balance";
+    const price = API().PACKS[pack], have = availTrx(), ok = have + 1e-9 >= price;
+    body(`${backBtn("chooser")}<div class="pu-banner">You are buying the <b>${pack} Pack (${price} TRX)</b>. The price is taken from your TRX Wallet balance and the pack is activated instantly.</div>
+<div class="modal-list"><div><strong>Pack price</strong><span>${price} TRX</span></div><div><strong>Available TRX balance</strong><span>${have.toFixed(6)} TRX</span></div><div><strong>Balance after payment</strong><span>${ok ? (have - price).toFixed(6) : "-"} TRX</span></div></div>
+${ok ? "" : '<div class="pu-msg err" style="display:block">Not enough TRX in your Wallet. Deposit TRX, or exchange your income to TRX first.</div>'}
+<button type="button" class="btn" id="puBal" style="width:100%;margin-top:14px"${ok ? "" : " disabled"}>Pay ${price} TRX</button>${DEMO_NOTE()}`);
+  }
+  async function payBal() {
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("purchase")) return;
+    if (busy) return; busy = true;
+    const D = 3500;
+    loading(D, ["Checking your balance...", "Confirming payment...", "Activating your membership..."]); const mine = flow, t0 = Date.now();
+    let r; try { r = await API().payWithBalance(pack); } catch (e) { r = { ok: false, error: "server" }; }
+    await delay(Math.max(0, D - (Date.now() - t0)));
+    busy = false;
+    if (r.ok) applyTier(r.tier);
+    if (mine !== flow) { if (r.ok) say(r.tier + " Pack activated"); return; }
+    if (r.ok) return celebrate(r.tier);
+    if (r.error === "banned") return restricted(r.bannedUntil, r.longBan);
+    balanceView();
+    say(r.error === "no_balance" ? "Not enough TRX in your Wallet" : r.error === "already_have" ? "You already have the " + r.tier + " Pack or a higher one" : "Something went wrong. Please try again.");
   }
 
   async function redeem() {
@@ -186,11 +213,11 @@ ${list.length ? '<div class="pu-list">' + list.map(p => `<div><span>${esc(p.pack
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-pu]"); if (!b || !document.getElementById("modalBody") || !document.getElementById("modalBody").contains(b)) return;
     const a = b.dataset.pu;
-    if (a === "chooser") chooser(); else if (a === "voucher") voucher(); else if (a === "crypto") crypto();
+    if (a === "chooser") chooser(); else if (a === "voucher") voucher(); else if (a === "crypto") crypto(); else if (a === "balance") balanceView();
     else if (a === "copy") { const t = document.getElementById("puAddr").textContent; if (!/not set/.test(t) && navigator.clipboard) navigator.clipboard.writeText(t).then(() => say("Address copied")).catch(() => {}); }
   });
   document.addEventListener("click", e => {
-    if (e.target.id === "puRedeem") redeem(); else if (e.target.id === "puPay") pay();
+    if (e.target.id === "puRedeem") redeem(); else if (e.target.id === "puPay") pay(); else if (e.target.id === "puBal") payBal();
     else if (e.target.id === "puDone") { if (typeof window.closeModal === "function") window.closeModal(); }
   });
   document.addEventListener("change", e => { if (e.target.id === "puAsset") showAddr(); });

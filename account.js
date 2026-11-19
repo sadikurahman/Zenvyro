@@ -357,9 +357,9 @@
 
   function faq() {
     const q = [
-      ["How does mining work?", "Tap Start Mining to begin a 4-hour session. When the 4 hours end, tap Claim Reward to add four hours of ZENY for your pack to your balance."],
-      ["When do I get referral income?", "Referral Income Commission can be claimed every night at 10 PM (Bangladesh time) and is added to your Exchange balance as ZENY. Purchase Bonus goes straight to your Wallet."],
-      ["How does Exchange work?", "Send a request to exchange ZENY into another asset. When an admin accepts, it is credited to your Wallet at the rate at acceptance after a total 10% fee; if rejected, your ZENY is refunded."],
+      ["How does mining work?", "Tap Start Mining to begin a 2-hour session. When the 2 hours end, tap Claim Reward to add two hours of ZENY for your pack to your balance."],
+      ["When do I get referral income?", "Referral Income Commission can be claimed every night at 10 PM (Bangladesh time) and is added to your Exchange balance as ZENY. Purchase Bonus goes to your Exchange Wallet."],
+      ["How does Exchange work?", "Exchange your income (mining ZENY or TRX rewards) into another asset. It is instant: after a total 10% fee the result is added to your Wallet, where you can spend, transfer or withdraw it."],
       ["How do Deposit and Withdraw work?", "Both are requests that an admin verifies and then accepts or rejects. When you request a withdrawal, that amount is locked."],
       ["Can a Transfer be reversed?", "No. User-to-user transfers are instant, so double-check the recipient's ID before sending."],
       ["Are earnings guaranteed?", "No. Rewards and commissions follow platform rules and are not guaranteed income."]

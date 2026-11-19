@@ -42,16 +42,17 @@
     update(id, patch) { const t = txs.find(x => x.id === id); if (t) { Object.assign(t, patch); saveTx(); render(); } }
   };
 
-  // Airdrop Hold: every withdrawal needs an extra 30% of the amount. When the withdrawal is completed,
-  // that 30% moves to "Hold Token for Airdrop" (shown in Summary, never withdrawable). A server must enforce this too.
+  // Airdrop Hold: 30% of every withdrawal is NOT paid out. The member receives 70% of the requested amount; when the withdrawal
+  // is completed, the 30% is converted to ZENY and kept in "Airdrop Hold" (shown in the Wallet and Summary, never withdrawable).
+  // Requests made under the earlier rule (extra 30% on top, no holdIn flag) are still honoured. A server must enforce this too.
   const HOLD_PCT = 30, HKEY = "zenvyro_airdrophold_v1";
   let holds = (() => { try { const o = JSON.parse(localStorage.getItem(HKEY) || "{}"); return o && typeof o === "object" ? o : {}; } catch (e) { return {}; } })();
   const saveHolds = () => { try { localStorage.setItem(HKEY, JSON.stringify(holds)); } catch (e) {} };
   window.ZenvyroAirdropHold = { get: () => Object.assign({}, holds), pct: HOLD_PCT };
   const holdOf = amt => Math.round(amt * HOLD_PCT / 100 * 1e8) / 1e8;
-  const locked = sym => txs.filter(t => t.kind === "withdraw" && t.status === "pending" && t.sym === sym).reduce((a, t) => a + +t.amount + (+t.hold || 0), 0);
+  const locked = sym => txs.filter(t => t.kind === "withdraw" && t.status === "pending" && t.sym === sym).reduce((a, t) => a + +t.amount + (t.holdIn ? 0 : (+t.hold || 0)), 0);
   const availAmt = sym => Math.max(0, (bals()[sym] ? bals()[sym].amount : 0) - locked(sym));
-  const maxWd = sym => availAmt(sym) / (1 + HOLD_PCT / 100);
+  const maxWd = sym => availAmt(sym);
   function availUsdt() {
     const b = bals(); let v = 0;
     ASSETS.forEach(a => { const x = b[a.sym]; if (x && x.amount > 0) v += x.value * (availAmt(a.sym) / x.amount); });
@@ -140,6 +141,7 @@
     const b = bals(), total = W().total(), pr = W().prices();
     const btc = pr.BTC ? total / pr.BTC : null;
     const avail = availUsdt(), zb = zenyBal();
+    const te = window.ZenvyroEarn ? window.ZenvyroEarn.get().TRX : 0, hz = +holds.ZENY || 0;
     const availBtc = pr.BTC ? avail / pr.BTC : null;
     const coins = [["₿", "#f7931a"], ["₮", "#1fbf8f"], ["◆", "#8a4dff"]].map(c => `<span class="coin" style="background:${c[1]}">${c[0]}</span>`).join("");
     const assets = ASSETS.map(a => {
@@ -157,8 +159,9 @@
         <div class="amt">${mask("$ " + Number(total).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</div>
         <div class="est">${btc !== null ? mask("≈ " + btc.toFixed(4) + " BTC") + " &nbsp;•&nbsp; " : ""}Est. value</div></div></div>
         <div class="subs">
-          <div class="sub"><span class="si">⛏</span><div><small>Mining Balance</small><strong>${mask(zb.toFixed(6))} <span style="font-size:12px;color:#c8b8ff">ZENY</span></strong><em>${mask("≈ " + usd(zb * ZENY_USDT))}</em></div></div>
+          <div class="sub" style="cursor:pointer" onclick="showSection('exchange')"><span class="si">⛏</span><div><small>Exchange Wallet · tap to exchange</small><strong>${mask(zb.toFixed(6))} <span style="font-size:12px;color:#c8b8ff">ZENY</span></strong><em>${mask(te.toFixed(6) + " TRX income")}</em></div></div>
           <div class="sub"><span class="si">🪙</span><div><small>Available to Withdraw</small><strong>${mask("$ " + Number(avail).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</strong><em>${availBtc !== null ? mask("≈ " + availBtc.toFixed(4) + " BTC") : "&nbsp;"}</em></div></div>
+          <div class="sub" style="grid-column:1/-1"><span class="si">⏳</span><div><small>Airdrop Hold · locked until the airdrop</small><strong>${mask(hz.toFixed(6))} <span style="font-size:12px;color:#c8b8ff">ZENY</span></strong><em>${HOLD_PCT}% of every withdrawal is kept here as ZENY</em></div></div>
         </div></div>
       <div class="acts"><button class="main" onclick="zvwDepositForm()"><span class="ai">↓</span>Deposit<small>Add Funds</small></button>
         <button onclick="zvwWithdrawForm()"><span class="ai">↑</span>Withdraw<small>Cash Out</small></button>
@@ -224,7 +227,7 @@
       <div class="modal-note" id="wdBreak" style="margin-top:8px"></div>
       <button class="btn alt" style="width:100%;margin-top:8px;padding:10px" onclick="zvwWdMax()">Max</button>
       <button class="btn" style="width:100%;margin-top:12px" onclick="zvwWithdraw()">Submit Withdraw Request</button>
-      <div class="modal-note">When you send a request, the total is locked. If an admin accepts, the amount is sent; if rejected, the lock is released. Double-check the address and network: funds sent to a wrong address cannot be recovered.</div>`);
+      <div class="modal-note">When you send a request, the amount is locked. If an admin accepts, you receive 70% and the other 30% goes to your Airdrop Hold as ZENY; if rejected, the lock is released. Double-check the address and network: funds sent to a wrong address cannot be recovered.</div>`);
     wdInfo();
   }
   function wdInfo() {
@@ -235,11 +238,12 @@
   function wdBreak() {
     const el = $("wdBreak"); if (!el) return;
     const sym = val("wdAsset"), a = asset(sym), amt = parseFloat(val("wdAmt")), d = a.dec > 6 ? 8 : 6;
-    if (!(amt > 0)) { el.textContent = "Hold Token for Airdrop is added to every withdrawal. Airdrop details coming soon."; return; }
-    const h = holdOf(amt);
-    el.textContent = "You receive " + amt.toFixed(d) + " " + sym + " · Hold Token for Airdrop " + h.toFixed(d) + " " + sym + " · Total needed " + (amt + h).toFixed(d) + " " + sym;
+    if (!(amt > 0)) { el.textContent = HOLD_PCT + "% of every withdrawal goes to Airdrop Hold as ZENY. You receive the other " + (100 - HOLD_PCT) + "%."; return; }
+    const h = holdOf(amt), px = sym === "USDT" ? 1 : (W() ? +W().prices()[sym] : 0), z = px > 0 ? h * px / ZENY_USDT : null;
+    el.textContent = "You receive " + (amt - h).toFixed(d) + " " + sym + " · Airdrop Hold " + h.toFixed(d) + " " + sym + (z !== null ? " = " + z.toFixed(6) + " ZENY (shown in your Wallet)" : " (converted to ZENY)");
   }
   const MIN_WITHDRAW_USD = 10; // minimum withdrawal per request (USD value). A server must enforce this too.
+  const MIN_TRANSFER_USD = 5; // minimum transfer (USD value). A server must enforce this too.
   async function submitWithdraw() {
     if (window.ZenvyroSettings && window.ZenvyroSettings.block("withdraw")) return;
     const sym = val("wdAsset"), a = asset(sym), addr = val("wdAddr"), amount = parseFloat(val("wdAmt"));
@@ -251,8 +255,8 @@
     if (amount * px < MIN_WITHDRAW_USD - 1e-9)
       return say("Minimum withdrawal is $" + MIN_WITHDRAW_USD + " (about " + +(MIN_WITHDRAW_USD / px).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + ")");
     const hold = holdOf(amount);
-    if (amount + hold > availAmt(sym) + 1e-12) return say("Not enough balance. You need " + +(amount + hold).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + " in total");
-    window.ZenvyroTx.log({ id: newId("WD"), kind: "withdraw", sym, amount, hold, status: "pending", sub: sym + " (" + a.net + ")", addr });
+    if (amount > availAmt(sym) + 1e-12) return say("Not enough available balance");
+    window.ZenvyroTx.log({ id: newId("WD"), kind: "withdraw", sym, amount, hold, holdIn: true, status: "pending", sub: sym + " (" + a.net + ")", addr });
     window.closeModal(); say("Withdraw request sent");
   }
 
@@ -268,14 +272,14 @@
       <label class="modal-label" for="trAmt">Amount</label>
       <input class="modal-field" id="trAmt" type="number" inputmode="decimal" step="any" min="0" placeholder="0.00">
       <button class="btn" style="width:100%;margin-top:14px" onclick="zvwTransfer()">Send</button>
-      <div class="modal-note">Transfers happen instantly and do not go through an admin, so they are final once sent, except in cases of error or fraud. Double-check the recipient's ID. In demo mode the recipient is not verified. Try a demo ID: ${window.ZenvyroId.demoMembers.map(m => m.id).join(", ")}</div>`);
+      <div class="modal-note">Minimum transfer: $5 (value). Transfers happen instantly and do not go through an admin, so they are final once sent, except in cases of error or fraud. Double-check the recipient's ID. In demo mode the recipient is not verified. Try a demo ID: ${window.ZenvyroId.demoMembers.map(m => m.id).join(", ")}</div>`);
     trInfo();
   }
   function trInfo() {
     const sym = val("trAsset"), a = asset(sym);
     $("trInfo").textContent = "Available: " + availAmt(sym).toFixed(a.dec > 6 ? 8 : 6) + " " + sym;
   }
-  function submitTransfer() {
+  async function submitTransfer() {
     if (window.ZenvyroSettings && window.ZenvyroSettings.block("transfer")) return;
     const sym = val("trAsset"), a = asset(sym), to = window.ZenvyroId.norm(val("trTo")), amount = parseFloat(val("trAmt"));
     if (!to || !window.ZenvyroId.valid(to)) return say("Enter a valid recipient ID");
@@ -283,6 +287,10 @@
     if (to.toLowerCase() === MY_ID.toLowerCase()) return say("You can't transfer to your own ID");
     if (!(amount > 0)) return say("Enter a valid amount");
     if (amount > availAmt(sym) + 1e-12) return say("Not enough available balance");
+    let px = sym === "USDT" ? 1 : (W() ? +W().prices()[sym] : 0);
+    if (!(px > 0) && W()) { try { await W().ensurePrices(); } catch (e) {} px = +W().prices()[sym]; }
+    if (!(px > 0)) return say("Could not check the current price. Please try again.");
+    if (amount * px < MIN_TRANSFER_USD - 1e-9) return say("Minimum transfer is $" + MIN_TRANSFER_USD + " (about " + +(MIN_TRANSFER_USD / px).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + ")");
     if (!window.confirm("Send " + amount + " " + sym + " to " + to + "?\n\nThis happens instantly. Zenvyro can reverse a transfer only in cases of error or fraud.")) return;
     if (!W().debit(sym, amount)) return say("Transfer failed");
     window.ZenvyroTx.log({ id: newId("TR"), kind: "transfer", dir: "out", sym, amount, status: "completed", sub: "To " + to });
@@ -311,8 +319,15 @@
       W().credit(t.sym, t.amount, v);
     } else if (t.kind === "withdraw") {
       const h = +t.hold || 0;
-      if (!W().debit(t.sym, t.amount + h)) return false;
-      if (h > 0) { holds[t.sym] = Math.round(((+holds[t.sym] || 0) + h) * 1e8) / 1e8; saveHolds(); } // moves to Hold Token for Airdrop
+      if (t.holdIn) {   // current rule: the 30% is part of the requested amount; the member gets the rest, the 30% becomes ZENY in Airdrop Hold
+        const px = t.sym === "USDT" ? 1 : (+priceUsdt > 0 ? +priceUsdt : +(W().prices()[t.sym] || 0));
+        if (h > 0 && !(px > 0)) return false;
+        if (!W().debit(t.sym, t.amount)) return false;
+        if (h > 0) { const z = Math.round(h * px / ZENY_USDT * 1e8) / 1e8; holds.ZENY = Math.round(((+holds.ZENY || 0) + z) * 1e8) / 1e8; saveHolds(); t.holdZeny = z; }
+      } else {          // request made under the earlier rule (extra 30% on top)
+        if (!W().debit(t.sym, t.amount + h)) return false;
+        if (h > 0) { holds[t.sym] = Math.round(((+holds[t.sym] || 0) + h) * 1e8) / 1e8; saveHolds(); }
+      }
     } else return false;
     t.status = "completed"; saveTx(); render(); return true;
   }
@@ -345,6 +360,7 @@
         if (el && navigator.clipboard) navigator.clipboard.writeText(el.textContent).then(() => say("Address copied")).catch(() => say(el.textContent));
       }
     });
+    window.ZenvyroWalletInfo = { avail: availAmt };
     window.ZenvyroWalletAdmin = {
       list: () => txs.filter(t => t.status === "pending" && (t.kind === "deposit" || t.kind === "withdraw")),
       approve: adminApprove, reject: adminReject

@@ -58,6 +58,18 @@
       db.purchases.push({ ts: Date.now(), user: id, pack, trx: PACKS[pack], via: "voucher" });
       save(db); return { ok: true, tier: pack };
     },
+    async payWithBalance(pack) {   // pay with the TRX in the Wallet (on the real server this check and debit happen there)
+      const db = load(), id = uid(), u = U(db, id), W = window.ZenvyroWallet, I = window.ZenvyroWalletInfo;
+      if (!(pack in PACKS)) return { ok: false, error: "invalid_pack" };
+      if (banned(u)) return { ok: false, error: "banned", bannedUntil: u.bannedUntil };
+      if (rank(u.tier) >= rank(pack)) return { ok: false, error: "already_have", tier: u.tier };
+      const have = I ? I.avail("TRX") : (W ? (W.balances().TRX || { amount: 0 }).amount : 0);
+      if (!W || have + 1e-9 < PACKS[pack]) return { ok: false, error: "no_balance", need: PACKS[pack], have };
+      if (!W.debit("TRX", PACKS[pack])) return { ok: false, error: "server" };
+      u.tier = pack;
+      db.purchases.push({ ts: Date.now(), user: id, pack, trx: PACKS[pack], via: "balance" });
+      save(db); return { ok: true, tier: pack };
+    },
     async submitPayment({ pack, asset, txid }) {
       const db = load(), id = uid(), u = U(db, id), a = ASSETS.find(x => x.id === asset);
       if (!(pack in PACKS) || !a) return { ok: false, error: "invalid" };

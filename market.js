@@ -57,6 +57,7 @@
   const LVL = () => window.ZenvyroLevel;
   const tierName = () => { try { return (window.ZenvyroMining && window.ZenvyroMining.getState().tier) || "Free"; } catch (e) { return "Free"; } };
   const trxBal = () => { try { const b = window.ZenvyroWallet.balances().TRX; return b ? b.amount : 0; } catch (e) { return 0; } };
+  const trxAvail = () => { try { const I = window.ZenvyroWalletInfo; return I ? I.avail("TRX") : trxBal(); } catch (e) { return 0; } };
 
   const css = `
 .zm-i{width:1em;height:1em;display:block;flex-shrink:0}
@@ -185,7 +186,7 @@
       <div class="modal-list"><div><strong>Price</strong><span>${pct ? "<s>" + fmt(i.price) + "</s> " : ""}${fmt(p)} TRX${pct ? " (-" + fmt(pct, 0) + "%)" : ""}</span></div>
       <div><strong>Benefit</strong><span>${esc(benefitFor(i, p))}</span></div><div><strong>Active for</strong><span>${durText(i.durDays)}</span></div>
       <div><strong>Stock</strong><span>${lf === Infinity ? "Unlimited" : lf + " left"}</span></div>${se ? `<div><strong>Sale ends in</strong><span>${dleft(se, t)}</span></div>` : ""}
-      <div><strong>Your TRX balance</strong><span>${fmt(trxBal(), 6)} TRX</span></div></div>
+      <div><strong>Your TRX balance</strong><span>${fmt(trxAvail(), 6)} TRX</span></div></div>
       <div class="modal-note">Daily rewards are added at 10 PM and wait for you to claim. When the active period ends, new rewards stop but what you already earned can still be claimed. ${DEMO ? "Demo mode: payment is not connected, so confirming adds this NFT without taking TRX." : "The price is taken from your TRX Wallet."}</div>
       <button class="btn" style="width:100%;margin-top:12px" onclick="zvBuyOk('${esc(i.id)}')">Confirm purchase</button>`);
   }
@@ -236,7 +237,7 @@
     const paid = C().priceNow(i, t);
     buying = true;
     if (!DEMO) {   // real payment: TRX from the Wallet (on the real server this check and debit happen there)
-      if (trxBal() + 1e-9 < paid) return stop("Not enough TRX in your Wallet");
+      if (trxAvail() + 1e-9 < paid) return stop("Not enough TRX in your Wallet");
       if (!W || !W.debit("TRX", paid)) return stop("Payment failed");
     }
     i.sold = (i.sold || 0) + 1; C().save(cat);
@@ -247,27 +248,27 @@
     buyFx(i, paid);
   }
   function claimOne(hid) {
-    const a = settle(), h = a.find(x => x.hid === hid), M = window.ZenvyroMining, W = window.ZenvyroWallet; if (!h) return;
+    const a = settle(), h = a.find(x => x.hid === hid), M = window.ZenvyroMining, E = window.ZenvyroEarn; if (!h) return;
     if (h.bt === "mining") {
       const n = h.pendZeny; if (!(n > 0)) return;
       if (!M || !M.addZeny) return say("Mining is not ready");
       M.addZeny(n); h.pendZeny = 0; store(a); say("+" + fmt(n, 8) + " ZENY added");
     } else {
       const n = h.pendTrx; if (!(n > 0)) return;
-      if (!W || !W.credit("TRX", n, 0)) return say("Claim failed");
-      h.pendTrx = 0; store(a); say("+" + fmt(n, 6) + " TRX added to your Wallet");
+      if (!E || !E.addTrx(n)) return say("Claim failed");
+      h.pendTrx = 0; store(a); say("+" + fmt(n, 6) + " TRX added to your Exchange Wallet");
     }
     refresh();
   }
   function claimAll() {
-    const a = settle(), M = window.ZenvyroMining, W = window.ZenvyroWallet; let tr = 0, zn = 0;
+    const a = settle(), M = window.ZenvyroMining, E = window.ZenvyroEarn; let tr = 0, zn = 0;
     a.forEach(h => { tr += h.pendTrx; zn += h.pendZeny; }); tr = r6(tr); zn = r8(zn);
     if (!(tr > 0 || zn > 0)) return;
     if (zn > 0 && !(M && M.addZeny)) return say("Mining is not ready");
-    if (tr > 0 && !(W && W.credit("TRX", tr, 0))) return say("Claim failed");
+    if (tr > 0 && !(E && E.addTrx(tr))) return say("Claim failed");
     if (zn > 0) M.addZeny(zn);
     a.forEach(h => { h.pendTrx = 0; h.pendZeny = 0; }); store(a);
-    say("Claimed " + (tr > 0 ? fmt(tr, 6) + " TRX" : "") + (tr > 0 && zn > 0 ? " and " : "") + (zn > 0 ? fmt(zn, 8) + " ZENY" : ""));
+    say("Added to your Exchange Wallet: " + (tr > 0 ? fmt(tr, 6) + " TRX" : "") + (tr > 0 && zn > 0 ? " and " : "") + (zn > 0 ? fmt(zn, 8) + " ZENY" : ""));
     refresh();
   }
 
@@ -279,12 +280,12 @@
     const value = nfts.reduce((t, i) => t + (+i.paid || 0), 0) + packVal;
     const boost = LVL() ? LVL().boost() : 0, base = RATE[tier] || RATE.Free, total = base * (1 + boost / 100);
     const tx = jget(TXKEY, []), wds = Array.isArray(tx) ? tx.filter(t => t && t.kind === "withdraw" && t.sym === "TRX") : [];
-    const pend = wds.filter(t => t.status === "pending").reduce((a, t) => a + (+t.amount || 0) + (+t.hold || 0), 0);
+    const pend = wds.filter(t => t.status === "pending").reduce((a, t) => a + (+t.amount || 0) + (t.holdIn ? 0 : (+t.hold || 0)), 0);
     const done = wds.filter(t => t.status === "completed").reduce((a, t) => a + (+t.amount || 0), 0);
     let held = 0; try { held = window.ZenvyroExchange.requests().filter(r => r.status === "pending").reduce((a, r) => a + (+r.zeny || 0), 0); } catch (e) {}
-    const AH = window.ZenvyroAirdropHold || { get: () => ({}), pct: 30 }, holds = AH.get(), hTrx = +holds.TRX || 0;
-    const hOthers = Object.keys(holds).filter(k => k !== "TRX" && +holds[k] > 0).map(k => fmt(holds[k], 8) + " " + k).join(", ");
-    const avail = L.lvl < 1 ? 0 : Math.max(0, (trxBal() - pend) / (1 + AH.pct / 100));
+    const AH = window.ZenvyroAirdropHold || { get: () => ({}), pct: 30 }, holds = AH.get(), hZ = +holds.ZENY || 0;
+    const hOthers = Object.keys(holds).filter(k => k !== "ZENY" && +holds[k] > 0).map(k => fmt(holds[k], 8) + " " + k).join(", ");
+    const avail = L.lvl < 1 ? 0 : Math.max(0, trxBal() - pend);
     const ms = new Date(); ms.setDate(1); ms.setHours(0, 0, 0, 0);
     const used = wds.filter(t => t.status !== "rejected" && (+t.ts || 0) >= ms.getTime()).length;
     const lim = LVL() ? LVL().wd() : 0, unl = lim === Infinity;
@@ -294,8 +295,8 @@
         <div class="zs-c">${ic("gem")}<small>NFT Holdings</small><b>${count}</b><em>${fmt(value)} TRX total</em></div>
         <div class="zs-c fz">${ic("snow")}<small>Frozen Balance</small><b>${fmt(pend, 6)} TRX</b><em>${fmt(held, 6)} ZENY on hold</em></div>
         <div class="zs-c">${ic("out")}<small>Total Withdrawal</small><b>${fmt(done, 6)} TRX</b><em>Withdrawn so far</em></div>
-        <div class="zs-c av">${ic("wallet")}<small>Available Withdrawal</small><b>${fmt(avail, 6)} TRX</b><em>${L.lvl < 1 ? "Unlocks at Level 1" : "After Hold Token for Airdrop"}</em></div>
-        <div class="zs-c hold">${ic("gem")}<small>Hold Token for Airdrop</small><b>${fmt(hTrx, 6)} TRX</b><em>${hOthers ? esc(hOthers) + " &middot; " : ""}Airdrop details coming soon.</em></div></div>
+        <div class="zs-c av">${ic("wallet")}<small>Available Withdrawal</small><b>${fmt(avail, 6)} TRX</b><em>${L.lvl < 1 ? "Unlocks at Level 1" : "You receive 70% of each withdrawal"}</em></div>
+        <div class="zs-c hold">${ic("gem")}<small>Hold Token for Airdrop</small><b>${fmt(hZ, 6)} ZENY</b><em>${hOthers ? esc(hOthers) + " (older holds) &middot; " : ""}${AH.pct}% of each withdrawal is held as ZENY. Airdrop details coming soon.</em></div></div>
       <div class="zs-w"><div class="r"><span>Withdrawals this month</span><b>${lim === 0 ? "Locked (Level 1 needed)" : used + " / " + (unl ? "Unlimited" : lim)}</b></div>${unl ? "" : `<div class="zs-tr"><i style="width:${lim ? Math.min(100, used / lim * 100) : 0}%"></i></div>`}</div>
       ${nfts.length ? `<div class="zm-note">Your NFTs: ${nfts.map(i => esc(i.name)).join(", ")}</div>` : ""}`;
   }

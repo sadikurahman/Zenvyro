@@ -56,7 +56,7 @@
     return slot;
   }
   const nextSlot = now => latestSlot(now) + DAY_MS;
-  const hasPending = () => claim.pendingIncome > 0; // Income Commission only (ZENY); Purchase Bonus goes straight to the Wallet
+  const hasPending = () => claim.pendingIncome > 0; // Income Commission only (ZENY); Purchase Bonus goes to the Exchange Wallet (TRX)
   // claimable when something is pending and a new 10 PM has passed since the last claim
   const canClaim = () => hasPending() && claim.lastSlot < latestSlot(Date.now());
   const hms = ms => {
@@ -141,7 +141,7 @@
     return data.history.map(h => {
       const isBonus = h.type === "bonus";
       const amt = (+h.amount || 0).toFixed(isBonus ? 2 : 6) + (isBonus ? " TRX" : " ZENY");
-      return `<div><strong>${isBonus ? "Purchase Bonus · Credited to Wallet" : "Income Commission"}<br><small style="color:#aeb9ff;font-weight:500">${esc(h.from || "User")} · ${esc(h.date || "")}</small></strong><span>+${amt}</span></div>`;
+      return `<div><strong>${isBonus ? "Purchase Bonus · Credited to Exchange Wallet" : "Income Commission"}<br><small style="color:#aeb9ff;font-weight:500">${esc(h.from || "User")} · ${esc(h.date || "")}</small></strong><span>+${amt}</span></div>`;
     }).join("");
   }
 

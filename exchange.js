@@ -1,4 +1,4 @@
-/* Zenvyro — Step 3a: Exchange (ZENY → USDT / BTC / TON / BNB / SOL)
+/* Zenvyro — Step 3a: Exchange (income ZENY or TRX → TRX / USDT / BTC / TON / BNB / SOL), instant
    JavaScript only; uses the existing modal design.
    A total 10% fee is deducted (Exchange 3% + Network 2% + Platform 5%) and shown before converting.
    Exchange is a Request: ZENY is held; when an admin accepts (at the rate at acceptance) it is credited to the Wallet, and if rejected the ZENY is refunded.
@@ -49,6 +49,15 @@
   let wallet = loadWallet();
   const saveWallet = () => { try { localStorage.setItem(WKEY, JSON.stringify(wallet)); } catch (e) {} };
 
+  // Exchange Wallet = the member's INCOME balance. ZENY income lives in the mining balance; TRX income (NFT rewards, bonuses) is kept here.
+  // To spend or withdraw it, the member exchanges it (10% fee) and the result lands in the Wallet. A server must hold this in the real system.
+  const EKEY = "zenvyro_earn_v1";
+  let earn = (() => { try { const o = JSON.parse(localStorage.getItem(EKEY) || "{}"); return { TRX: Math.max(0, +o.TRX || 0) }; } catch (e) { return { TRX: 0 }; } })();
+  const saveEarn = () => { try { localStorage.setItem(EKEY, JSON.stringify(earn)); } catch (e) {} };
+  const trxEarn = () => earn.TRX;
+  function addTrx(n) { n = +n; if (!(n > 0)) return false; earn.TRX = Math.round((earn.TRX + n) * 1e6) / 1e6; saveEarn(); update(); return true; }
+  function takeTrx(n) { n = +n; if (!(n > 0) || n > earn.TRX + 1e-9) return false; earn.TRX = Math.max(0, Math.round((earn.TRX - n) * 1e6) / 1e6); saveEarn(); update(); return true; }
+
   const fmtUsd = n => Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   // Home Account Balance
@@ -85,7 +94,7 @@
   function loadReqs() {
     try {
       const a = JSON.parse(localStorage.getItem(RKEY) || "[]");
-      return Array.isArray(a) ? a.filter(r => r && r.id && asset(r.asset) && +r.zeny > 0 &&
+      return Array.isArray(a) ? a.filter(r => r && r.id && asset(r.asset) && (+r.zeny > 0 || +r.amt > 0) &&
         ["pending", "approved", "rejected"].includes(r.status)) : [];
     } catch (e) { return []; }
   }
@@ -122,19 +131,17 @@
   }
 
   function reqRows() {
-    if (!reqs.length) return '<div><strong>No requests yet</strong><span>—</span></div>';
+    if (!reqs.length) return '<div><strong>No exchanges yet</strong><span>—</span></div>';
     return reqs.slice(0, 20).map(r => {
-      const a = asset(r.asset);
-      const st = r.status === "pending" ? "⏳ Pending"
-        : r.status === "approved" ? "✓ " + (+r.receive).toFixed(a.dec) + " " + r.asset
-        : "✕ Rejected · ZENY refunded";
-      return `<div><strong>${(+r.zeny).toFixed(6)} ZENY → ${r.asset}<br><small style="color:#aeb9ff;font-weight:500">${when(r.created)} · ${r.id}</small></strong><span>${st}</span></div>`;
+      const a = asset(r.asset), from = r.src || "ZENY", amt = +(r.amt || r.zeny);
+      const st = r.status === "pending" ? "⏳ Pending" : r.status === "approved" ? "✓ " + (+r.receive).toFixed(a.dec) + " " + r.asset : "✕ Rejected · ZENY refunded";
+      return `<div><strong>${amt.toFixed(6)} ${from} → ${r.asset}<br><small style="color:#aeb9ff;font-weight:500">${when(r.created)} · ${r.id}</small></strong><span>${st}</span></div>`;
     }).join("");
   }
   function renderReqs() { const el = $("exReqs"); if (el) el.innerHTML = reqRows(); }
 
   // ---- Prices (in USDT) ----
-  let prices = { USDT: 1 }, priceState = "idle", priceTime = 0, sel = "TRX";
+  let prices = { USDT: 1 }, priceState = "idle", priceTime = 0, sel = "TRX", src = "ZENY";
 
   async function loadPrices() {
     if (priceState === "ok" && Date.now() - priceTime < 60000) return;
@@ -160,29 +167,30 @@
   }
 
   const zenyBalance = () => (window.ZenvyroMining ? window.ZenvyroMining.getState().balance : 0);
+  const srcBal = () => (src === "TRX" ? trxEarn() : zenyBalance());
 
   function calc() {
     const el = $("exAmount");
     const amount = el ? Math.max(0, parseFloat(el.value) || 0) : 0;
-    const gross = amount * ZENY_USDT;
+    const sp = src === "ZENY" ? ZENY_USDT : (prices.TRX || 0), gross = amount * sp;
     const fees = FEES.map(f => ({ label: f.label, pct: f.pct, usdt: gross * f.pct / 100 }));
     const net = gross - fees.reduce((a, f) => a + f.usdt, 0);
     const price = prices[sel];
     const a = asset(sel);
-    const receive = price ? floorTo(net / price, a.dec) : null;
+    const receive = price && sp > 0 ? floorTo(net / price, a.dec) : null;
     return { amount, gross, fees, net, price, receive, a };
   }
 
   function update() {
     if (!$("exAmount")) return;
-    const c = calc(), bal = zenyBalance();
-    $("exAvail").textContent = bal.toFixed(6) + " ZENY";
+    const c = calc(), bal = srcBal(), sp = src === "ZENY" ? ZENY_USDT : (prices.TRX || 0);
+    $("exAvail").textContent = zenyBalance().toFixed(6) + " ZENY · " + trxEarn().toFixed(6) + " TRX";
+    if ($("exFromLbl")) $("exFromLbl").textContent = "Amount · " + src;
     if ($("exHeld")) $("exHeld").textContent = heldZeny().toFixed(6) + " ZENY";
 
     let rate;
-    if (sel === "USDT") rate = "1 ZENY = " + ZENY_USDT + " USDT (before fees)";
-    else if (c.price) rate = "1 ZENY ≈ " + (ZENY_USDT / c.price).toFixed(c.a.dec) + " " + sel + " (before fees)";
-    else rate = priceState === "loading" ? "Loading price…" : "Live price unavailable — please try again later";
+    if (!sp || !c.price) rate = priceState === "loading" ? "Loading price…" : "Live price unavailable — please try again later";
+    else rate = "1 " + src + " ≈ " + (sp / c.price).toFixed(c.a.dec) + " " + sel + " (before fees)";
     $("exRate").textContent = rate;
 
     $("exRows").innerHTML =
@@ -193,7 +201,7 @@
     $("exReceive").textContent = c.receive === null ? "—" : c.receive.toFixed(c.a.dec) + " " + sel;
 
     const over = c.amount > bal + 1e-12;
-    $("exErr").textContent = over ? "Not enough ZENY balance" : "";
+    $("exErr").textContent = over ? "Not enough " + src + " balance" : "";
     const ok = c.amount > 0 && !over && c.receive !== null && c.receive > 0;
     const btn = $("exConfirm");
     btn.disabled = !ok; btn.style.opacity = ok ? "1" : ".5";
@@ -203,14 +211,21 @@
       if (t) t.style.borderColor = x.sym === sel ? "#a54cff" : "#302864";
       if (t) t.style.boxShadow = x.sym === sel ? "0 0 18px #8d31ff30" : "none";
     });
+    ["ZENY", "TRX"].forEach(k => {
+      const t = $("exSrc_" + k);
+      if (t) { t.style.borderColor = k === src ? "#a54cff" : "#302864"; t.style.boxShadow = k === src ? "0 0 18px #8d31ff30" : "none"; }
+    });
   }
 
   function body() {
     const tiles = ASSETS.map(a =>
       `<button id="exTile_${a.sym}" onclick="exSelect('${a.sym}')" style="border:1px solid #302864;background:#0b0a23;color:#fff;border-radius:16px;padding:12px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800;font-size:15px"><span style="font-size:24px;color:#b28aff;line-height:1">${a.icon}</span>${a.sym}<small style="color:#aeb9ff;font-weight:500;font-size:11px">${a.name}</small></button>`).join("");
+    const sb = k => `<button id="exSrc_${k}" onclick="exSrc('${k}')" style="border:1px solid #302864;background:#0b0a23;color:#fff;border-radius:16px;padding:12px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800;font-size:14px">${k}<small style="font-weight:500;color:#aeb9ff">${k === "ZENY" ? "Mining income" : "NFT and other income"}</small></button>`;
     return `
-      <div class="modal-list"><div><strong>Mining Available Balance</strong><span id="exAvail">0.000000 ZENY</span></div><div><strong>On hold (Pending requests)</strong><span id="exHeld">0.000000 ZENY</span></div></div>
-      <label class="modal-label" for="exAmount">From · ZENY (Mining Balance)</label>
+      <div class="modal-list"><div><strong>Exchange Wallet (your income)</strong><span id="exAvail">0.000000 ZENY</span></div></div>
+      <label class="modal-label">From</label>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px">${sb("ZENY")}${sb("TRX")}</div>
+      <label class="modal-label" for="exAmount" id="exFromLbl">Amount · ZENY</label>
       <input class="modal-field" id="exAmount" type="number" inputmode="decimal" step="any" min="0" placeholder="0.000000" oninput="exUpdate()">
       <button class="btn alt" style="width:100%;margin-top:8px;padding:10px" onclick="exMax()">Max</button>
       <div id="exErr" style="color:#ff8aa0;font-size:12px;margin-top:6px;min-height:14px"></div>
@@ -221,10 +236,10 @@
       <div class="modal-list" id="exRows"></div>
       <label class="modal-label">You receive (estimated)</label>
       <div class="balance-num" style="font-size:30px;margin:0" id="exReceive">—</div>
-      <button class="btn" id="exConfirm" style="width:100%;margin-top:14px" onclick="exConfirm()">Request Exchange</button>
-      <label class="modal-label">My Requests</label>
+      <button class="btn" id="exConfirm" style="width:100%;margin-top:14px" onclick="exConfirm()">Exchange Now</button>
+      <label class="modal-label">Recent Exchanges</label>
       <div class="modal-list" id="exReqs">${reqRows()}</div>
-      <div class="modal-note">When you send a request, your ZENY is put on hold. When an admin accepts, the result is credited to your Wallet at the market price at acceptance (after the 10% fee); if rejected, your ZENY is refunded. Amounts shown here are estimates. The ZENY rate is a platform-set reference rate. Requests and the Wallet are in demo mode for now; real acceptance will happen via the server/admin panel.</div>`;
+      <div class="modal-note">Exchange is instant. A total 10% fee is taken and the result is added straight to your Wallet, where you can spend it, transfer it or withdraw it. Only your income (mining ZENY and TRX rewards) can be exchanged. Amounts shown here are estimates until you confirm.</div>`;
   }
 
   function openExchange() {
@@ -250,23 +265,27 @@
     window.ZenvyroExchange = { requests: () => reqs.slice(), approve, reject };
     window.exSelect = sym => { if (asset(sym)) { sel = sym; update(); } };
     window.exUpdate = update;
-    window.exMax = () => { const el = $("exAmount"); if (el) { el.value = zenyBalance().toFixed(6); update(); } };
+    window.exMax = () => { const el = $("exAmount"); if (el) { el.value = srcBal().toFixed(6); update(); } };
+    window.exSrc = k => { if (k === "ZENY" || k === "TRX") { src = k; const el = $("exAmount"); if (el) el.value = ""; update(); } };
+    window.ZenvyroEarn = { get: () => ({ ZENY: zenyBalance(), TRX: trxEarn() }), addTrx, takeTrx };
     window.exConfirm = () => {
       const c = calc();
       if (window.ZenvyroSettings && window.ZenvyroSettings.block("exchange")) return;
       if (!(c.amount > 0) || c.receive === null || c.receive <= 0) return;
-      if (c.amount > zenyBalance() + 1e-12) { say("Not enough ZENY balance"); return; }
-      const msg = "Request: " + c.amount.toFixed(6) + " ZENY → " + sel +
-                  "\nEstimated: " + c.receive.toFixed(c.a.dec) + " " + sel +
-                  "\nTotal fees: " + TOTAL_FEE + "%\nThe rate will be set when the admin accepts; your ZENY will be held now.\n\nSend request?";
+      if (c.amount > srcBal() + 1e-12) { say("Not enough " + src + " balance"); return; }
+      const msg = "Exchange " + c.amount.toFixed(6) + " " + src + " → " + c.receive.toFixed(c.a.dec) + " " + sel +
+                  "\nTotal fees: " + TOTAL_FEE + "%\nThe result is added to your Wallet at once.\n\nContinue?";
       if (!window.confirm(msg)) return;
-      if (!window.ZenvyroMining || !window.ZenvyroMining.spendZeny(c.amount)) { say("Request failed"); return; }
-      reqs.unshift({ id: newId(), zeny: c.amount, asset: sel, status: "pending", estimate: c.receive, receive: 0, created: Date.now() });
+      const took = src === "ZENY" ? !!(window.ZenvyroMining && window.ZenvyroMining.spendZeny(c.amount)) : takeTrx(c.amount);
+      if (!took) { say("Exchange failed"); return; }
+      const id = newId();
+      credit(sel, c.receive, c.net);
+      reqs.unshift({ id, src, amt: c.amount, zeny: src === "ZENY" ? c.amount : 0, asset: sel, status: "approved", estimate: c.receive, receive: c.receive, rate: c.price, created: Date.now(), decided: Date.now() });
       saveReqs();
-      if (window.ZenvyroTx) window.ZenvyroTx.log({ id: reqs[0].id, kind: "exchange", sym: sel, amount: c.receive, status: "pending", sub: "ZENY → " + sel });
+      if (window.ZenvyroTx) window.ZenvyroTx.log({ id, kind: "exchange", sym: sel, amount: c.receive, status: "completed", sub: src + " → " + sel });
       $("exAmount").value = "";
       renderReqs(); update();
-      say("Request sent — ZENY is on hold");
+      say("Exchanged: added to your Wallet");
     };
 
     const orig = window.showSection;
