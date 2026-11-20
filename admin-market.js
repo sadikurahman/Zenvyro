@@ -35,7 +35,7 @@
   }
   function form(id) {
     cat = C.get(); const t = Date.now();
-    const i = id ? cat.items.find(x => x.id === id) : { id: "", name: "", img: "", price: "", disc: 0, discEnd: null, cats: [], badge: "", stock: null, sold: 0, saleDays: null, saleStart: t, durDays: 30, btype: "mining", bval: "", hidden: false };
+    const i = id ? cat.items.find(x => x.id === id) : { id: "", name: "", img: "", price: "", disc: 0, discEnd: null, cats: [], stock: null, sold: 0, saleDays: null, saleStart: t, durDays: 30, btype: "mining", bval: "", hidden: false };
     editId = id || null; imgData = String(i.img).startsWith("data:") ? i.img : null;
     const dRem = i.discEnd ? Math.max(1, Math.ceil((i.discEnd - t) / DAY)) : "";
     const sLeft = i.saleDays ? Math.max(0, Math.ceil((i.saleStart + i.saleDays * DAY - t) / DAY)) : null;
@@ -47,7 +47,6 @@
 <p class="sub">Discount % (0 = none)</p>${num("mkDisc", i.disc || "", "0 to 90")}
 <p class="sub">Discount lasts (days, empty = no end)</p>${num("mkDiscD", dRem, "empty = until you remove it", "1")}
 <p class="sub">Categories (where it shows)</p>${cat.cats.map(c => `<label class="li"><span>${esc(c)}</span><input type="checkbox" class="mkc" value="${esc(c)}" ${i.cats.includes(c) ? "checked" : ""}></label>`).join("") || '<div class="li">No category yet (add one in Categories)</div>'}
-<p class="sub">Badge</p><select class="in" id="mkBadge">${["", "Hot", "Premium", "Popular", "New"].map(b => `<option value="${b}" ${i.badge === b ? "selected" : ""}>${b || "None"}</option>`).join("")}</select>
 <p class="sub">Stock (how many can be sold${id ? "; sold so far " + i.sold : ""})</p>${num("mkStock", i.stock, "e.g. 100", "1")}<label class="li"><span>Unlimited stock</span><input type="checkbox" id="mkUnl" ${i.stock == null ? "checked" : ""}></label>
 <p class="sub">Sale open for (days, empty = unlimited)</p>${num("mkSale", i.saleDays, "empty = always for sale", "1")}${sLeft !== null ? `<p class="note">${sLeft} day(s) left. Changing this number restarts the count from today.</p>` : ""}
 <p class="sub">Active period after purchase (days)</p>${num("mkDur", i.durDays, "e.g. 30", "1")}<label class="li"><span>Permanent (lifetime benefit)</span><input type="checkbox" id="mkPerm" ${i.durDays == null ? "checked" : ""}></label>
@@ -78,7 +77,7 @@
       const dv = g("mkDiscD").value.trim();
       if (dv !== "") { const d = Math.floor(+dv); if (!(d >= 1)) return toast("Discount days must be 1 or more"); const o = old && old.discEnd ? Math.max(1, Math.ceil((old.discEnd - t) / DAY)) : null; discEnd = o === d ? old.discEnd : t + d * DAY; }
     }
-    const rec = { id: old ? old.id : nextId(), name, img, price, disc, discEnd, cats: [...document.querySelectorAll(".mkc:checked")].map(x => x.value), badge: g("mkBadge").value, stock, sold, saleDays,
+    const rec = { id: old ? old.id : nextId(), name, img, price, disc, discEnd, cats: [...document.querySelectorAll(".mkc:checked")].map(x => x.value), stock, sold, saleDays, created: old ? (old.created || null) : t,
       saleStart: old && String(old.saleDays || "") === String(saleDays || "") ? old.saleStart : t, durDays, btype, bval, hidden: g("mkHide").checked };
     if (old) Object.assign(old, rec); else cat.items.push(rec);
     if (!C.save(cat)) return toast("Could not save (storage full). Use a smaller image");

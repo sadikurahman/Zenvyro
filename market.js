@@ -86,21 +86,17 @@
 .zm-card{position:relative;border:1px solid #5a35d8;border-radius:20px;background:linear-gradient(160deg,#150c4e,#0b0830);box-shadow:0 0 18px #6b32ff2a;overflow:hidden;padding-bottom:10px}
 .zm-card.lg{border-color:#b8902c;box-shadow:0 0 18px #e8a52a33}
 .zm-card.t-hot{border-color:#ff5a3c;background:linear-gradient(160deg,#3a1010,#150c4e 50%,#0b0830);box-shadow:0 0 20px #ff3d2e44}
-.zm-card.t-pre{border-color:#f2c14e;background:linear-gradient(160deg,#4a3410,#1d1050 52%,#0b0830);box-shadow:0 0 24px #e8a52a66,inset 0 0 0 1px #f2c14e33}
-.zm-card.t-pop{border-color:#ff5fa8;background:linear-gradient(160deg,#3a1050,#150c4e 50%,#0b0830);box-shadow:0 0 20px #d64dff44}
 .zm-card.t-new{border-color:#2bf0b0;background:linear-gradient(160deg,#0a3a3a,#150c4e 50%,#0b0830);box-shadow:0 0 20px #2bf0b044}
 .zm-card.xp{opacity:.88}.zm-card.xp .im img{filter:grayscale(.7) brightness(.8)}
 .zm-card .im{position:relative;aspect-ratio:1.3;background:#1a1058}.zm-card .im img{width:100%;height:100%;object-fit:cover;display:block}
 .zm-card .im:after{content:"";position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(transparent,#0b0830cc);pointer-events:none}
 .zm-bd{position:absolute;top:8px;right:8px;z-index:2;display:inline-flex;align-items:center;gap:4px;height:26px;border-radius:13px;padding:0 11px 0 9px;font-size:12.5px;line-height:1;font-weight:800;letter-spacing:.3px;color:#fff;border:1px solid #ffffff55;box-shadow:0 2px 8px #0009}.zm-bd .zm-i{font-size:14px}
 .zm-bd.hot{background:linear-gradient(135deg,#ff6a2b,#e0183c);box-shadow:0 0 14px #ff3d2e99,0 2px 8px #0009}
-.zm-bd.pre{background:linear-gradient(135deg,#ffe08a,#e8a52a 55%,#b8761a);color:#2a1a00;border-color:#fff3c2;box-shadow:0 0 16px #ffc84acc,0 2px 8px #0009}
-.zm-bd.pop{background:linear-gradient(135deg,#ff5fa8,#8a3dff);box-shadow:0 0 14px #d64dff99,0 2px 8px #0009}
 .zm-bd.new{background:linear-gradient(135deg,#34f0b0,#1a9f8f);color:#032a22;border-color:#c8ffe9;box-shadow:0 0 14px #2bf0b099,0 2px 8px #0009}
 .zm-card b{display:block;padding:10px 10px 4px;font-size:15px}
-.zm-pr{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 10px;font-size:13px;color:#e0d2ff}
-.zm-pr span{display:flex;align-items:center;gap:5px;min-width:0;font-weight:800;color:#fff;font-size:14px}.zm-pr .zm-i{font-size:18px;color:#b28aff}
-.zm-buy{border:0;border-radius:14px;padding:7px 11px;font-weight:800;font-size:12.5px;color:#2a1a00;background:linear-gradient(180deg,#ffd36b,#e8a52a)}
+.zm-pr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;row-gap:6px;gap:6px;padding:0 10px;font-size:13px;color:#e0d2ff}
+.zm-pr span{display:flex;align-items:center;gap:4px;min-width:0;white-space:nowrap;font-weight:800;color:#fff;font-size:13px}.zm-pr .zm-i{font-size:18px;color:#b28aff}
+.zm-buy{white-space:nowrap;border:0;border-radius:14px;padding:7px 10px;font-weight:800;font-size:12.5px;color:#2a1a00;background:linear-gradient(180deg,#ffd36b,#e8a52a)}
 .zm-buy:disabled{background:#2a1a86;color:#cfc4ff}.zm-buy.owned:disabled{background:linear-gradient(180deg,#5dffd0,#1fbf8f);color:#06231c}.zm-buy.sold:disabled{background:#3a1414;color:#ff9a9a}
 .zm-bonus{display:flex;align-items:center;gap:12px;margin-top:16px;border:1px solid #d8a93a;border-radius:20px;background:linear-gradient(135deg,#2a1d08,#150c4e);padding:14px}
 .zm-bonus .zm-i{font-size:34px;color:#ffd36b}.zm-bonus b{display:block;color:#ffd36b;font-size:15px}.zm-bonus small{color:#cfc4ff;font-size:12.5px}
@@ -123,9 +119,7 @@
 .zm-card .ch{position:absolute;top:8px;left:8px;z-index:2;display:inline-flex;align-items:center;height:26px;border-radius:13px;padding:0 10px;font-size:12.5px;font-weight:800;line-height:1;background:linear-gradient(135deg,#ff4f8a,#d6204f);color:#fff;border:1px solid #ffffff55;box-shadow:0 2px 8px #0009}
 .zm-old{text-decoration:line-through;color:#9d93e0;font-size:11.5px;margin-right:4px}
 .zm-bf{padding:0 10px 8px;color:#2bf0b0;font-size:12px;font-weight:700;line-height:1.4}
-.zm-mt{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px 0}
-.zm-ch{display:inline-flex;align-items:center;gap:4px;border-radius:10px;border:1px solid #3a2a90;background:#0b0830;color:#cfc4ff;padding:4px 8px;font-size:11.5px;font-weight:700;line-height:1}.zm-ch .zm-i{font-size:13px}
-.zm-ch.g{border-color:#d8a93a;background:#2a1d08;color:#ffd36b}.zm-ch.w{border-color:#ff8a8a;background:#2b0a0a;color:#ff9a9a}
+.zm-mt{padding:8px 10px 0;color:#aeb9ff;font-size:11.5px;line-height:1.45}.zm-mt .lo{color:#ffb84a}.zm-mt .w{color:#ff9a9a}
 .zm-rd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:2px 10px 0;padding:8px 10px;border-radius:12px;background:#0b0830;border:1px solid #2e1d7a}.zm-rd small{color:#aeb9ff;font-size:11.5px}.zm-rd strong{color:#2bf0b0;font-size:13px;overflow-wrap:anywhere;text-align:right}
 .zm-st{position:absolute;bottom:8px;left:8px;z-index:2;display:inline-flex;align-items:center;gap:5px;border-radius:13px;padding:6px 12px 6px 9px;font-size:12.5px;font-weight:800;line-height:1;background:#0a2b2bdd;color:#2bf0b0;border:1px solid #2bf0b0}.zm-st .zm-i{font-size:14px}.zm-st.tl{top:8px;bottom:auto}
 .zm-st.pm{background:linear-gradient(135deg,#ffe08a,#e8a52a 60%,#b8761a);color:#2a1a00;border-color:#fff3c2;box-shadow:0 0 14px #ffc84aaa}
@@ -158,15 +152,16 @@
   const durText = d => d ? d + " days" : "Permanent";
   const benefitFor = (i, p) => i.btype === "mining" ? "+" + fmt(i.bval, 2) + "% extra ZENY on every mining claim" : i.btype === "trx" ? fmt(i.bval, 6) + " TRX every day" : fmt(i.bval, 2) + "% of the price = " + fmt(r6(p * i.bval / 100), 6) + " TRX every day";
   const mstate = (i, a, t) => a.some(h => h.id === i.id && active(h, t)) ? "owned" : C().left(i) <= 0 ? "sold" : !C().saleOpen(i, t) ? "closed" : "buy";
-  const BI = { hot: "flame", pre: "crown", pop: "star", new: "spark" };
+  const BI = { hot: "flame", new: "spark" };
   const statOf = (h, t) => h.exp == null ? ["Permanent", "pm", "inf"] : active(h, t) ? [dleft(h.exp, t) + " left", (h.exp - t) / DAY <= 3 ? "lo" : "ok", "clock"] : ["Expired", "ex", "clock"];
   const statChip = (h, t, top) => { const x = statOf(h, t); return `<span class="zm-st ${x[1]}${top ? " tl" : ""}">${ic(x[2])}${x[0]}</span>`; };
-  const cardHtml = (i, s, t, h) => {
-    const pct = C().discPct(i, t), p = C().priceNow(i, t), lf = C().left(i), se = C().saleEnd(i), b = C().BADGES[i.badge];
+  const cardHtml = (i, s, t, h, ab) => {
+    const pct = C().discPct(i, t), p = C().priceNow(i, t), lf = C().left(i), se = C().saleEnd(i), b = ab ? [ab, ab.toLowerCase()] : null;
     const lab = s === "owned" ? "Owned" : s === "sold" ? "Sold Out" : s === "closed" ? "Closed" : "Buy Now";
     const cls = "zm-card" + ((i.cats || []).includes("Legendary") ? " lg" : "") + (b ? " t-" + b[1] : "");
-    const chip = h ? statChip(h, t) : se && s === "buy" ? `<span class="zm-st lo">${ic("clock")}Ends in ${dleft(se, t)}</span>` : "";
-    const meta = h ? "" : `<div class="zm-mt">${i.durDays ? `<span class="zm-ch">${ic("clock")}${i.durDays} days</span>` : `<span class="zm-ch g">${ic("inf")}Permanent</span>`}<span class="zm-ch${lf <= 10 ? " w" : ""}">${lf === Infinity ? "Unlimited stock" : "Stock: " + lf + " left"}</span></div>`;
+    const chip = h ? statChip(h, t) : "";
+    const lastDays = se && s === "buy" ? Math.max(1, Math.ceil((se - t) / DAY)) : 0;
+    const meta = h ? "" : `<div class="zm-mt">${lastDays ? `<span class="${lastDays <= 3 ? "lo" : ""}">${dleft(se, t)} left</span> &middot; ` : ""}${lf === Infinity ? "Unlimited stock" : `<span class="${lf <= 10 ? "w" : ""}">${lf} left</span>`}</div>`;
     return `<article class="${cls}"><div class="im"><img src="${esc(i.img)}" alt="${esc(i.name)}" loading="lazy">${b ? `<span class="zm-bd ${b[1]}">${ic(BI[b[1]] || "star")}${b[0]}</span>` : ""}${pct ? `<span class="ch">-${fmt(pct, 0)}%</span>` : ""}${chip}</div><b>${esc(i.name)}</b>
     <div class="zm-bf">${esc(benefitFor(i, p))}</div>
     <div class="zm-pr"><span>${ic("gem")}${pct ? `<s class="zm-old">${fmt(i.price)}</s>` : ""}${fmt(p)} TRX</span><button class="zm-buy ${s}" ${s !== "buy" ? "disabled" : ""} onclick="zvBuy('${esc(i.id)}')">${lab}</button></div>
@@ -188,14 +183,14 @@
       const tr = a.reduce((s, h) => s + h.pendTrx, 0), zn = a.reduce((s, h) => s + h.pendZeny, 0);
       return `<div class="zm-all"><span>Ready: <strong>${fmt(tr, 6)} TRX</strong> &middot; <strong>${fmt(zn, 8)} ZENY</strong><br><small>A new day starts at 10 PM.</small></span><button class="zm-cl" ${tr > 0 || zn > 0 ? "" : "disabled"} onclick="zvNftClaimAll()">Claim all</button></div>` + a.map(h => myCard(h, t)).join("");
     }
-    const own = load(), list = C().get().items.filter(i => !i.hidden && (S.tab === "All NFTs" || i.cats.includes(S.tab)) && (!q || i.name.toLowerCase().includes(q)));
-    return list.length ? list.map(i => { const st = mstate(i, own, t); return cardHtml(i, st, t, st === "owned" ? own.find(x => x.id === i.id && active(x, t)) : null); }).join("") : '<div class="zm-empty">No NFT found.</div>';
+    const own = load(), all = C().get().items, list = all.filter(i => !i.hidden && (S.tab === "All NFTs" || i.cats.includes(S.tab)) && (!q || i.name.toLowerCase().includes(q)));
+    return list.length ? list.map(i => { const st = mstate(i, own, t); return cardHtml(i, st, t, st === "owned" ? own.find(x => x.id === i.id && active(x, t)) : null, C().autoBadge(i, all, t)); }).join("") : '<div class="zm-empty">No NFT found.</div>';
   }
   function render() {
     const tabs = ["All NFTs", ...C().get().cats, "My NFTs"]; if (!tabs.includes(S.tab)) S.tab = "All NFTs";
     root.innerHTML = `<div class="in"><div class="hd"><button class="ib" onclick="zvmClose()" aria-label="Back">${ic("back")}</button><b>${ic("store")}NFT Marketplace</b><button class="ib" onclick="zvmSearch()" aria-label="Search">${ic("search")}</button></div>
       ${S.s ? `<input class="sr" id="zmQ" placeholder="Search NFTs" value="${esc(S.q)}" oninput="zvmQ(this.value)">` : ""}
-      <div class="zm-bn2"><img src="nft-banner.jpg" alt="Discover Premium NFTs. Own and collect."><button class="zm-bgo" aria-label="Browse NFTs" onclick="document.getElementById('zmGrid').scrollIntoView({behavior:'smooth'})"></button></div</div>
+      <div class="zm-bn2"><img src="nft-banner.jpg" alt="Discover Premium NFTs. Own and collect."><button class="zm-bgo" aria-label="Browse NFTs" onclick="document.getElementById('zmGrid').scrollIntoView({behavior:'smooth'})"></button></div>
       <div class="tabs">${tabs.map(t => `<button class="${t === S.tab ? "on" : ""}" onclick="zvmTab('${esc(t)}')">${esc(t)}</button>`).join("")}</div>
       <div class="grid" id="zmGrid">${gridHtml()}</div>
       <div class="zm-bonus">${ic("gift")}<div><b>5% Bonus for your referrer</b><small>When you buy your first pack or NFT, the member who invited you earns a 5% Purchase Bonus.</small></div></div>
