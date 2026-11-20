@@ -42,7 +42,7 @@
     const num = (idn, v, ph, st) => `<input class="in" id="${idn}" type="number" inputmode="decimal" min="0" step="${st || "any"}" value="${v == null ? "" : v}" placeholder="${ph || ""}">`;
     return `<div class="bg"><button class="sm" data-mk="list">Back</button></div>
 <p class="sub">Name</p><input class="in" id="mkName" maxlength="40" value="${esc(i.name)}" placeholder="e.g. Cyber Knight #001">
-<p class="sub">Image</p>${i.img ? `<img id="mkPrev" src="${esc(i.img)}" alt="" style="width:96px;height:72px;object-fit:cover;border-radius:12px;display:block;margin-bottom:8px">` : '<img id="mkPrev" alt="" style="display:none">'}<input id="mkFile" type="file" accept="image/*" style="color:#fff;margin-bottom:8px"><input class="in" id="mkImg" value="${imgData ? "" : esc(i.img)}" placeholder="or an image file name / link">
+<p class="sub">Image</p>${i.img ? `<img id="mkPrev" src="${esc(i.img)}" alt="" style="width:auto;max-width:100%;height:auto;max-height:150px;object-fit:contain;border-radius:12px;display:block;margin-bottom:8px">` : '<img id="mkPrev" alt="" style="display:none">'}<input id="mkFile" type="file" accept="image/*" style="color:#fff;margin-bottom:8px"><input class="in" id="mkImg" value="${imgData ? "" : esc(i.img)}" placeholder="or an image file name / link">
 <p class="sub">Price (TRX)</p>${num("mkPrice", i.price, "TRX")}
 <p class="sub">Discount % (0 = none)</p>${num("mkDisc", i.disc || "", "0 to 90")}
 <p class="sub">Discount lasts (days, empty = no end)</p>${num("mkDiscD", dRem, "empty = until you remove it", "1")}
@@ -85,7 +85,7 @@
   }
   function pick(file) {
     const r = new FileReader();
-    r.onload = () => { const im = new Image(); im.onload = () => { const s = Math.min(1, 480 / Math.max(im.width, im.height)), c = document.createElement("canvas"); c.width = Math.round(im.width * s); c.height = Math.round(im.height * s); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); imgData = c.toDataURL("image/jpeg", .82); const p = $("#mkPrev"); if (p) { p.src = imgData; p.style.cssText = "width:96px;height:72px;object-fit:cover;border-radius:12px;display:block;margin-bottom:8px"; } }; im.src = r.result; };
+    r.onload = () => { const im = new Image(); im.onload = () => { const s = Math.min(1, 720 / Math.max(im.width, im.height)), c = document.createElement("canvas"); c.width = Math.round(im.width * s); c.height = Math.round(im.height * s); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); imgData = c.toDataURL("image/jpeg", .82); const p = $("#mkPrev"); if (p) { p.src = imgData; p.style.cssText = "width:auto;max-width:100%;height:auto;max-height:150px;object-fit:contain;border-radius:12px;display:block;margin-bottom:8px"; } }; im.src = r.result; };
     r.readAsDataURL(file);
   }
   document.addEventListener("click", e => {

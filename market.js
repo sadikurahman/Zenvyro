@@ -83,26 +83,27 @@
 #zvMarket .tabs button.on{background:linear-gradient(135deg,#6b32ff,#9a5cff);border-color:#b28aff;box-shadow:0 0 16px #8a3dff80;color:#fff}
 #zvMarket .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media(min-width:700px){#zvMarket .grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.zm-card{position:relative;border:1px solid #5a35d8;border-radius:20px;background:linear-gradient(160deg,#150c4e,#0b0830);box-shadow:0 0 18px #6b32ff2a;overflow:hidden;padding-bottom:10px}
+.zm-card{position:relative;display:flex;flex-direction:column;border:1px solid #6b45d8;border-radius:20px;background:#0b0830;box-shadow:0 8px 22px #0007,0 0 18px #6b32ff33;overflow:hidden}
 .zm-card.lg{border-color:#b8902c;box-shadow:0 0 18px #e8a52a33}
-.zm-card.t-hot{border-color:#ff5a3c;background:linear-gradient(160deg,#3a1010,#150c4e 50%,#0b0830);box-shadow:0 0 20px #ff3d2e44}
+.zm-card.t-hot{border-color:#ff5a3c;background:linear-gradient(160deg,#3a1010,#150c4e 50%,#0b0830);box-shadow:0 0 16px #ff3d2e33}
 .zm-card.t-new{border-color:#2bf0b0;background:linear-gradient(160deg,#0a3a3a,#150c4e 50%,#0b0830);box-shadow:0 0 20px #2bf0b044}
 .zm-card.xp{opacity:.88}.zm-card.xp .im img{filter:grayscale(.7) brightness(.8)}
-.zm-card .im{position:relative;aspect-ratio:1.3;background:#1a1058}.zm-card .im img{width:100%;height:100%;object-fit:cover;display:block}
-.zm-card .im:after{content:"";position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(transparent,#0b0830cc);pointer-events:none}
-.zm-bd{position:absolute;top:8px;right:8px;z-index:2;display:inline-flex;align-items:center;gap:4px;height:26px;border-radius:13px;padding:0 11px 0 9px;font-size:12.5px;line-height:1;font-weight:800;letter-spacing:.3px;color:#fff;border:1px solid #ffffff55;box-shadow:0 2px 8px #0009}.zm-bd .zm-i{font-size:14px}
+.zm-card .im{position:relative;flex:1;display:flex;align-items:center;background:#120c40;line-height:0}.zm-card .im img{width:100%;height:auto;display:block}
+.zm-in{margin-top:auto;padding:11px 11px 13px;background:linear-gradient(180deg,#160c52,#0a0630);box-shadow:inset 0 1px 0 #ffffff1f}
+.zm-bd{position:absolute;top:7px;right:7px;z-index:2;display:inline-flex;align-items:center;gap:3px;height:22px;border-radius:11px;padding:0 9px 0 7px;font-size:11.5px;line-height:1;font-weight:800;letter-spacing:.3px;color:#fff;border:1px solid #ffffff55;box-shadow:0 2px 8px #0009}.zm-bd .zm-i{font-size:12px}
 .zm-bd.hot{background:linear-gradient(135deg,#ff6a2b,#e0183c);box-shadow:0 0 14px #ff3d2e99,0 2px 8px #0009}
 .zm-bd.new{background:linear-gradient(135deg,#34f0b0,#1a9f8f);color:#032a22;border-color:#c8ffe9;box-shadow:0 0 14px #2bf0b099,0 2px 8px #0009}
-.zm-card b{display:block;padding:10px 10px 4px;font-size:15px}
-.zm-pr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;row-gap:6px;gap:6px;padding:0 10px;font-size:13px;color:#e0d2ff}
+.zm-card b{display:block;margin:0 0 9px;padding:0;font-size:15.5px;font-weight:800;letter-spacing:.2px;line-height:1.25;overflow-wrap:anywhere;background:linear-gradient(90deg,#fff,#e6d8ff 55%,#ffd36b);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.zm-pr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;row-gap:6px;gap:6px;padding:0;font-size:13px;color:#e0d2ff}
 .zm-pr span{display:flex;align-items:center;gap:4px;min-width:0;white-space:nowrap;font-weight:800;color:#fff;font-size:13px}.zm-pr .zm-i{font-size:18px;color:#b28aff}
 .zm-buy{white-space:nowrap;border:0;border-radius:14px;padding:7px 10px;font-weight:800;font-size:12.5px;color:#2a1a00;background:linear-gradient(180deg,#ffd36b,#e8a52a)}
-.zm-buy:disabled{background:#2a1a86;color:#cfc4ff}.zm-buy.owned:disabled{background:linear-gradient(180deg,#5dffd0,#1fbf8f);color:#06231c}.zm-buy.sold:disabled{background:#3a1414;color:#ff9a9a}
+.zm-buy.closed{background:#2a1a86;color:#cfc4ff}.zm-buy.owned{background:linear-gradient(180deg,#5dffd0,#1fbf8f);color:#06231c}.zm-buy.sold{background:#3a1414;color:#ff9a9a}
+.zm-card.pt{cursor:pointer;-webkit-tap-highlight-color:transparent}.zm-mt .pm{color:#ffd36b}
 .zm-bonus{display:flex;align-items:center;gap:12px;margin-top:16px;border:1px solid #d8a93a;border-radius:20px;background:linear-gradient(135deg,#2a1d08,#150c4e);padding:14px}
 .zm-bonus .zm-i{font-size:34px;color:#ffd36b}.zm-bonus b{display:block;color:#ffd36b;font-size:15px}.zm-bonus small{color:#cfc4ff;font-size:12.5px}
 .zm-empty{grid-column:1/-1;border:1px dashed #4a32a8;border-radius:16px;padding:22px;text-align:center;color:#b9b2ee}
 .zm-note{color:#aeb9ff;font-size:12px;line-height:1.5;margin-top:12px}
-.zm-bm{display:flex;gap:12px;align-items:center;margin-bottom:12px}.zm-bm img{width:96px;height:72px;object-fit:cover;border-radius:14px;border:1px solid #5a35d8}
+.zm-bm{display:flex;gap:12px;align-items:center;margin-bottom:12px}.zm-bm img{width:84px;height:auto;max-height:130px;object-fit:contain;border-radius:12px;border:1px solid #5a35d8;background:#120c40}
 .zm-bm b{display:block;font-size:16px}.zm-bm span{color:#c8b8ff;font-size:13px}
 .zs-hero{border:1px solid #6b45d8;border-radius:20px;background:linear-gradient(135deg,#2a1475,#0b0830);box-shadow:0 0 24px #6b32ff40;padding:16px;margin-bottom:12px;color:#fff}
 .zs-hero small{color:#c8b8ff;font-size:12px}.zs-hero .big{font-size:26px;font-weight:800;margin:4px 0 8px;overflow-wrap:anywhere}.zs-hero .big i{font-style:normal;font-size:13px;color:#c8b8ff;font-weight:600}
@@ -116,16 +117,15 @@
 .zs-tr{height:8px;border-radius:8px;background:#0a0720;border:1px solid #2e1d7a;margin-top:8px;overflow:hidden}.zs-tr i{display:block;height:100%;background:linear-gradient(90deg,#6b32ff,#cda5ff)}
 #zvAccount .mrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 #zvAccount .zv-sum{display:inline-flex;align-items:center;gap:4px;border:1px solid #6b45d8;border-radius:16px;background:linear-gradient(135deg,#2a1475,#1a1058);color:#e0d2ff;padding:5px 10px;font-size:11.5px;font-weight:700;box-shadow:0 0 10px #8a3dff44}
-.zm-card .ch{position:absolute;top:8px;left:8px;z-index:2;display:inline-flex;align-items:center;height:26px;border-radius:13px;padding:0 10px;font-size:12.5px;font-weight:800;line-height:1;background:linear-gradient(135deg,#ff4f8a,#d6204f);color:#fff;border:1px solid #ffffff55;box-shadow:0 2px 8px #0009}
 .zm-old{text-decoration:line-through;color:#9d93e0;font-size:11.5px;margin-right:4px}
-.zm-bf{padding:0 10px 8px;color:#2bf0b0;font-size:12px;font-weight:700;line-height:1.4}
-.zm-mt{padding:8px 10px 0;color:#aeb9ff;font-size:11.5px;line-height:1.45}.zm-mt .lo{color:#ffb84a}.zm-mt .w{color:#ff9a9a}
-.zm-rd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:2px 10px 0;padding:8px 10px;border-radius:12px;background:#0b0830;border:1px solid #2e1d7a}.zm-rd small{color:#aeb9ff;font-size:11.5px}.zm-rd strong{color:#2bf0b0;font-size:13px;overflow-wrap:anywhere;text-align:right}
-.zm-st{position:absolute;bottom:8px;left:8px;z-index:2;display:inline-flex;align-items:center;gap:5px;border-radius:13px;padding:6px 12px 6px 9px;font-size:12.5px;font-weight:800;line-height:1;background:#0a2b2bdd;color:#2bf0b0;border:1px solid #2bf0b0}.zm-st .zm-i{font-size:14px}.zm-st.tl{top:8px;bottom:auto}
+.zm-bf{padding:0 0 8px;color:#2bf0b0;font-size:12px;font-weight:700;line-height:1.4}
+.zm-mt{padding:8px 0 0;color:#aeb9ff;font-size:11.5px;line-height:1.45}.zm-mt .lo{color:#ffb84a}.zm-mt .w{color:#ff9a9a}.zm-mt .pm{color:#ffd36b}.zm-mt .dc{color:#ff7aa8;font-weight:800}
+.zm-rd{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin:2px 0 0;padding:8px 10px;border-radius:12px;background:#0b0830;border:1px solid #2e1d7a}.zm-rd small{color:#aeb9ff;font-size:11.5px}.zm-rd strong{color:#2bf0b0;font-size:13px;overflow-wrap:anywhere;text-align:left}
+.zm-st{position:absolute;bottom:8px;left:8px;z-index:2;display:inline-flex;align-items:center;gap:5px;border-radius:13px;padding:6px 12px 6px 9px;font-size:12.5px;font-weight:800;line-height:1;background:#0a2b2bdd;color:#2bf0b0;border:1px solid #2bf0b0}.zm-st .zm-i{font-size:14px}.zm-st.sp{position:static;margin:0 0 8px}
 .zm-st.pm{background:linear-gradient(135deg,#ffe08a,#e8a52a 60%,#b8761a);color:#2a1a00;border-color:#fff3c2;box-shadow:0 0 14px #ffc84aaa}
 .zm-st.lo{background:#3a2406dd;color:#ffb84a;border-color:#ffb84a}
 .zm-st.ex{background:#2b0a0add;color:#ff8a8a;border-color:#ff8a8a}
-.zm-cl{display:block;width:calc(100% - 20px);margin:8px 10px 0;border:0;border-radius:14px;padding:9px;font-weight:800;font-size:13px;color:#06231c;background:linear-gradient(180deg,#5dffd0,#1fbf8f)}
+.zm-cl{display:block;width:100%;margin:8px 0 0;border:0;border-radius:14px;padding:9px;font-weight:800;font-size:13px;color:#06231c;background:linear-gradient(180deg,#5dffd0,#1fbf8f)}
 .zm-cl:disabled{background:#1a1058;color:#9d93e0}
 .zm-all{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #1fbf8f;border-radius:16px;background:#0a2b2b;padding:12px 14px;color:#cfeee6;font-size:13px}
 .zm-all .zm-cl{width:auto;margin:0;padding:9px 16px;flex-shrink:0}
@@ -154,26 +154,31 @@
   const mstate = (i, a, t) => a.some(h => h.id === i.id && active(h, t)) ? "owned" : C().left(i) <= 0 ? "sold" : !C().saleOpen(i, t) ? "closed" : "buy";
   const BI = { hot: "flame", new: "spark" };
   const statOf = (h, t) => h.exp == null ? ["Permanent", "pm", "inf"] : active(h, t) ? [dleft(h.exp, t) + " left", (h.exp - t) / DAY <= 3 ? "lo" : "ok", "clock"] : ["Expired", "ex", "clock"];
-  const statChip = (h, t, top) => { const x = statOf(h, t); return `<span class="zm-st ${x[1]}${top ? " tl" : ""}">${ic(x[2])}${x[0]}</span>`; };
+  const statChip = (h, t, top) => { const x = statOf(h, t); return `<span class="zm-st ${x[1]} sp">${ic(x[2])}${x[0]}</span>`; };
+  const holdInfo = h => h.bt === "mining" ? "+" + fmt(h.bv, 2) + "% extra ZENY on every mining claim" : h.bt === "trx" ? fmt(h.daily, 6) + " TRX every day" : fmt(h.bv, 2) + "% of " + fmt(h.paid) + " TRX = " + fmt(h.daily, 6) + " TRX every day";
+  const benefitShort = (i, p) => i.btype === "mining" ? "+" + fmt(i.bval, 2) + "% ZENY per claim" : i.btype === "trx" ? fmt(i.bval, 6) + " TRX / day" : fmt(r6(p * i.bval / 100), 6) + " TRX / day";
   const cardHtml = (i, s, t, h, ab) => {
     const pct = C().discPct(i, t), p = C().priceNow(i, t), lf = C().left(i), se = C().saleEnd(i), b = ab ? [ab, ab.toLowerCase()] : null;
-    const lab = s === "owned" ? "Owned" : s === "sold" ? "Sold Out" : s === "closed" ? "Closed" : "Buy Now";
-    const cls = "zm-card" + ((i.cats || []).includes("Legendary") ? " lg" : "") + (b ? " t-" + b[1] : "");
-    const chip = h ? statChip(h, t) : "";
+    const lab = s === "owned" ? "Owned" : s === "sold" ? "Sold Out" : s === "closed" ? "Closed" : "Buy NFT";
+    const cls = "zm-card pt" + ((i.cats || []).includes("Legendary") ? " lg" : "") + (b ? " t-" + b[1] : "");
     const lastDays = se && s === "buy" ? Math.max(1, Math.ceil((se - t) / DAY)) : 0;
-    const meta = h ? "" : `<div class="zm-mt">${lastDays ? `<span class="${lastDays <= 3 ? "lo" : ""}">${dleft(se, t)} left</span> &middot; ` : ""}${lf === Infinity ? "Unlimited stock" : `<span class="${lf <= 10 ? "w" : ""}">${lf} left</span>`}</div>`;
-    return `<article class="${cls}"><div class="im"><img src="${esc(i.img)}" alt="${esc(i.name)}" loading="lazy">${b ? `<span class="zm-bd ${b[1]}">${ic(BI[b[1]] || "star")}${b[0]}</span>` : ""}${pct ? `<span class="ch">-${fmt(pct, 0)}%</span>` : ""}${chip}</div><b>${esc(i.name)}</b>
-    <div class="zm-bf">${esc(benefitFor(i, p))}</div>
-    <div class="zm-pr"><span>${ic("gem")}${pct ? `<s class="zm-old">${fmt(i.price)}</s>` : ""}${fmt(p)} TRX</span><button class="zm-buy ${s}" ${s !== "buy" ? "disabled" : ""} onclick="zvBuy('${esc(i.id)}')">${lab}</button></div>
-    ${meta}</article>`;
+    const parts = h ? (x => [`<span class="${x[1]}">${x[0]}</span>`])(statOf(h, t)) : [
+      pct ? `<span class="dc">-${fmt(pct, 0)}%</span>` : "",
+      lastDays ? `<span class="${lastDays <= 3 ? "lo" : ""}">${dleft(se, t)} left</span>` : "",
+      lf === Infinity ? "Unlimited stock" : `<span class="${lf <= 10 ? "w" : ""}">${lf} left</span>`].filter(Boolean);
+    return `<article class="${cls}" role="button" tabindex="0" onclick="zvBuy('${esc(i.id)}')"><div class="im"><img src="${esc(i.img)}" alt="${esc(i.name)}" loading="lazy">${b ? `<span class="zm-bd ${b[1]}">${ic(BI[b[1]] || "star")}${b[0]}</span>` : ""}</div>
+    <div class="zm-in"><b>${esc(i.name)}</b>
+    <div class="zm-pr"><span>${ic("gem")}${fmt(p)} TRX</span><button class="zm-buy ${s}">${lab}</button></div>
+    <div class="zm-mt">${parts.join(" &middot; ")}</div></div></article>`;
   };
   const myCard = (h, t) => {
     const act = active(h, t), mining = h.bt === "mining", pend = mining ? h.pendZeny : h.pendTrx, unit = mining ? "ZENY" : "TRX";
-    const info = mining ? "+" + fmt(h.bv, 2) + "% extra ZENY on every mining claim" : h.bt === "trx" ? fmt(h.daily, 6) + " TRX every day" : fmt(h.bv, 2) + "% of " + fmt(h.paid) + " TRX = " + fmt(h.daily, 6) + " TRX every day";
+    const info = holdInfo(h);
     const none = !(pend > 0), why = act ? (mining ? "Grows with your mining claims" : "Next reward at 10 PM") : "Nothing to claim";
-    return `<article class="zm-card${act ? "" : " xp"}"><div class="im"><img src="${esc(h.img)}" alt="${esc(h.name)}" loading="lazy">${statChip(h, t, true)}</div><b>${esc(h.name)}</b>
+    return `<article class="zm-card${act ? "" : " xp"}"><div class="im"><img src="${esc(h.img)}" alt="${esc(h.name)}" loading="lazy"></div>
+    <div class="zm-in">${statChip(h, t)}<b>${esc(h.name)}</b>
     <div class="zm-bf">${esc(info)}</div><div class="zm-rd"><small>Ready to claim</small><strong>${fmt(pend, mining ? 8 : 6)} ${unit}</strong></div>
-    <button class="zm-cl" ${none ? "disabled" : ""} onclick="zvNftClaim('${h.hid}')">${none ? why : "Claim"}</button></article>`;
+    <button class="zm-cl" ${none ? "disabled" : ""} onclick="zvNftClaim('${h.hid}')">${none ? why : "Claim"}</button></div></article>`;
   };
   function gridHtml() {
     const t = Date.now(), q = S.q.trim().toLowerCase();
@@ -202,14 +207,18 @@
   function buyForm(id) {
     if (window.ZenvyroSettings && window.ZenvyroSettings.block("market")) return;
     const t = Date.now(), i = C().get().items.find(x => x.id === id); if (!i) return;
+    const own = load(), s = mstate(i, own, t), h = s === "owned" ? own.find(x => x.id === i.id && active(x, t)) : null;
     const pct = C().discPct(i, t), p = C().priceNow(i, t), lf = C().left(i), se = C().saleEnd(i);
-    window.openModal("Buy NFT", `<div class="zm-bm"><img src="${esc(i.img)}" alt=""><div><b>${esc(i.name)}</b><span>${esc((i.cats || []).join(" · "))}</span></div></div>
-      <div class="modal-list"><div><strong>Price</strong><span>${pct ? "<s>" + fmt(i.price) + "</s> " : ""}${fmt(p)} TRX${pct ? " (-" + fmt(pct, 0) + "%)" : ""}</span></div>
+    const head = `<div class="zm-bm"><img src="${esc(i.img)}" alt=""><div><b>${esc(i.name)}</b><span>${esc((i.cats || []).join(" · "))}</span></div></div>`;
+    if (h) return window.openModal("NFT Details", head + `<div class="modal-list"><div><strong>Benefit</strong><span>${esc(holdInfo(h))}</span></div><div><strong>Time left</strong><span>${statOf(h, t)[0]}</span></div></div>
+      <div class="modal-note">You own this NFT. Your rewards are in My NFTs.</div><button class="btn" style="width:100%;margin-top:12px" onclick="zvBuyDone()">View My NFTs</button>`);
+    const act = s === "buy" ? `<div class="modal-note">Daily rewards are added at 10 PM and wait for you to claim. When the active period ends, new rewards stop but what you already earned can still be claimed. ${DEMO ? "Demo mode: payment is not connected, so confirming adds this NFT without taking TRX." : "The price is taken from your TRX Wallet."}</div>
+      <button class="btn" style="width:100%;margin-top:12px" onclick="zvBuyOk('${esc(i.id)}')">Confirm purchase</button>`
+      : `<div class="modal-note">${s === "sold" ? "This NFT is sold out." : "The sale of this NFT has ended."}</div>`;
+    window.openModal("NFT Details", head + `<div class="modal-list"><div><strong>Price</strong><span>${pct ? "<s>" + fmt(i.price) + "</s> " : ""}${fmt(p)} TRX${pct ? " (-" + fmt(pct, 0) + "%)" : ""}</span></div>
       <div><strong>Benefit</strong><span>${esc(benefitFor(i, p))}</span></div><div><strong>Active for</strong><span>${durText(i.durDays)}</span></div>
       <div><strong>Stock</strong><span>${lf === Infinity ? "Unlimited" : lf + " left"}</span></div>${se ? `<div><strong>Sale ends in</strong><span>${dleft(se, t)}</span></div>` : ""}
-      <div><strong>Your TRX balance</strong><span>${fmt(trxAvail(), 6)} TRX</span></div></div>
-      <div class="modal-note">Daily rewards are added at 10 PM and wait for you to claim. When the active period ends, new rewards stop but what you already earned can still be claimed. ${DEMO ? "Demo mode: payment is not connected, so confirming adds this NFT without taking TRX." : "The price is taken from your TRX Wallet."}</div>
-      <button class="btn" style="width:100%;margin-top:12px" onclick="zvBuyOk('${esc(i.id)}')">Confirm purchase</button>`);
+      <div><strong>Your TRX balance</strong><span>${fmt(trxAvail(), 6)} TRX</span></div></div>` + act);
   }
   // Purchase animation (~2 s): only transform/opacity are animated (GPU, light on CPU), then the success popup opens.
   let buying = false;
