@@ -7,6 +7,9 @@
   const HKEY = "zenvyro_nft_v1", TXKEY = "zenvyro_tx_v1";
   const RATE = { Free: 0.001587, Standard: 0.002222, Silver: 0.006945, Gold: 0.017361, Platinum: 0.050505 };
   const P = {
+    flame: '<path d="M12 3c.6 3.2 4.5 5 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2 1-3.2 2-4.2.1 1.6.9 2.2 1.5 2.4C11 8.4 10.7 5.8 12 3z"/>', crown: '<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-1.8 11H4.8z"/>',
+    star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>', spark: '<path d="M12 3v5M12 16v5M3 12h5M16 12h5M6 6l3 3M15 15l3 3M18 6l-3 3M9 15l-3 3"/>',
+    inf: '<path d="M6 8a4 4 0 1 0 0 8c4 0 8-8 12-8a4 4 0 1 1 0 8c-4 0-8-8-12-8z"/>', clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
     gem: '<path d="M6 4h12l4 5-10 11L2 9z"/><path d="M2 9h20M9 4l-2 5 5 11 5-11-2-5"/>',
     back: '<path d="M15 5l-7 7 7 7"/>', search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
     store: '<path d="M4 9l1.5-5h13L20 9"/><path d="M4 9a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0A2.7 2.7 0 0 0 20 9"/><path d="M5 12v8h14v-8"/>',
@@ -80,15 +83,25 @@
 #zvMarket .tabs button.on{background:linear-gradient(135deg,#6b32ff,#9a5cff);border-color:#b28aff;box-shadow:0 0 16px #8a3dff80;color:#fff}
 #zvMarket .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media(min-width:700px){#zvMarket .grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.zm-card{border:1px solid #5a35d8;border-radius:20px;background:linear-gradient(160deg,#150c4e,#0b0830);box-shadow:0 0 18px #6b32ff2a;overflow:hidden;padding-bottom:10px}
+.zm-card{position:relative;border:1px solid #5a35d8;border-radius:20px;background:linear-gradient(160deg,#150c4e,#0b0830);box-shadow:0 0 18px #6b32ff2a;overflow:hidden;padding-bottom:10px}
+.zm-card.lg{border-color:#b8902c;box-shadow:0 0 18px #e8a52a33}
+.zm-card.t-hot{border-color:#ff5a3c;background:linear-gradient(160deg,#3a1010,#150c4e 50%,#0b0830);box-shadow:0 0 20px #ff3d2e44}
+.zm-card.t-pre{border-color:#f2c14e;background:linear-gradient(160deg,#4a3410,#1d1050 52%,#0b0830);box-shadow:0 0 24px #e8a52a66,inset 0 0 0 1px #f2c14e33}
+.zm-card.t-pop{border-color:#ff5fa8;background:linear-gradient(160deg,#3a1050,#150c4e 50%,#0b0830);box-shadow:0 0 20px #d64dff44}
+.zm-card.t-new{border-color:#2bf0b0;background:linear-gradient(160deg,#0a3a3a,#150c4e 50%,#0b0830);box-shadow:0 0 20px #2bf0b044}
+.zm-card.xp{opacity:.88}.zm-card.xp .im img{filter:grayscale(.7) brightness(.8)}
 .zm-card .im{position:relative;aspect-ratio:1.3;background:#1a1058}.zm-card .im img{width:100%;height:100%;object-fit:cover;display:block}
-.zm-bd{position:absolute;top:8px;right:8px;border-radius:10px;padding:3px 9px;font-size:11px;font-weight:800;color:#fff}
-.zm-bd.hot{background:#e0306a}.zm-bd.pre{background:#c9922a;color:#2a1a00}.zm-bd.pop{background:#e0455a}.zm-bd.new{background:#27a66b}
-.zm-card b{display:block;padding:9px 10px 6px;font-size:14px}
+.zm-card .im:after{content:"";position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(transparent,#0b0830cc);pointer-events:none}
+.zm-bd{position:absolute;top:8px;right:8px;z-index:2;display:inline-flex;align-items:center;gap:4px;height:26px;border-radius:13px;padding:0 11px 0 9px;font-size:12.5px;line-height:1;font-weight:800;letter-spacing:.3px;color:#fff;border:1px solid #ffffff55;box-shadow:0 2px 8px #0009}.zm-bd .zm-i{font-size:14px}
+.zm-bd.hot{background:linear-gradient(135deg,#ff6a2b,#e0183c);box-shadow:0 0 14px #ff3d2e99,0 2px 8px #0009}
+.zm-bd.pre{background:linear-gradient(135deg,#ffe08a,#e8a52a 55%,#b8761a);color:#2a1a00;border-color:#fff3c2;box-shadow:0 0 16px #ffc84acc,0 2px 8px #0009}
+.zm-bd.pop{background:linear-gradient(135deg,#ff5fa8,#8a3dff);box-shadow:0 0 14px #d64dff99,0 2px 8px #0009}
+.zm-bd.new{background:linear-gradient(135deg,#34f0b0,#1a9f8f);color:#032a22;border-color:#c8ffe9;box-shadow:0 0 14px #2bf0b099,0 2px 8px #0009}
+.zm-card b{display:block;padding:10px 10px 4px;font-size:15px}
 .zm-pr{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 10px;font-size:13px;color:#e0d2ff}
-.zm-pr span{display:flex;align-items:center;gap:5px;min-width:0}.zm-pr .zm-i{font-size:18px;color:#b28aff}
+.zm-pr span{display:flex;align-items:center;gap:5px;min-width:0;font-weight:800;color:#fff;font-size:14px}.zm-pr .zm-i{font-size:18px;color:#b28aff}
 .zm-buy{border:0;border-radius:14px;padding:7px 11px;font-weight:800;font-size:12.5px;color:#2a1a00;background:linear-gradient(180deg,#ffd36b,#e8a52a)}
-.zm-buy:disabled{background:#2a1a86;color:#cfc4ff}
+.zm-buy:disabled{background:#2a1a86;color:#cfc4ff}.zm-buy.owned:disabled{background:linear-gradient(180deg,#5dffd0,#1fbf8f);color:#06231c}.zm-buy.sold:disabled{background:#3a1414;color:#ff9a9a}
 .zm-bonus{display:flex;align-items:center;gap:12px;margin-top:16px;border:1px solid #d8a93a;border-radius:20px;background:linear-gradient(135deg,#2a1d08,#150c4e);padding:14px}
 .zm-bonus .zm-i{font-size:34px;color:#ffd36b}.zm-bonus b{display:block;color:#ffd36b;font-size:15px}.zm-bonus small{color:#cfc4ff;font-size:12.5px}
 .zm-empty{grid-column:1/-1;border:1px dashed #4a32a8;border-radius:16px;padding:22px;text-align:center;color:#b9b2ee}
@@ -107,12 +120,17 @@
 .zs-tr{height:8px;border-radius:8px;background:#0a0720;border:1px solid #2e1d7a;margin-top:8px;overflow:hidden}.zs-tr i{display:block;height:100%;background:linear-gradient(90deg,#6b32ff,#cda5ff)}
 #zvAccount .mrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 #zvAccount .zv-sum{display:inline-flex;align-items:center;gap:4px;border:1px solid #6b45d8;border-radius:16px;background:linear-gradient(135deg,#2a1475,#1a1058);color:#e0d2ff;padding:5px 10px;font-size:11.5px;font-weight:700;box-shadow:0 0 10px #8a3dff44}
-.zm-card .ch{position:absolute;top:8px;left:8px;border-radius:10px;padding:3px 8px;font-size:11px;font-weight:800;background:#e0306a;color:#fff}
+.zm-card .ch{position:absolute;top:8px;left:8px;z-index:2;display:inline-flex;align-items:center;height:26px;border-radius:13px;padding:0 10px;font-size:12.5px;font-weight:800;line-height:1;background:linear-gradient(135deg,#ff4f8a,#d6204f);color:#fff;border:1px solid #ffffff55;box-shadow:0 2px 8px #0009}
 .zm-old{text-decoration:line-through;color:#9d93e0;font-size:11.5px;margin-right:4px}
-.zm-bf{padding:0 10px 6px;color:#2bf0b0;font-size:11.5px;font-weight:700;line-height:1.35}
-.zm-mt{padding:6px 10px 0;color:#aeb9ff;font-size:11px;line-height:1.45}
-.zm-st{position:absolute;bottom:8px;left:8px;border-radius:10px;padding:3px 9px;font-size:11px;font-weight:800;background:#0a2b2bcc;color:#2bf0b0;border:1px solid #2bf0b0}
-.zm-st.ex{background:#2b0a0acc;color:#ff8a8a;border-color:#ff8a8a}
+.zm-bf{padding:0 10px 8px;color:#2bf0b0;font-size:12px;font-weight:700;line-height:1.4}
+.zm-mt{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px 0}
+.zm-ch{display:inline-flex;align-items:center;gap:4px;border-radius:10px;border:1px solid #3a2a90;background:#0b0830;color:#cfc4ff;padding:4px 8px;font-size:11.5px;font-weight:700;line-height:1}.zm-ch .zm-i{font-size:13px}
+.zm-ch.g{border-color:#d8a93a;background:#2a1d08;color:#ffd36b}.zm-ch.w{border-color:#ff8a8a;background:#2b0a0a;color:#ff9a9a}
+.zm-rd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:2px 10px 0;padding:8px 10px;border-radius:12px;background:#0b0830;border:1px solid #2e1d7a}.zm-rd small{color:#aeb9ff;font-size:11.5px}.zm-rd strong{color:#2bf0b0;font-size:13px;overflow-wrap:anywhere;text-align:right}
+.zm-st{position:absolute;bottom:8px;left:8px;z-index:2;display:inline-flex;align-items:center;gap:5px;border-radius:13px;padding:6px 12px 6px 9px;font-size:12.5px;font-weight:800;line-height:1;background:#0a2b2bdd;color:#2bf0b0;border:1px solid #2bf0b0}.zm-st .zm-i{font-size:14px}.zm-st.tl{top:8px;bottom:auto}
+.zm-st.pm{background:linear-gradient(135deg,#ffe08a,#e8a52a 60%,#b8761a);color:#2a1a00;border-color:#fff3c2;box-shadow:0 0 14px #ffc84aaa}
+.zm-st.lo{background:#3a2406dd;color:#ffb84a;border-color:#ffb84a}
+.zm-st.ex{background:#2b0a0add;color:#ff8a8a;border-color:#ff8a8a}
 .zm-cl{display:block;width:calc(100% - 20px);margin:8px 10px 0;border:0;border-radius:14px;padding:9px;font-weight:800;font-size:13px;color:#06231c;background:linear-gradient(180deg,#5dffd0,#1fbf8f)}
 .zm-cl:disabled{background:#1a1058;color:#9d93e0}
 .zm-all{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid #1fbf8f;border-radius:16px;background:#0a2b2b;padding:12px 14px;color:#cfeee6;font-size:13px}
@@ -140,22 +158,27 @@
   const durText = d => d ? d + " days" : "Permanent";
   const benefitFor = (i, p) => i.btype === "mining" ? "+" + fmt(i.bval, 2) + "% extra ZENY on every mining claim" : i.btype === "trx" ? fmt(i.bval, 6) + " TRX every day" : fmt(i.bval, 2) + "% of the price = " + fmt(r6(p * i.bval / 100), 6) + " TRX every day";
   const mstate = (i, a, t) => a.some(h => h.id === i.id && active(h, t)) ? "owned" : C().left(i) <= 0 ? "sold" : !C().saleOpen(i, t) ? "closed" : "buy";
-  const cardHtml = (i, s, t) => {
+  const BI = { hot: "flame", pre: "crown", pop: "star", new: "spark" };
+  const statOf = (h, t) => h.exp == null ? ["Permanent", "pm", "inf"] : active(h, t) ? [dleft(h.exp, t) + " left", (h.exp - t) / DAY <= 3 ? "lo" : "ok", "clock"] : ["Expired", "ex", "clock"];
+  const statChip = (h, t, top) => { const x = statOf(h, t); return `<span class="zm-st ${x[1]}${top ? " tl" : ""}">${ic(x[2])}${x[0]}</span>`; };
+  const cardHtml = (i, s, t, h) => {
     const pct = C().discPct(i, t), p = C().priceNow(i, t), lf = C().left(i), se = C().saleEnd(i), b = C().BADGES[i.badge];
     const lab = s === "owned" ? "Owned" : s === "sold" ? "Sold Out" : s === "closed" ? "Closed" : "Buy Now";
-    return `<article class="zm-card"><div class="im"><img src="${esc(i.img)}" alt="${esc(i.name)}" loading="lazy">${b ? `<span class="zm-bd ${b[1]}">${b[0]}</span>` : ""}${pct ? `<span class="ch">-${fmt(pct, 0)}%</span>` : ""}</div><b>${esc(i.name)}</b>
+    const cls = "zm-card" + ((i.cats || []).includes("Legendary") ? " lg" : "") + (b ? " t-" + b[1] : "");
+    const chip = h ? statChip(h, t) : se && s === "buy" ? `<span class="zm-st lo">${ic("clock")}Ends in ${dleft(se, t)}</span>` : "";
+    const meta = h ? "" : `<div class="zm-mt">${i.durDays ? `<span class="zm-ch">${ic("clock")}${i.durDays} days</span>` : `<span class="zm-ch g">${ic("inf")}Permanent</span>`}<span class="zm-ch${lf <= 10 ? " w" : ""}">${lf === Infinity ? "Unlimited stock" : "Stock: " + lf + " left"}</span></div>`;
+    return `<article class="${cls}"><div class="im"><img src="${esc(i.img)}" alt="${esc(i.name)}" loading="lazy">${b ? `<span class="zm-bd ${b[1]}">${ic(BI[b[1]] || "star")}${b[0]}</span>` : ""}${pct ? `<span class="ch">-${fmt(pct, 0)}%</span>` : ""}${chip}</div><b>${esc(i.name)}</b>
     <div class="zm-bf">${esc(benefitFor(i, p))}</div>
-    <div class="zm-pr"><span>${ic("gem")}${pct ? `<s class="zm-old">${fmt(i.price)}</s>` : ""}${fmt(p)} TRX</span><button class="zm-buy" ${s !== "buy" ? "disabled" : ""} onclick="zvBuy('${esc(i.id)}')">${lab}</button></div>
-    <div class="zm-mt">${durText(i.durDays)} &middot; ${lf === Infinity ? "Unlimited stock" : lf + " left"}${se && s === "buy" ? " &middot; Sale ends in " + dleft(se, t) : ""}</div></article>`;
+    <div class="zm-pr"><span>${ic("gem")}${pct ? `<s class="zm-old">${fmt(i.price)}</s>` : ""}${fmt(p)} TRX</span><button class="zm-buy ${s}" ${s !== "buy" ? "disabled" : ""} onclick="zvBuy('${esc(i.id)}')">${lab}</button></div>
+    ${meta}</article>`;
   };
   const myCard = (h, t) => {
     const act = active(h, t), mining = h.bt === "mining", pend = mining ? h.pendZeny : h.pendTrx, unit = mining ? "ZENY" : "TRX";
-    const st = h.exp == null ? "Permanent" : act ? dleft(h.exp, t) + " left" : "Expired";
     const info = mining ? "+" + fmt(h.bv, 2) + "% extra ZENY on every mining claim" : h.bt === "trx" ? fmt(h.daily, 6) + " TRX every day" : fmt(h.bv, 2) + "% of " + fmt(h.paid) + " TRX = " + fmt(h.daily, 6) + " TRX every day";
     const none = !(pend > 0), why = act ? (mining ? "Grows with your mining claims" : "Next reward at 10 PM") : "Nothing to claim";
-    return `<article class="zm-card"><div class="im"><img src="${esc(h.img)}" alt="${esc(h.name)}" loading="lazy"><span class="zm-st ${act ? "" : "ex"}">${st}</span></div><b>${esc(h.name)}</b>
-    <div class="zm-bf">${esc(info)}</div><div class="zm-mt">Ready to claim: <strong style="color:#fff">${fmt(pend, 8)} ${unit}</strong></div>
-    <button class="zm-cl" ${none ? "disabled" : ""} onclick="zvNftClaim('${h.hid}')">${none ? why : "Claim " + fmt(pend, 6) + " " + unit}</button></article>`;
+    return `<article class="zm-card${act ? "" : " xp"}"><div class="im"><img src="${esc(h.img)}" alt="${esc(h.name)}" loading="lazy">${statChip(h, t, true)}</div><b>${esc(h.name)}</b>
+    <div class="zm-bf">${esc(info)}</div><div class="zm-rd"><small>Ready to claim</small><strong>${fmt(pend, mining ? 8 : 6)} ${unit}</strong></div>
+    <button class="zm-cl" ${none ? "disabled" : ""} onclick="zvNftClaim('${h.hid}')">${none ? why : "Claim"}</button></article>`;
   };
   function gridHtml() {
     const t = Date.now(), q = S.q.trim().toLowerCase();
@@ -166,7 +189,7 @@
       return `<div class="zm-all"><span>Ready: <strong>${fmt(tr, 6)} TRX</strong> &middot; <strong>${fmt(zn, 8)} ZENY</strong><br><small>A new day starts at 10 PM.</small></span><button class="zm-cl" ${tr > 0 || zn > 0 ? "" : "disabled"} onclick="zvNftClaimAll()">Claim all</button></div>` + a.map(h => myCard(h, t)).join("");
     }
     const own = load(), list = C().get().items.filter(i => !i.hidden && (S.tab === "All NFTs" || i.cats.includes(S.tab)) && (!q || i.name.toLowerCase().includes(q)));
-    return list.length ? list.map(i => cardHtml(i, mstate(i, own, t), t)).join("") : '<div class="zm-empty">No NFT found.</div>';
+    return list.length ? list.map(i => { const st = mstate(i, own, t); return cardHtml(i, st, t, st === "owned" ? own.find(x => x.id === i.id && active(x, t)) : null); }).join("") : '<div class="zm-empty">No NFT found.</div>';
   }
   function render() {
     const tabs = ["All NFTs", ...C().get().cats, "My NFTs"]; if (!tabs.includes(S.tab)) S.tab = "All NFTs";
@@ -185,7 +208,7 @@
     if (window.ZenvyroSettings && window.ZenvyroSettings.block("market")) return;
     const t = Date.now(), i = C().get().items.find(x => x.id === id); if (!i) return;
     const pct = C().discPct(i, t), p = C().priceNow(i, t), lf = C().left(i), se = C().saleEnd(i);
-    window.openModal("Buy NFT", `<div class="zm-bm"><img src="${esc(i.img)}" alt=""><div><b>${esc(i.name)}</b><span>${fmt(p)} TRX</span></div></div>
+    window.openModal("Buy NFT", `<div class="zm-bm"><img src="${esc(i.img)}" alt=""><div><b>${esc(i.name)}</b><span>${esc((i.cats || []).join(" · "))}</span></div></div>
       <div class="modal-list"><div><strong>Price</strong><span>${pct ? "<s>" + fmt(i.price) + "</s> " : ""}${fmt(p)} TRX${pct ? " (-" + fmt(pct, 0) + "%)" : ""}</span></div>
       <div><strong>Benefit</strong><span>${esc(benefitFor(i, p))}</span></div><div><strong>Active for</strong><span>${durText(i.durDays)}</span></div>
       <div><strong>Stock</strong><span>${lf === Infinity ? "Unlimited" : lf + " left"}</span></div>${se ? `<div><strong>Sale ends in</strong><span>${dleft(se, t)}</span></div>` : ""}
@@ -193,11 +216,11 @@
       <div class="modal-note">Daily rewards are added at 10 PM and wait for you to claim. When the active period ends, new rewards stop but what you already earned can still be claimed. ${DEMO ? "Demo mode: payment is not connected, so confirming adds this NFT without taking TRX." : "The price is taken from your TRX Wallet."}</div>
       <button class="btn" style="width:100%;margin-top:12px" onclick="zvBuyOk('${esc(i.id)}')">Confirm purchase</button>`);
   }
-  // Purchase animation (~3.6 s): only transform/opacity are animated (GPU, light on CPU), then the success popup opens.
+  // Purchase animation (~2 s): only transform/opacity are animated (GPU, light on CPU), then the success popup opens.
   let buying = false;
   function successPop(i, paid) {
     window.openModal("Purchase Successful", `<div style="text-align:center"><div class="zm-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.5l3 3 6-6.5"/></svg></div>
-      <b style="display:block;font-size:19px;margin:10px 0 12px">Your NFT purchase was successful</b></div>
+      <b style="display:block;font-size:19px;margin:10px 0 12px">Added to your collection</b></div>
       <div class="zm-bm"><img src="${esc(i.img)}" alt=""><div><b>${esc(i.name)}</b><span>${fmt(paid)} TRX paid</span></div></div>
       <div class="modal-list"><div><strong>Benefit</strong><span>${esc(benefitFor(i, paid))}</span></div><div><strong>Active for</strong><span>${durText(i.durDays)}</span></div></div>
       <button class="btn" style="width:100%;margin-top:12px" onclick="zvBuyDone()">View My NFTs</button>`);
@@ -218,15 +241,15 @@
       const s = document.createElement("i"); s.className = "s"; s.style.background = cols[k % 3]; c.appendChild(s);
       const a = k * 20 + Math.random() * 12;
       s.animate([{ transform: `rotate(${a}deg) translateX(260px) scaleX(.4)`, opacity: 0 }, { opacity: 1, offset: .5 }, { transform: `rotate(${a}deg) translateX(80px) scaleX(1.4)`, opacity: 0 }],
-        { duration: 700 + Math.random() * 500, delay: Math.random() * 600, iterations: Infinity, easing: "ease-in" });
+        { duration: 700 + Math.random() * 500, delay: Math.random() * 300, iterations: Infinity, easing: "ease-in" });
     }
-    setTimeout(() => { tx.textContent = "Adding it to your collection..."; }, 1700);
+    setTimeout(() => { tx.textContent = "Adding it to your collection..."; }, 1000);
     setTimeout(() => {   // final flash + shockwave
       const f = document.createElement("div"); f.className = "zm-fx-f"; ov.appendChild(f);
       f.animate([{ opacity: 0 }, { opacity: .9, offset: .25 }, { opacity: 0 }], { duration: 500, easing: "ease-out" });
       c.animate([{ transform: "scale(1)" }, { transform: "scale(1.18)", offset: .3 }, { transform: "scale(1)" }], { duration: 500, easing: "ease-out" });
-    }, 3100);
-    setTimeout(() => { if (ov.parentNode) ov.parentNode.removeChild(ov); done(); }, 3600);
+    }, 1500);
+    setTimeout(() => { if (ov.parentNode) ov.parentNode.removeChild(ov); done(); }, 2000);
   }
   function buyOk(id) {
     if (buying) return;
