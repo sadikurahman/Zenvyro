@@ -184,7 +184,8 @@
   function update() {
     if (!$("exAmount")) return;
     const c = calc(), bal = srcBal(), sp = src === "ZENY" ? ZENY_USDT : (prices.TRX || 0);
-    $("exAvail").textContent = zenyBalance().toFixed(6) + " ZENY · " + trxEarn().toFixed(6) + " TRX";
+    $("exAvail").textContent = bal.toFixed(6) + " " + src;
+    if ($("exAvailLbl")) $("exAvailLbl").textContent = "Exchange Wallet · " + src;
     if ($("exFromLbl")) $("exFromLbl").textContent = "Amount · " + src;
     if ($("exHeld")) $("exHeld").textContent = heldZeny().toFixed(6) + " ZENY";
 
@@ -222,7 +223,7 @@
       `<button id="exTile_${a.sym}" onclick="exSelect('${a.sym}')" style="border:1px solid #302864;background:#0b0a23;color:#fff;border-radius:16px;padding:12px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800;font-size:15px"><span style="font-size:24px;color:#b28aff;line-height:1">${a.icon}</span>${a.sym}<small style="color:#aeb9ff;font-weight:500;font-size:11px">${a.name}</small></button>`).join("");
     const sb = k => `<button id="exSrc_${k}" onclick="exSrc('${k}')" style="border:1px solid #302864;background:#0b0a23;color:#fff;border-radius:16px;padding:12px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800;font-size:14px">${k}<small style="font-weight:500;color:#aeb9ff">${k === "ZENY" ? "Mining income" : "NFT and other income"}</small></button>`;
     return `
-      <div class="modal-list"><div><strong>Exchange Wallet (your income)</strong><span id="exAvail">0.000000 ZENY</span></div></div>
+      <div class="modal-list"><div><strong id="exAvailLbl">Exchange Wallet · ZENY</strong><span id="exAvail">0.000000 ZENY</span></div></div>
       <label class="modal-label">From</label>
       <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px">${sb("ZENY")}${sb("TRX")}</div>
       <label class="modal-label" for="exAmount" id="exFromLbl">Amount · ZENY</label>
@@ -240,6 +241,36 @@
       <label class="modal-label">Recent Exchanges</label>
       <div class="modal-list" id="exReqs">${reqRows()}</div>
       <div class="modal-note">Exchange is instant. A total 10% fee is taken and the result is added straight to your Wallet, where you can spend it, transfer it or withdraw it. Only your income (mining ZENY and TRX rewards) can be exchanged. Amounts shown here are estimates until you confirm.</div>`;
+  }
+
+  // ---- 2.6 s loading animation, then a success popup ----
+  let busy = false;
+  function exFx(from, to, done) {
+    const old = $("exFx"); if (old) old.remove();
+    if (!$("exFxCss")) {
+      const st = document.createElement("style"); st.id = "exFxCss";
+      st.textContent = "#exFx{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:#03020de6;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);animation:exfin .25s ease-out both}" +
+        ".exfx-c{text-align:center;color:#fff}.exfx-r{position:relative;width:96px;height:96px;margin:0 auto 18px}" +
+        ".exfx-r i{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#a54cff;animation:exfs 1s linear infinite}" +
+        ".exfx-r i:nth-child(2){inset:12px;border-top-color:#2bf0b0;animation-duration:1.4s;animation-direction:reverse}" +
+        ".exfx-r i:nth-child(3){inset:28px;border:0;background:radial-gradient(circle,#c9a0ff,#7a2cff 60%,transparent 72%);animation:exfp 1.2s ease-in-out infinite}" +
+        ".exfx-c b{display:block;font-size:18px}.exfx-c span{display:inline-block;margin-top:8px;padding:4px 12px;border-radius:12px;border:1px solid #5a35d8;color:#cfc4ff;font-size:13px;font-weight:700}" +
+        ".ex-ok{width:76px;height:76px;margin:6px auto 0;color:#2bf0b0;animation:expop .5s ease-out both}.ex-ok svg{width:100%;height:100%;display:block}" +
+        "@keyframes exfs{to{transform:rotate(360deg)}}@keyframes exfp{50%{transform:scale(.7);opacity:.7}}@keyframes exfin{from{opacity:0}}@keyframes expop{from{transform:scale(.4);opacity:0}}";
+      document.head.appendChild(st);
+    }
+    const ov = document.createElement("div"); ov.id = "exFx";
+    ov.innerHTML = '<div class="exfx-c"><div class="exfx-r"><i></i><i></i><i></i></div><b id="exFxT">Exchanging…</b><span>' + from + " → " + to + "</span></div>";
+    document.body.appendChild(ov);
+    setTimeout(() => { const t = $("exFxT"); if (t) t.textContent = "Adding to your Wallet…"; }, 1300);
+    setTimeout(() => { ov.remove(); done(); }, 2600);
+  }
+  function exDone(r) {
+    window.openModal("Exchange Successful", '<div style="text-align:center"><div class="ex-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.5l3 3 6-6.5"/></svg></div>' +
+      '<b style="display:block;font-size:19px;margin:10px 0 12px">Added to your Wallet</b></div>' +
+      '<div class="modal-list"><div><strong>Exchanged</strong><span>' + r.amount.toFixed(6) + " " + r.from + "</span></div><div><strong>Received</strong><span>" + r.receive.toFixed(r.dec) + " " + r.to + "</span></div>" +
+      "<div><strong>Total fees (" + TOTAL_FEE + '%)</strong><span>' + r.fee.toFixed(2) + " USDT</span></div><div><strong>Reference</strong><span>" + r.id + "</span></div></div>" +
+      '<button class="btn" style="width:100%;margin-top:12px" onclick="closeModal()">Done</button>');
   }
 
   function openExchange() {
@@ -269,6 +300,7 @@
     window.exSrc = k => { if (k === "ZENY" || k === "TRX") { src = k; const el = $("exAmount"); if (el) el.value = ""; update(); } };
     window.ZenvyroEarn = { get: () => ({ ZENY: zenyBalance(), TRX: trxEarn() }), addTrx, takeTrx };
     window.exConfirm = () => {
+      if (busy) return;
       const c = calc();
       if (window.ZenvyroSettings && window.ZenvyroSettings.block("exchange")) return;
       if (!(c.amount > 0) || c.receive === null || c.receive <= 0) return;
@@ -276,16 +308,18 @@
       const msg = "Exchange " + c.amount.toFixed(6) + " " + src + " → " + c.receive.toFixed(c.a.dec) + " " + sel +
                   "\nTotal fees: " + TOTAL_FEE + "%\nThe result is added to your Wallet at once.\n\nContinue?";
       if (!window.confirm(msg)) return;
-      const took = src === "ZENY" ? !!(window.ZenvyroMining && window.ZenvyroMining.spendZeny(c.amount)) : takeTrx(c.amount);
+      const from = src, to = sel;
+      const took = from === "ZENY" ? !!(window.ZenvyroMining && window.ZenvyroMining.spendZeny(c.amount)) : takeTrx(c.amount);
       if (!took) { say("Exchange failed"); return; }
+      busy = true;
       const id = newId();
-      credit(sel, c.receive, c.net);
-      reqs.unshift({ id, src, amt: c.amount, zeny: src === "ZENY" ? c.amount : 0, asset: sel, status: "approved", estimate: c.receive, receive: c.receive, rate: c.price, created: Date.now(), decided: Date.now() });
+      credit(to, c.receive, c.net);
+      reqs.unshift({ id, src: from, amt: c.amount, zeny: from === "ZENY" ? c.amount : 0, asset: to, status: "approved", estimate: c.receive, receive: c.receive, rate: c.price, created: Date.now(), decided: Date.now() });
       saveReqs();
-      if (window.ZenvyroTx) window.ZenvyroTx.log({ id, kind: "exchange", sym: sel, amount: c.receive, status: "completed", sub: src + " → " + sel });
-      $("exAmount").value = "";
+      if (window.ZenvyroTx) window.ZenvyroTx.log({ id, kind: "exchange", sym: to, amount: c.receive, status: "completed", sub: from + " → " + to });
+      const am = $("exAmount"); if (am) am.value = "";
       renderReqs(); update();
-      say("Exchanged: added to your Wallet");
+      exFx(from, to, () => { busy = false; exDone({ id, from, to, amount: c.amount, receive: c.receive, dec: c.a.dec, fee: c.gross - c.net }); });
     };
 
     const orig = window.showSection;

@@ -83,6 +83,9 @@
 #zvMarket .tabs button.on{background:linear-gradient(135deg,#6b32ff,#9a5cff);border-color:#b28aff;box-shadow:0 0 16px #8a3dff80;color:#fff}
 #zvMarket .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 @media(min-width:700px){#zvMarket .grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+#zvMarket .grid.my{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}@media(min-width:700px){#zvMarket .grid.my{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.grid.my .zm-card{border-radius:14px}.grid.my .zm-in.zm-my{padding:7px 4px 8px;text-align:center}
+.zm-my span{display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:11.5px;font-weight:800;line-height:1.2;color:#2bf0b0}.zm-my .zm-i{font-size:12px}.zm-my .pm{color:#ffd36b}.zm-my .lo{color:#ffb84a}.zm-my .ex{color:#ff8a8a}
 .zm-card{position:relative;display:flex;flex-direction:column;border:1px solid #6b45d8;border-radius:20px;background:#0b0830;box-shadow:0 8px 22px #0007,0 0 18px #6b32ff33;overflow:hidden}
 .zm-card.lg{border-color:#b8902c;box-shadow:0 0 18px #e8a52a33}
 .zm-card.t-hot{border-color:#ff5a3c;background:linear-gradient(160deg,#3a1010,#150c4e 50%,#0b0830);box-shadow:0 0 16px #ff3d2e33}
@@ -172,14 +175,19 @@
     <div class="zm-mt">${parts.join(" &middot; ")}</div></div></article>`;
   };
   const myCard = (h, t) => {
-    const act = active(h, t), mining = h.bt === "mining", pend = mining ? h.pendZeny : h.pendTrx, unit = mining ? "ZENY" : "TRX";
-    const info = holdInfo(h);
-    const none = !(pend > 0), why = act ? (mining ? "Grows with your mining claims" : "Next reward at 10 PM") : "Nothing to claim";
-    return `<article class="zm-card${act ? "" : " xp"}"><div class="im"><img src="${esc(h.img)}" alt="${esc(h.name)}" loading="lazy"></div>
-    <div class="zm-in">${statChip(h, t)}<b>${esc(h.name)}</b>
-    <div class="zm-bf">${esc(info)}</div><div class="zm-rd"><small>Ready to claim</small><strong>${fmt(pend, mining ? 8 : 6)} ${unit}</strong></div>
-    <button class="zm-cl" ${none ? "disabled" : ""} onclick="zvNftClaim('${h.hid}')">${none ? why : "Claim"}</button></div></article>`;
+    const x = statOf(h, t);
+    return `<article class="zm-card pt${active(h, t) ? "" : " xp"}" role="button" tabindex="0" onclick="zvMy('${h.hid}')"><div class="im"><img src="${esc(h.img)}" alt="${esc(h.name)}" loading="lazy"></div>
+    <div class="zm-in zm-my"><span class="${x[1]}">${ic(x[2])}${x[0]}</span></div></article>`;
   };
+  function myDetail(hid) {
+    const h = settle().find(x => x.hid === hid); if (!h) return;
+    const t = Date.now(), mining = h.bt === "mining", pend = mining ? h.pendZeny : h.pendTrx, unit = mining ? "ZENY" : "TRX", none = !(pend > 0);
+    const why = active(h, t) ? (mining ? "Grows with your mining claims" : "Next reward at 10 PM") : "Nothing to claim";
+    window.openModal("NFT Details", `<div class="zm-bm"><img src="${esc(h.img)}" alt=""><div><b>${esc(h.name)}</b></div></div>
+      <div class="modal-list"><div><strong>Benefit</strong><span>${esc(holdInfo(h))}</span></div><div><strong>Time left</strong><span>${statOf(h, t)[0]}</span></div>
+      <div><strong>Bought for</strong><span>${fmt(h.paid)} TRX</span></div><div><strong>Ready to claim</strong><span>${fmt(pend, mining ? 8 : 6)} ${unit}</span></div></div>
+      <button class="btn" ${none ? "disabled" : ""} style="width:100%;margin-top:12px;${none ? "opacity:.5" : ""}" onclick="zvMyClaim('${h.hid}')">${none ? why : "Claim"}</button>`);
+  }
   function gridHtml() {
     const t = Date.now(), q = S.q.trim().toLowerCase();
     if (S.tab === "My NFTs") {
@@ -197,7 +205,7 @@
       ${S.s ? `<input class="sr" id="zmQ" placeholder="Search NFTs" value="${esc(S.q)}" oninput="zvmQ(this.value)">` : ""}
       <div class="zm-bn2"><img src="nft-banner.jpg" alt="Discover Premium NFTs. Own and collect."><button class="zm-bgo" aria-label="Browse NFTs" onclick="document.getElementById('zmGrid').scrollIntoView({behavior:'smooth'})"></button></div>
       <div class="tabs">${tabs.map(t => `<button class="${t === S.tab ? "on" : ""}" onclick="zvmTab('${esc(t)}')">${esc(t)}</button>`).join("")}</div>
-      <div class="grid" id="zmGrid">${gridHtml()}</div>
+      <div class="grid${S.tab === "My NFTs" ? " my" : ""}" id="zmGrid">${gridHtml()}</div>
       <div class="zm-bonus">${ic("gift")}<div><b>5% Bonus for your referrer</b><small>When you buy your first pack or NFT, the member who invited you earns a 5% Purchase Bonus.</small></div></div>
       <div class="zm-note">Every NFT you buy counts toward your Level progress. NFT rewards follow the active period shown on each NFT. NFTs are not a promise of profit or income.${DEMO ? " Demo mode: purchases are samples only." : ""}</div></div>`;
   }
@@ -338,7 +346,7 @@
     if (q && !document.getElementById("zmBan")) q.insertAdjacentHTML("afterend", `<section class="zm-ban" id="zmBan" role="button" tabindex="0" onclick="zvOpenMarket()"><div><h3>Explore Premium<br>NFT Collection</h3><p>Collect &bull; Own &bull; Hold</p><span class="zm-go">Go to Marketplace ${ic("go")}</span></div><img src="nft-hero.jpg" alt=""></section>`);
     Object.assign(window, {
       zvOpenMarket: openMarket, zvmClose: closeMarket, zvBuy: buyForm, zvBuyOk: buyOk, zvaSummary: openSummary,
-      zvNftClaim: claimOne, zvNftClaimAll: claimAll,
+      zvNftClaim: claimOne, zvNftClaimAll: claimAll, zvMy: myDetail, zvMyClaim: hid => { claimOne(hid); window.closeModal(); },
       zvBuyDone: () => { window.closeModal(); S.tab = "My NFTs"; if (root && !root.classList.contains("open")) openMarket(); else render(); },
       zvmTab: t => { S.tab = t; render(); },
       zvmSearch: () => { S.s = !S.s; if (!S.s) S.q = ""; render(); const e = document.getElementById("zmQ"); if (e) e.focus(); },
