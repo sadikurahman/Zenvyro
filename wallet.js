@@ -60,60 +60,116 @@
   }
   const zenyBal = () => (window.ZenvyroMining ? window.ZenvyroMining.getState().balance : 0);
 
-  // ---- CSS (only for #zvWallet) ----
+  // ---- CSS (only for #zvWallet). Every size is design-pixels x --u, so the page scales exactly like the design on any phone width ----
+  const u = n => `calc(${n} * var(--u))`;
+  const ART = {"W":820,"H":568,"p":{"hero":[0,0,460,376],"gift":[462,0,256,148],"zlogo":[720,0,82,82],"bell":[0,378,80,80],"user":[82,378,80,80],"swap":[164,378,98,98],"gem":[264,378,98,98],"dep":[364,378,80,80],"wd":[446,378,80,80],"tr":[528,378,80,80],"trx":[610,378,90,90],"usdt":[702,378,90,90],"btc":[0,478,90,90],"ton":[92,478,90,90],"bnb":[184,478,90,90],"sol":[276,478,90,90]}}, AV = "20261114p";
+  const spriteCss = Object.keys(ART.p).map(k => { const q = ART.p[k]; return `#zvWallet .s-${k}{display:block;flex-shrink:0;width:${u(q[2])};height:${u(q[3])};background:url(wallet-art.webp?v=${AV}) no-repeat;background-size:${u(ART.W)} ${u(ART.H)};background-position:calc(${-q[0]} * var(--u)) calc(${-q[1]} * var(--u))}`; }).join("\n");
   const css = `
-#zvWallet{position:fixed;inset:0;z-index:4;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;padding:calc(14px + env(safe-area-inset-top,0px)) 14px 130px;background:radial-gradient(ellipse at 50% 0,#2b1475 0,#0b0824 46%,#050511 100%);color:#fff}
+#zvWallet{--u:calc(min(100vw,var(--maxw,520px))/852);position:fixed;inset:0;z-index:4;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:none;padding:calc(${u(40)} + env(safe-area-inset-top,0px)) 0 calc(130px + env(safe-area-inset-bottom,0px));color:#fff;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+background-attachment:local;background-image:radial-gradient(ellipse ${u(300)} ${u(200)} at 0 0,#4c099ecc,transparent 72%),radial-gradient(ellipse ${u(320)} ${u(120)} at 70% 0,#3a14a0bb,transparent 72%),radial-gradient(ellipse ${u(120)} ${u(330)} at 0 ${u(400)},#8a2070dd,transparent 74%),radial-gradient(ellipse ${u(70)} ${u(200)} at 0 ${u(470)},#d0603acc,transparent 74%),radial-gradient(ellipse ${u(200)} ${u(300)} at 0 ${u(1300)},#2a0a7acc,transparent 72%),radial-gradient(ellipse ${u(520)} ${u(300)} at 100% ${u(1500)},#1a0a6a99,transparent 72%),radial-gradient(ellipse ${u(700)} ${u(400)} at 50% 100%,#2a0f7a77,transparent 72%);background-color:#030119}
 #zvWallet.open{display:block}
-#zvWallet .in{max-width:760px;margin:auto}
-#zvWallet .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-#zvWallet .logo{display:flex;gap:10px;align-items:center}
-#zvWallet .z{font-size:40px;font-weight:900;font-style:italic;color:#cda5ff;text-shadow:0 0 18px #8a32ff;line-height:1}
-#zvWallet .brand b{letter-spacing:5px;font-size:20px;display:block}
-#zvWallet .brand small{color:#b7b5ec;font-size:11px;letter-spacing:1px}
-#zvWallet .ic{width:46px;height:46px;border-radius:15px;border:1px solid #6b45d8;background:#1b1050;display:grid;place-items:center;font-size:20px;color:#fff;position:relative}
-#zvWallet .dot{position:absolute;top:8px;right:9px;width:9px;height:9px;border-radius:50%;background:#ff4466}
-#zvWallet .card{border:1px solid #6a3ff0;border-radius:24px;background:linear-gradient(135deg,#1c1060ee,#0e0a33f2);box-shadow:0 0 30px #6b32ff30,inset 0 0 0 1px #3a2490;margin-bottom:14px}
-#zvWallet .total{padding:16px;position:relative;overflow:hidden}
-#zvWallet .trow{display:flex;gap:14px;align-items:center}
-#zvWallet .wic{width:64px;height:64px;border-radius:18px;background:linear-gradient(145deg,#8b4dff,#4a2bd0);display:grid;place-items:center;font-size:30px;flex-shrink:0;box-shadow:0 0 20px #7a3dff66}
-#zvWallet .tl{color:#c8b8ff;font-size:15px}
-#zvWallet .amt{font-size:38px;font-weight:900;letter-spacing:-1px;margin:2px 0}
-#zvWallet .est{color:#b9b2ee;font-size:13px}
-#zvWallet .pill{position:absolute;top:14px;right:14px;border:1px solid #1fbf8f;color:#2bf0b0;background:#0a2b2b;border-radius:20px;padding:5px 10px;font-size:12px;font-weight:700}
-#zvWallet .coins{position:absolute;right:14px;top:50px;display:flex;gap:-6px}
-#zvWallet .coin{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:15px;margin-left:-8px;box-shadow:0 0 12px #0006}
-#zvWallet .subs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-#zvWallet .sub{border:1px solid #4a32a8;border-radius:18px;background:#120c40;padding:12px;display:flex;gap:10px;align-items:center;min-width:0}
-#zvWallet .sub .si{width:42px;height:42px;border-radius:50%;border:1px solid #7a55e8;display:grid;place-items:center;font-size:20px;flex-shrink:0;background:#1b1050}
-#zvWallet .sub small{color:#c8b8ff;font-size:12px;display:block}
-#zvWallet .sub strong{font-size:16px;display:block;margin:2px 0;overflow-wrap:anywhere}
-#zvWallet .sub em{font-style:normal;color:#b9b2ee;font-size:11px}
-#zvWallet .acts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-#zvWallet .acts button{border:1px solid #5b38d8;border-radius:20px;padding:14px 4px;background:linear-gradient(145deg,#1a1060,#0d0a30);color:#fff;display:flex;flex-direction:column;align-items:center;gap:5px;font-weight:800;font-size:15px}
-#zvWallet .acts button.main{background:linear-gradient(145deg,#8a33ff,#3c1fc0);box-shadow:0 0 22px #7a33ff55}
-#zvWallet .acts .ai{width:42px;height:42px;border-radius:50%;border:1px solid #8a66ff;display:grid;place-items:center;font-size:20px;background:#ffffff14}
-#zvWallet .acts small{font-weight:500;color:#cfc4ff;font-size:12px}
-#zvWallet .hd{display:flex;align-items:center;gap:10px;padding:14px 16px}
-#zvWallet .hd .hi{width:34px;height:34px;border-radius:10px;background:#1b1050;display:grid;place-items:center}
-#zvWallet .hd h3{margin:0;font-size:19px;flex:1}
-#zvWallet .hd .tv{text-align:right;font-size:11px;color:#c8b8ff}
-#zvWallet .hd .tv b{display:block;color:#fff;font-size:16px}
-#zvWallet .hd a{color:#a98bff;font-size:14px;font-weight:700}
-#zvWallet .row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid #2a2170;width:100%;background:none;border-left:0;border-right:0;border-bottom:0;color:#fff;text-align:left}
-#zvWallet .ai2{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:20px;flex-shrink:0;color:#fff}
-#zvWallet .mid{flex:1;min-width:0}
-#zvWallet .mid b{font-size:16px}
-#zvWallet .tk{margin-left:8px;font-size:11px;padding:2px 8px;border:1px solid #4a3aa8;border-radius:12px;color:#c8b8ff;background:#17104a}
-#zvWallet .rt{text-align:right}
-#zvWallet .rt b{display:block;font-size:15px}
-#zvWallet .rt small{color:#b9b2ee;font-size:12px}
-#zvWallet .tx small.s{display:block;color:#b9b2ee;font-size:12px;margin-top:2px}
-#zvWallet .st{display:inline-block;margin-top:4px;font-size:11px;padding:2px 9px;border-radius:12px;border:1px solid}
-#zvWallet .st.completed{color:#2bf0b0;border-color:#1fbf8f;background:#0a2b2b}
+#zvWallet *{box-sizing:border-box}
+#zvWallet button{font-family:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;appearance:none;-webkit-appearance:none}
+#zvWallet .in{position:relative;width:${u(852)};max-width:100%;margin:0 auto}
+#zvWallet .pg{padding:0 ${u(28)}}
+#zvWallet .h0{position:relative;height:${u(75)}}
+#zvWallet .h0 .bgr{position:absolute;left:${u(45)};top:${u(18)};width:${u(43)};height:${u(37)};border:0;background:none;padding:0}
+#zvWallet .h0 .bgr svg,#zvWallet .eye svg,#zvWallet .chv svg{display:block;width:100%;height:100%}
+#zvWallet .h0 .dv{position:absolute;left:${u(121)};top:0;width:1px;height:${u(75)};background:linear-gradient(transparent,#ffffff2b,transparent)}
+#zvWallet .h0 .s-zlogo{position:absolute;left:${u(142)};top:${u(-6)}}
+#zvWallet .h0 .wm{position:absolute;left:${u(250)};top:${u(7)};font-size:${u(33)};line-height:${u(40)};font-weight:600;letter-spacing:${u(9)};color:#fff;white-space:nowrap}
+#zvWallet .h0 .tg{position:absolute;left:${u(250)};top:${u(49)};font-size:${u(18.3)};line-height:${u(24)};color:#b9b3ea;letter-spacing:${u(.5)};white-space:nowrap}
+#zvWallet .h0 .hb{position:absolute;top:${u(-2)};border:0;background:none;padding:0;width:${u(80)};height:${u(80)}}
+#zvWallet .bx{position:relative}
+#zvWallet .bx:before{content:"";position:absolute;inset:0;border-radius:inherit;padding:${u(2.4)};background:var(--bd);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;pointer-events:none;z-index:3}
+#zvWallet .hero{height:${u(383)};margin-top:${u(55)};border-radius:${u(46)};overflow:hidden;box-shadow:0 0 ${u(50)} #6b32ff44;--bd:linear-gradient(135deg,#efe2ff 0%,#8a52ff 24%,#3a2aa0 52%,#6a3ff0 78%,#c06aff 100%);
+background:radial-gradient(ellipse ${u(320)} ${u(230)} at 0 26%,#2a0a8a99,transparent 72%),radial-gradient(ellipse ${u(300)} ${u(220)} at 0 100%,#0a24a099,transparent 72%),radial-gradient(ellipse ${u(520)} ${u(200)} at 70% 112%,#5a1a9a88,transparent 72%),linear-gradient(160deg,#12034a 0%,#04012a 40%,#02012a 72%,#06104a 100%)}
+#zvWallet .hero>*{position:absolute;z-index:2}
+#zvWallet .hero .s-hero{left:${u(328)};top:0;z-index:1}
+#zvWallet .hero .sc{left:${u(45)};top:${u(22)};width:${u(284)};height:${u(48)};border-radius:${u(24)};background:linear-gradient(90deg,#2850dc,#1b2a9c 65%,#171a6a);border:1px solid #5b7bff77;display:flex;align-items:center;gap:${u(10)};padding-left:${u(13)};font-size:${u(19)};font-weight:500;color:#fff;white-space:nowrap}
+#zvWallet .hero .sc svg{width:${u(26)};height:${u(30)}}
+#zvWallet .hero .tl{left:${u(48)};top:${u(95)};font-size:${u(28)};line-height:${u(36)};color:#dcd6f7;display:flex;align-items:center;gap:${u(18)};white-space:nowrap}
+#zvWallet .eye{width:${u(38)};height:${u(24)};border:0;background:none;padding:0;display:block}
+#zvWallet .hero .amt{left:${u(46)};top:${u(128)};line-height:${u(112)};font-weight:700;letter-spacing:${u(-1)};white-space:nowrap}
+#zvWallet .hero .es{left:${u(52)};top:${u(247)};display:flex;align-items:center;gap:${u(16)};font-size:${u(24.5)};line-height:${u(36)};color:#e6e2fa;white-space:nowrap}
+#zvWallet .hero .es svg{width:${u(27)};height:${u(30)}}
+#zvWallet .hero .wa{left:${u(46)};top:${u(302)};width:${u(207)};height:${u(53)};border-radius:${u(27)};border:1px solid #3dd6a0aa;background:linear-gradient(90deg,#1b5a52,#0a2a3a 75%);display:flex;align-items:center;gap:${u(14)};padding-left:${u(20)};font-size:${u(21.5)};font-weight:700;color:#79ffa8;white-space:nowrap}
+#zvWallet .hero .wa i{width:${u(20)};height:${u(20)};border-radius:50%;background:#5cff8c;box-shadow:0 0 ${u(12)} #5cff8c}
+#zvWallet .two{display:grid;grid-template-columns:1fr 1fr;gap:${u(26)};margin-top:${u(42)}}
+#zvWallet .xc,#zvWallet .ac{height:${u(192)};border-radius:${u(42)};overflow:hidden;text-align:left;border:0;padding:0;color:#fff;cursor:pointer}
+#zvWallet .xc{--bd:linear-gradient(135deg,#4a7bff,#2a2a90 40%,#3a2aa0 70%,#6a4aff);background:radial-gradient(ellipse ${u(220)} ${u(160)} at 0 0,#2548c8bb,transparent 70%),radial-gradient(ellipse ${u(320)} ${u(120)} at 50% 115%,#3a2ac077,transparent 70%),linear-gradient(160deg,#10114a,#050326 55%,#0b0540)}
+#zvWallet .ac{--bd:linear-gradient(135deg,#5a3aff,#2a2a90 40%,#2a3ad0 80%,#5a7aff);background:radial-gradient(ellipse ${u(280)} ${u(190)} at 100% 100%,#3a78f0dd,transparent 70%),radial-gradient(ellipse ${u(220)} ${u(150)} at 0 0,#2a0f70bb,transparent 70%),linear-gradient(160deg,#1a0c58,#121236 55%,#1a2a9a)}
+#zvWallet .xc>*,#zvWallet .ac>*{position:absolute;z-index:2;white-space:nowrap}
+#zvWallet .xc .s-swap{left:${u(25)};top:${u(26)}}
+#zvWallet .ac .s-gem{left:${u(21)};top:${u(26)}}
+#zvWallet .xc .a{left:${u(150)};top:${u(24)};font-size:${u(23.5)};line-height:${u(36)};font-weight:700}
+#zvWallet .xc .chv{right:${u(24)};top:${u(31)};width:${u(18)};height:${u(26)}}
+#zvWallet .xc .b{left:${u(150)};top:${u(67)};font-size:${u(18)};line-height:${u(26)};color:#bdb8ea}
+#zvWallet .xc .c{left:${u(150)};top:${u(100)};font-size:${u(23.5)};line-height:${u(36)};font-weight:700}
+#zvWallet .xc .c em,#zvWallet .ac .c em{font-style:normal;font-weight:400;font-size:.85em;color:#d0cbf0}
+#zvWallet .xc .d{left:${u(147)};top:${u(146)};display:flex;align-items:center;gap:${u(8)};font-size:${u(17)};line-height:${u(26)};color:#cfcaf0}
+#zvWallet .xc .d svg{width:${u(24)};height:${u(24)}}
+#zvWallet .ac .a{left:${u(145)};top:${u(24)};font-size:${u(20.5)};line-height:${u(36)};font-weight:500;color:#ece8ff;display:flex;align-items:center;gap:${u(8)}}
+#zvWallet .ac .a svg{width:${u(14)};height:${u(22)}}
+#zvWallet .ac .c{left:${u(145)};top:${u(74)};font-size:${u(38)};line-height:${u(46)};font-weight:700}
+#zvWallet .ac .d{left:${u(145)};top:${u(134)};font-size:${u(21.5)};line-height:${u(30)};color:#c9c5ef}
+#zvWallet .acts{display:grid;grid-template-columns:repeat(3,1fr);gap:${u(26)};margin-top:${u(33)}}
+#zvWallet .acts button{position:relative;height:${u(188)};border-radius:${u(40)};overflow:hidden;border:0;padding:0;color:#fff;text-align:center}
+#zvWallet .acts button>*{position:absolute;z-index:2;left:0;right:0}
+#zvWallet .acts .ai{left:50%;right:auto;top:${u(5)};transform:translateX(-50%)}
+#zvWallet .acts b{top:${u(102)};font-size:${u(26.5)};line-height:${u(32)};font-weight:700}
+#zvWallet .acts small{top:${u(142)};font-size:${u(19.5)};line-height:${u(24)};font-weight:400;color:#f1eeff}
+#zvWallet .acts .dep{--bd:linear-gradient(135deg,#9af5d4,#2c584f 50%,#5cc8a0);background:radial-gradient(ellipse 90% 70% at 20% 0,#52b595cc,transparent 65%),linear-gradient(165deg,#2f7d6a,#0a2a30 60%,#1b4c50)}
+#zvWallet .acts .wd{--bd:linear-gradient(135deg,#ffc98a,#6f4b29 50%,#ff9a6a);background:radial-gradient(ellipse 90% 70% at 20% 0,#d07a2aee,transparent 65%),radial-gradient(ellipse 80% 60% at 90% 100%,#d4605ccc,transparent 65%),linear-gradient(165deg,#8a4a1e,#3a1418 60%,#9a4a44)}
+#zvWallet .acts .trf{--bd:linear-gradient(135deg,#9abaff,#325abc 50%,#6a8aff);background:radial-gradient(ellipse 90% 70% at 20% 0,#4a74f0cc,transparent 65%),linear-gradient(165deg,#2a54c8,#232a8a 60%,#4a66e0)}
+#zvWallet .air{display:block;width:100%;height:${u(158)};margin-top:${u(37)};border-radius:${u(48)};overflow:hidden;border:0;padding:0;text-align:left;color:#fff;cursor:pointer;--bd:linear-gradient(120deg,#8aefff 0%,#5a2ac0 25%,#3a1a80 55%,#c8607a 90%,#ffb06a);background:radial-gradient(ellipse ${u(320)} ${u(170)} at 100% 100%,#c8506add,transparent 65%),radial-gradient(ellipse ${u(280)} ${u(170)} at 85% 15%,#3a1a9a99,transparent 70%),radial-gradient(ellipse ${u(260)} ${u(120)} at 4% 95%,#c87a2a66,transparent 70%),linear-gradient(100deg,#0b022f,#050030 50%,#14023f 75%,#2a0a4a)}
+#zvWallet .air>*{position:absolute;z-index:2;white-space:nowrap}
+#zvWallet .air .s-gift{left:${u(6)};top:${u(5)}}
+#zvWallet .air .a{left:${u(269)};top:${u(29)};font-size:${u(26)};line-height:${u(32)};font-weight:500;display:flex;align-items:center;gap:${u(12)}}
+#zvWallet .air .a svg{width:${u(22)};height:${u(28)}}
+#zvWallet .air .c{left:${u(269)};top:${u(65)};font-size:${u(31)};line-height:${u(40)};font-weight:700}
+#zvWallet .air .c em{font-style:normal;font-weight:500}
+#zvWallet .air .d{left:${u(269)};top:${u(110)};font-size:${u(20.5)};line-height:${u(26)};color:#efeaff}
+#zvWallet .air .chv{right:${u(30)};top:${u(58)};width:${u(24)};height:${u(42)}}
+#zvWallet .mc,#zvWallet .tc{border-radius:${u(46)};overflow:hidden;margin-top:${u(39)};--bd:linear-gradient(135deg,#c8a0ff 0%,#6a3ac8 30%,#3a2290 60%,#a070ff 100%);background:radial-gradient(ellipse ${u(220)} ${u(420)} at 0 30%,#8a2ed766,transparent 70%),radial-gradient(ellipse ${u(520)} ${u(170)} at 85% 100%,#4a22c088,transparent 70%),linear-gradient(170deg,#12053f,#07031f 40%,#06031c 75%,#0d0640)}
+#zvWallet .mc{height:${u(852)};position:relative}
+#zvWallet .tc{position:relative;padding:${u(86)} 0 ${u(10)}}
+#zvWallet .mc>.ib,#zvWallet .tc>.ib{position:absolute;left:${u(40)};top:${u(32)};width:${u(62)};height:${u(66)};border-radius:${u(18)};border:1px solid #7a4aff99;background:linear-gradient(160deg,#2a1475,#0c0634);box-shadow:0 0 ${u(18)} #7a3dff77;display:grid;place-items:center}
+#zvWallet .tc>.ib{top:${u(20)};height:${u(60)};width:${u(60)}}
+#zvWallet .ib svg{width:${u(34)};height:${u(34)}}
+#zvWallet .mc>h3,#zvWallet .tc>h3{position:absolute;left:${u(130)};top:${u(45)};margin:0;font-size:${u(34.5)};line-height:${u(44)};font-weight:700}
+#zvWallet .tc>h3{top:${u(26)};font-size:${u(29)};font-weight:600}
+#zvWallet .mc .tv{position:absolute;right:${u(48)};top:${u(18)};text-align:right}
+#zvWallet .mc .tv small{display:flex;align-items:center;justify-content:flex-end;gap:${u(12)};font-size:${u(22)};line-height:${u(30)};color:#b9b4e8}
+#zvWallet .mc .tv b{display:block;font-size:${u(41)};line-height:${u(52)};font-weight:700;margin-top:${u(8)}}
+#zvWallet .mc .tv .eye{width:${u(30)};height:${u(20)}}
+#zvWallet .rows{position:absolute;left:${u(22)};right:${u(22)};top:${u(135)}}
+#zvWallet .ar{display:flex;align-items:center;gap:${u(26)};width:100%;height:${u(114)};margin-bottom:${u(4)};padding:0 ${u(26)} 0 ${u(20)};border-radius:${u(34)};border:1px solid #2a1a6a;background:linear-gradient(90deg,#0c0430,#080226);color:#fff;text-align:left}
+#zvWallet .ar.hl{border-color:#8a2ed7;background:linear-gradient(90deg,#34055dcc,#0d0433 58%);box-shadow:inset 0 0 ${u(30)} #7a2ae055}
+#zvWallet .ar .nm{font-size:${u(29.5)};font-weight:700;white-space:nowrap}
+#zvWallet .ar .tk{margin-left:${u(18)};display:inline-block;height:${u(40)};padding:0 ${u(17)};line-height:${u(38)};border-radius:${u(20)};border:1px solid #4a3aa8;background:#1a1250aa;color:#c8b8ff;font-size:${u(20)};font-weight:500;vertical-align:middle}
+#zvWallet .ar .rt{margin-left:auto;text-align:right}
+#zvWallet .ar .rt b{display:block;font-size:${u(29)};line-height:${u(38)};font-weight:700}
+#zvWallet .ar .rt small{display:block;font-size:${u(22.3)};line-height:${u(30)};color:#c0bce8}
+#zvWallet .ar .go{width:${u(14)};height:${u(24)};flex-shrink:0}
+#zvWallet .tc .va{position:absolute;right:${u(44)};top:${u(26)};font-size:${u(24)};line-height:${u(44)};font-weight:700;color:#a98bff;display:flex;align-items:center;gap:${u(10)};cursor:pointer}
+#zvWallet .tc .va svg{width:${u(14)};height:${u(24)}}
+#zvWallet .tx{display:flex;align-items:center;gap:${u(26)};min-height:${u(112)};margin:0 ${u(22)};padding:0 ${u(8)};border-top:1px solid #ffffff14}
+#zvWallet .tx:first-of-type{border-top-color:#ffffff1f}
+#zvWallet .tx .ti{width:${u(76)};height:${u(76)};border-radius:50%;display:grid;place-items:center;flex-shrink:0;box-shadow:0 0 ${u(18)} #7a3dff55}
+#zvWallet .tx .ti svg{width:${u(38)};height:${u(38)}}
+#zvWallet .tx .mid{flex:1;min-width:0}
+#zvWallet .tx .mid b{font-size:${u(26)};line-height:${u(38)};font-weight:700;display:flex;align-items:center;gap:${u(12)}}
+#zvWallet .tx .mid small{display:block;font-size:${u(21.5)};line-height:${u(30)};color:#b8b3e8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#zvWallet .tx .rt{text-align:right;flex-shrink:0}
+#zvWallet .tx .rt b{display:block;font-size:${u(26.5)};line-height:${u(38)};font-weight:700}
+#zvWallet .tx .rt small{display:block;font-size:${u(21)};line-height:${u(30)};color:#b8b3e8}
+#zvWallet .st{display:inline-block;font-size:${u(19)};line-height:${u(26)};padding:0 ${u(12)};border-radius:${u(13)};border:1px solid;font-weight:600}
 #zvWallet .st.pending{color:#ffc24a;border-color:#a8791b;background:#2d2208}
 #zvWallet .st.rejected{color:#ff7a90;border-color:#a8283f;background:#2d0c14}
-#zvWallet .pos{color:#2bf0b0}#zvWallet .neg{color:#ffa33a}
-#zvWallet .empty{padding:18px 16px;color:#b9b2ee;border-top:1px solid #2a2170;font-size:14px}`;
+#zvWallet .pos{color:#6dffb0}#zvWallet .neg{color:#ffa33a}
+#zvWallet .empty{margin:0 ${u(22)};padding:${u(30)} ${u(8)};color:#b8b3e8;border-top:1px solid #ffffff14;font-size:${u(26)}}
+${spriteCss}`;
   const style = document.createElement("style"); style.textContent = css; document.head.appendChild(style);
 
   // ---- Page ----
@@ -123,17 +179,33 @@
   // up to 8/6 decimals, trailing zeros trimmed (at least 2 places)
   const fmtAmt = (n, a) => { let x = (+n).toFixed(a.dec > 6 ? 8 : 6).replace(/0+$/, ""); const d = x.split(".")[1] || ""; return d.length < 2 ? (+n).toFixed(2) : x; };
 
+  const SV = {
+    burger: '<svg viewBox="0 0 43 37" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"><path d="M3 4h37M3 18.500h37M3 33h37"/></svg>',
+    shield: '<svg viewBox="0 0 24 28"><path d="M12 1l10 4v8c0 7-4.500 11.500-10 14C6.500 24.500 2 20 2 13V5z" fill="#fff"/><path d="M8 13l3 3 5-6" stroke="#2850dc" stroke-width="2.600" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    eye: '<svg viewBox="0 0 38 24" fill="none" stroke="#d5ccff" stroke-width="2.800" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C7 4.500 12.500 2 19 2s12 2.500 17 10c-5 7.500-10.500 10-17 10S7 19.500 2 12z"/><circle cx="19" cy="12" r="5.200" fill="#d5ccff" stroke="none"/></svg>',
+    eyeoff: '<svg viewBox="0 0 38 24" fill="none" stroke="#d5ccff" stroke-width="2.800" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C7 4.500 12.500 2 19 2s12 2.500 17 10c-5 7.500-10.500 10-17 10S7 19.500 2 12z"/><path d="M5 22L33 2"/></svg>',
+    up: '<svg viewBox="0 0 28 30" fill="none" stroke="#5cff8c" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 28V4M4 13L14 3l10 10"/></svg>',
+    chv: '<svg viewBox="0 0 14 24" fill="none" stroke="currentColor" stroke-width="3.200" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l10 10L2 22"/></svg>',
+    chart: '<svg viewBox="0 0 24 24" fill="none" stroke="#b36bff" stroke-width="3.200" stroke-linecap="round"><path d="M3 21v-7M9 21V9M15 21v-6M21 21V4"/></svg>',
+    lock: '<svg viewBox="0 0 22 28"><path d="M5 12V8a6 6 0 0 1 12 0v4" fill="none" stroke="#f6c453" stroke-width="3"/><rect x="2" y="12" width="18" height="14" rx="3.500" fill="#f6c453"/></svg>',
+    bars: '<svg viewBox="0 0 32 32" fill="none" stroke-width="5" stroke-linecap="round"><path d="M6 27v-8" stroke="#d38dff"/><path d="M16 27V7" stroke="#a45cff"/><path d="M26 27V14" stroke="#7a4aff"/></svg>',
+    clock: '<svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="3.400" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="11"/><path d="M16 9.500V17l4.500 3"/></svg>',
+    swap: '<svg viewBox="0 0 38 38" fill="none" stroke="#fff" stroke-width="3.400" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14h26M26 7l7 7-7 7M32 25H6M12 18l-7 7 7 7"/></svg>',
+    down: '<svg viewBox="0 0 38 38" fill="none" stroke="#fff" stroke-width="3.600" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5v27M8 21l11 11 11-11"/></svg>',
+    out: '<svg viewBox="0 0 38 38" fill="none" stroke="#fff" stroke-width="3.600" stroke-linecap="round" stroke-linejoin="round"><path d="M19 33V6M8 17L19 6l11 11"/></svg>'
+  };
+  const D = (n, d) => (+n).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+
   function txRow(t) {
     const a = asset(t.sym);
-    const ic = { deposit: ["↓", "#1fbf8f"], withdraw: ["↑", "#f7931a"], exchange: ["⇄", "#8a4dff"], transfer: ["⇄", "#8a4dff"] }[t.kind] || ["•", "#555"];
+    const ic = { deposit: [SV.down, "linear-gradient(160deg,#35d0a0,#16856a)"], withdraw: [SV.out, "linear-gradient(160deg,#ffb04a,#d4701a)"], exchange: [SV.swap, "linear-gradient(160deg,#8a3dff,#4a14e0)"], transfer: [SV.swap, "linear-gradient(160deg,#8a3dff,#4a14e0)"] }[t.kind] || [SV.swap, "#555"];
     const title = { deposit: "Deposit", withdraw: "Withdraw", exchange: "Exchange", transfer: "Transfer" }[t.kind] || t.kind;
     const out = t.kind === "withdraw" || (t.kind === "transfer" && t.dir === "out");
-    const sign = out ? "-" : "+";
-    const date = new Date(t.ts).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false });
-    const stText = { completed: "Completed", pending: "Pending", rejected: "Rejected" }[t.status];
-    return `<div class="row tx"><span class="ai2" style="background:${ic[1]}">${ic[0]}</span>
-      <div class="mid"><b>${title}</b><small class="s">${esc(t.sub || a.sym)}</small><small class="s">${date}</small></div>
-      <div class="rt"><b class="${t.status === "pending" ? "neg" : out ? "neg" : "pos"}">${sign}${fmtAmt(t.amount, a)} ${a.sym}</b><span class="st ${t.status}">${stText}</span></div></div>`;
+    const date = new Date(t.ts).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+    const chip = t.status === "completed" ? "" : `<span class="st ${t.status}">${{ pending: "Pending", rejected: "Rejected" }[t.status]}</span>`;
+    return `<div class="tx"><span class="ti" style="background:${ic[1]}">${ic[0]}</span>
+      <div class="mid"><b>${title}${chip}</b><small>${esc(t.sub || a.sym)}</small></div>
+      <div class="rt"><b class="${t.status === "pending" || out ? "neg" : "pos"}">${out ? "-" : "+"} ${fmtAmt(t.amount, a)} ${a.sym}</b><small>${date}</small></div></div>`;
   }
 
   function render() {
@@ -143,32 +215,46 @@
     const avail = availUsdt(), zb = zenyBal();
     const te = window.ZenvyroEarn ? window.ZenvyroEarn.get().TRX : 0, hz = +holds.ZENY || 0;
     const availBtc = pr.BTC ? avail / pr.BTC : null;
-    const coins = [["₿", "#f7931a"], ["₮", "#1fbf8f"], ["◆", "#8a4dff"]].map(c => `<span class="coin" style="background:${c[1]}">${c[0]}</span>`).join("");
+    const totalTxt = mask("$ " + D(total, 2)), amtPx = totalTxt.length <= 8 ? 90 : totalTxt.length <= 10 ? 75 : 62;
+    let best = null; ASSETS.forEach(a => { const x = b[a.sym]; if (x && x.value > 0 && (!best || x.value > b[best].value)) best = a.sym; });
     const assets = ASSETS.map(a => {
       const x = b[a.sym] || { amount: 0, value: 0 };
-      return `<button class="row" onclick="zvwAsset('${a.sym}')"><span class="ai2" style="background:${a.bg}">${a.ch}</span>
-        <div class="mid"><b>${a.name}</b><span class="tk">${a.sym}</span></div>
-        <div class="rt"><b>${mask(x.amount.toFixed(a.dec > 6 ? 8 : 6))}</b><small>${mask("≈ " + usd(x.value))}</small></div><span style="color:#a98bff">›</span></button>`;
+      return `<button class="ar${a.sym === best ? " hl" : ""}" onclick="zvwAsset('${a.sym}')"><i class="s-${a.sym.toLowerCase()}"></i>
+        <div><span class="nm">${a.name}</span><span class="tk">${a.sym}</span></div>
+        <div class="rt"><b>${mask(x.amount.toFixed(a.dec > 6 ? 8 : 6))}</b><small>${mask("≈ $" + D(x.value, 2))}</small></div><span class="go" style="color:#8f7bff">${SV.chv}</span></button>`;
     }).join("");
-    const list = (showAll ? txs.slice(0, 30) : txs.slice(0, 4));
+    const list = (showAll ? txs.slice(0, 30) : txs.slice(0, 3));
+    const eyeBtn = `<button class="eye" aria-label="Show or hide balances" onclick="zvwEye()">${hidden ? SV.eyeoff : SV.eye}</button>`;
     root.innerHTML = `<div class="in">
-      <div class="top"><div class="logo"><span class="z">Z</span><div class="brand"><b>ZENVYRO</b><small>Your Crypto Future</small></div></div>
-        <div style="display:flex;gap:10px"><button class="ic" onclick="toast('No new notifications')">🔔<span class="dot"></span></button><button class="ic" onclick="showSection('account')">👤</button></div></div>
-      <div class="card total"><span class="pill">● Wallet Active</span><div class="coins">${coins}</div>
-        <div class="trow"><span class="wic">👛</span><div><div class="tl">Total Wallet Balance <a onclick="zvwEye()" style="cursor:pointer">${hidden ? "🙈" : "👁"}</a></div>
-        <div class="amt">${mask("$ " + Number(total).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</div>
-        <div class="est">${btc !== null ? mask("≈ " + btc.toFixed(4) + " BTC") + " &nbsp;•&nbsp; " : ""}Est. value</div></div></div>
-        <div class="subs">
-          <div class="sub" style="cursor:pointer" onclick="showSection('exchange')"><span class="si">⛏</span><div><small>Exchange Wallet · tap to exchange</small><strong>${mask(zb.toFixed(6))} <span style="font-size:12px;color:#c8b8ff">ZENY</span></strong><em>${mask(te.toFixed(6) + " TRX income")}</em></div></div>
-          <div class="sub"><span class="si">🪙</span><div><small>Available to Withdraw</small><strong>${mask("$ " + Number(avail).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }))}</strong><em>${availBtc !== null ? mask("≈ " + availBtc.toFixed(4) + " BTC") : "&nbsp;"}</em></div></div>
-          <div class="sub" style="grid-column:1/-1"><span class="si">⏳</span><div><small>Airdrop Hold · locked until the airdrop</small><strong>${mask(hz.toFixed(6))} <span style="font-size:12px;color:#c8b8ff">ZENY</span></strong><em>${HOLD_PCT}% of every withdrawal is kept here as ZENY</em></div></div>
-        </div></div>
-      <div class="acts"><button class="main" onclick="zvwDepositForm()"><span class="ai">↓</span>Deposit<small>Add Funds</small></button>
-        <button onclick="zvwWithdrawForm()"><span class="ai">↑</span>Withdraw<small>Cash Out</small></button>
-        <button onclick="zvwTransferForm()"><span class="ai">⇄</span>Transfer<small>Move Funds</small></button></div>
-      <div class="card"><div class="hd"><span class="hi">▦</span><h3>My Assets</h3><div class="tv">Total Value<b>${mask(usd(total))}</b></div></div>${assets}</div>
-      <div class="card"><div class="hd"><span class="hi">🕒</span><h3>Recent Transactions</h3><a onclick="zvwAll()" style="cursor:pointer">${showAll ? "Show Less" : "View All"} ›</a></div>
-        ${list.length ? list.map(txRow).join("") : '<div class="empty">No transactions yet</div>'}</div></div>`;
+      <div class="h0"><button class="bgr" aria-label="Menu" onclick="toast('Menu coming soon')">${SV.burger}</button><span class="dv"></span><i class="s-zlogo"></i>
+        <div class="wm">ZENVYRO</div><div class="tg">Your Crypto Future</div>
+        <button class="hb" style="left:${u(650)}" aria-label="Notifications" onclick="toast('No new notifications')"><i class="s-bell"></i></button>
+        <button class="hb" style="left:${u(745)}" aria-label="Account" onclick="showSection('account')"><i class="s-user"></i></button></div>
+      <div class="pg">
+        <div class="hero bx"><i class="s-hero"></i>
+          <div class="sc">${SV.shield}Secure &amp; Decentralized</div>
+          <div class="tl">Total Wallet Balance ${eyeBtn}</div>
+          <div class="amt" style="font-size:${u(amtPx)}">${totalTxt}</div>
+          <div class="es">${SV.up}<span>${btc !== null ? mask("≈ " + btc.toFixed(4) + " BTC") + " &nbsp;•&nbsp; " : ""}Est. value</span></div>
+          <div class="wa"><i></i>Wallet Active</div></div>
+        <div class="two">
+          <div class="xc bx" role="button" tabindex="0" onclick="showSection('exchange')"><i class="s-swap"></i><span class="a">Exchange</span><span class="chv">${SV.chv.replace("currentColor", "#fff")}</span>
+            <span class="b">Wallet · tap to exchange</span><span class="c">${mask(zb.toFixed(6))} <em>ZENY</em></span><span class="d">${SV.chart}${mask(te.toFixed(6))} TRX · income</span></div>
+          <div class="ac bx" role="button" tabindex="0" onclick="zvwWithdrawForm()"><i class="s-gem"></i><span class="a">Available Withdrawal ${SV.chv.replace("currentColor", "#fff")}</span>
+            <span class="c">${mask("$ " + D(avail, 2))}</span><span class="d">${availBtc !== null ? mask("≈ " + availBtc.toFixed(4) + " BTC") : "&nbsp;"}</span></div></div>
+        <div class="acts">
+          <button class="dep bx" onclick="zvwDepositForm()"><i class="ai s-dep"></i><b>Deposit</b><small>Add Funds</small></button>
+          <button class="wd bx" onclick="zvwWithdrawForm()"><i class="ai s-wd"></i><b>Withdraw</b><small>Cash Out</small></button>
+          <button class="trf bx" onclick="zvwTransferForm()"><i class="ai s-tr"></i><b>Transfer</b><small>Move Funds</small></button></div>
+        <div class="air bx" role="button" tabindex="0" onclick="toast('Airdrop details coming soon')"><i class="s-gift"></i>
+          <span class="a">Airdrop Hold ${SV.lock}</span><span class="c">${mask(hz.toFixed(6))} <em>ZENY</em></span><span class="d">${HOLD_PCT}% of every withdrawal is kept here as ZENY</span><span class="chv">${SV.chv.replace("currentColor", "#fff")}</span></div>
+        <div class="mc bx"><span class="ib">${SV.bars}</span><h3>My Assets</h3>
+          <div class="tv"><small>Total Value ${eyeBtn}</small><b>${mask("$" + D(total, 2))}</b></div>
+          <div class="rows">${assets}</div></div>
+        <div class="tc bx"><span class="ib">${SV.clock}</span><h3>Recent Transactions</h3>
+          <a class="va" onclick="zvwAll()">${showAll ? "Show Less" : "View All"} ${SV.chv}</a>
+          ${list.length ? list.map(txRow).join("") : '<div class="empty">No transactions yet</div>'}</div>
+      </div></div>`;
   }
 
   const navBtn = () => Array.from(document.querySelectorAll(".nav button")).find(b => /Wallet/.test(b.textContent));
