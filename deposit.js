@@ -4,7 +4,7 @@
    Demo: admin settings and requests live in this browser (localStorage). A server must hold them in the real system. */
 (() => {
   "use strict";
-  const CFG_KEY = "zenvyro_deposit_cfg_v1", TXKEY = "zenvyro_tx_v1";
+  const CFG_KEY = "zenvyro_deposit_cfg_v1", TXKEY = "zenvyro_tx_v1", DKEY = "zenvyro_dp_draft_v1", TTL = 30 * 60 * 1000;
   const NETS = [
     { k: "TRX", coin: "TRX", name: "TRON", icon: "trx" },
     { k: "SOL", coin: "SOL", name: "Solana", icon: "sol" },
@@ -21,6 +21,7 @@
   const u = n => `calc(${n} * var(--u))`;
   const ART = {"W":480,"H":250,"p":{"hero":[0,0,184,140],"layers":[186,0,52,52],"trx":[240,0,66,68],"link":[308,0,48,50],"coins":[358,0,52,56],"shield":[412,0,46,50],"plane":[0,142,62,64],"empty":[64,142,220,108],"sol":[286,142,68,60],"bnb":[356,142,66,66]}}, AV = "20261114r";
   const SV = {
+    x: '<svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="4.200" stroke-linecap="round"><path d="M5 5l22 22M27 5L5 27"/></svg>',
     chvd: '<svg viewBox="0 0 24 14" fill="none" stroke="#fff" stroke-width="3.400" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2l9 9 9-9"/></svg>',
     chv: '<svg viewBox="0 0 14 24" fill="none" stroke="currentColor" stroke-width="3.400" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l10 10L2 22"/></svg>',
     head: '<svg viewBox="0 0 36 36" fill="none" stroke="#fff" stroke-width="2.800" stroke-linecap="round" stroke-linejoin="round"><path d="M6 21v-3a12 12 0 0 1 24 0v3"/><rect x="3.500" y="19" width="6" height="10" rx="3" fill="#fff"/><rect x="26.500" y="19" width="6" height="10" rx="3" fill="#fff"/><path d="M29.500 29c0 3-3 4-7 4"/></svg>',
@@ -31,6 +32,11 @@
     down: '<svg viewBox="0 0 38 38" fill="none" stroke="#fff" stroke-width="3.600" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5v27M8 21l11 11 11-11"/></svg>'
   };
   let cur = "TRX", showAll = false, pollTimer = 0;
+  /* Sensitive page: it stays as it is when the app is minimised. The chosen network, TRX amount and TXID are kept in sessionStorage for 30 minutes
+     (this tab only), so if the phone reloads the page the sheet opens again with the same values. Cleared after a request is sent. */
+  const saveDraft = (open, a, t) => { try { sessionStorage.setItem(DKEY, JSON.stringify({ net: cur, amt: a !== undefined ? a : ($("dpAmt") ? $("dpAmt").value : ""), tx: t !== undefined ? t : ($("dpTx") ? $("dpTx").value : ""), open: !!open, ts: Date.now() })); } catch (e) {} };
+  const clearDraft = () => { try { sessionStorage.removeItem(DKEY); } catch (e) {} };
+  const loadDraft = () => { try { const d = JSON.parse(sessionStorage.getItem(DKEY) || "null"); if (d && typeof d === "object" && Date.now() - (+d.ts || 0) < TTL) return d; } catch (e) {} return null; };
 
   function injectCss() {
     if ($("dpCss")) return;
@@ -49,7 +55,9 @@ background:radial-gradient(ellipse ${u(560)} ${u(360)} at 100% 0,#4a1fb0aa,trans
 #zvDp .dh .ti{position:absolute;left:${u(222)};top:${u(20)};white-space:nowrap}
 #zvDp .dh h2{margin:0;font-size:${u(48)};line-height:${u(56)};font-weight:700}
 #zvDp .dh p{margin:${u(4)} 0 0;font-size:${u(26)};line-height:${u(32)};color:#c4bcf2}
-#zvDp .hp{position:absolute;right:${u(24)};top:${u(30)};width:${u(235)};height:${u(65)};border-radius:${u(33)};border:${u(2.5)} solid #7a5aff;background:#1a1070;display:flex;align-items:center;justify-content:center;gap:${u(12)};padding:0;font-size:${u(24)};font-weight:600;white-space:nowrap}
+#zvDp .xc{position:absolute;right:${u(24)};top:${u(30)};width:${u(65)};height:${u(65)};border-radius:${u(20)};border:${u(2.5)} solid #8a6aff;background:#1a1070;display:grid;place-items:center;padding:0;z-index:6;box-shadow:0 0 ${u(16)} #7a4aff55}
+#zvDp .xc svg{width:${u(28)};height:${u(28)}}
+#zvDp .hp{position:absolute;right:${u(105)};top:${u(30)};width:${u(235)};height:${u(65)};border-radius:${u(33)};border:${u(2.5)} solid #7a5aff;background:#1a1070;display:flex;align-items:center;justify-content:center;gap:${u(12)};padding:0;font-size:${u(24)};font-weight:600;white-space:nowrap}
 #zvDp .hp svg.h{width:${u(38)};height:${u(38)}}#zvDp .hp svg.c{width:${u(13)};height:${u(22)}}
 #zvDp .dl{display:flex;align-items:center;gap:${u(22)};height:${u(50)};margin:${u(24)} 0 0 ${u(20)};font-size:${u(26)};font-weight:700}
 #zvDp .dl .qm{width:${u(34)};height:${u(34)};border-radius:50%;border:0;background:#7a5aff;color:#fff;font-size:${u(22)};font-weight:700;padding:0;margin-left:${u(-8)}}
@@ -132,7 +140,7 @@ ${spr}`;
   function html() {
     const opts = NETS.map(n => `<button data-n="${n.k}" onclick="zvDpPick('${n.k}')"><span class="ic"><i class="ds-${n.icon}"></i></span>${n.coin} · ${n.name}</button>`).join("");
     return `<div class="dp">
-      <div class="dh bd"><i class="ds-hero"></i><div class="ti"><h2>Deposit</h2><p>Add funds to your account</p></div><button class="hp" onclick="zvDpHelp()">${SV.head.replace("<svg", '<svg class="h"')}Need Help?${SV.chv.replace("<svg", '<svg class="c"').replace("currentColor", "#fff")}</button></div>
+      <div class="dh bd"><i class="ds-hero"></i><div class="ti"><h2>Deposit</h2><p>Add funds to your account</p></div><button class="hp" onclick="zvDpHelp()">${SV.head.replace("<svg", '<svg class="h"')}Need Help?${SV.chv.replace("<svg", '<svg class="c"').replace("currentColor", "#fff")}</button><button class="xc" aria-label="Close" onclick="zvDpClose()">${SV.x}</button></div>
       <div class="dl"><i class="ds-layers"></i>Select Asset</div>
       <div class="sel bd" id="dpSel" onclick="zvDpToggle()"><span class="ic" id="dpSelIc"></span><span id="dpSelTx"></span>${SV.chvd}</div>
       <div class="opts" id="dpOpts">${opts}</div>
@@ -147,7 +155,7 @@ ${spr}`;
       <div class="af bd"><span class="ic" id="dpSendIc"></span><span class="v ph" id="dpSendVal">Enter the TRX amount first</span><span class="pl" id="dpSendCoin">TRX</span></div>
       <div class="pn" id="dpPn"></div>
       <div class="dl"><i class="ds-shield"></i>Transaction ID (TXID)<button class="qm" aria-label="What is a TXID" onclick="zvDpQ()">?</button></div>
-      <input class="tx" id="dpTx" type="text" placeholder="Enter Transaction ID (TXID) from blockchain..." autocomplete="off" autocapitalize="off" spellcheck="false">
+      <input class="tx" id="dpTx" oninput="zvDpSave()" type="text" placeholder="Enter Transaction ID (TXID) from blockchain..." autocomplete="off" autocapitalize="off" spellcheck="false">
       <button class="sb" id="dpSubmit" onclick="zvDpSubmit()"><i class="ds-plane"></i><span><b>Submit Deposit Request</b><small>Confirm your deposit details</small></span></button>
       <div class="hs bd"><div class="hh">${SV.clock}<b>Deposit History</b><button id="dpVA" onclick="zvDpAll()">View All${SV.chv}</button></div><div id="dpHist"></div></div>
       <div class="nt">Once an admin checks your transaction and accepts it, the TRX amount is added to your Wallet. If it is rejected, nothing is added. Send only the coin and network shown above.</div>
@@ -197,18 +205,25 @@ ${spr}`;
     if (va) va.firstChild.textContent = showAll ? "Show Less" : "View All";
   }
 
-  function open(sym) {
+  function open(sym, restore) {
     if (window.ZenvyroSettings && window.ZenvyroSettings.block("deposit")) return;
     injectCss(); const old = $("zvDp"); if (old) old.remove();
-    cur = NETS.some(n => n.k === sym) ? sym : "TRX"; showAll = false;
+    const d = loadDraft(), keep = d && NETS.some(n => n.k === d.net) && (restore || !sym || sym === d.net);
+    cur = keep ? d.net : (NETS.some(n => n.k === sym) ? sym : "TRX"); showAll = false;
     const ov = document.createElement("div"); ov.id = "zvDp"; ov.innerHTML = html(); document.body.appendChild(ov);
     paintNet(); paintHist();
+    if (keep) { $("dpAmt").value = d.amt || ""; $("dpTx").value = d.tx || ""; paintSend(); }
+    saveDraft(true);
     window.__dpPriceFail = false;
     try { if (window.ZenvyroWallet && window.ZenvyroWallet.ensurePrices) window.ZenvyroWallet.ensurePrices(); } catch (e) {}
     let tries = 0; clearInterval(pollTimer);
     pollTimer = setInterval(() => { tries++; if ((prices().TRX > 0) || tries > 14 || !$("zvDp")) { clearInterval(pollTimer); if (!(prices().TRX > 0)) window.__dpPriceFail = true; } paintSend(); }, 700);
   }
-  function close() { const ov = $("zvDp"); if (ov) ov.remove(); clearInterval(pollTimer); }
+  function close() {
+    const ov = $("zvDp");
+    if (ov) { const a = $("dpAmt") ? $("dpAmt").value : "", t = $("dpTx") ? $("dpTx").value : ""; ov.remove(); if (a || t) saveDraft(false, a, t); else clearDraft(); }
+    clearInterval(pollTimer);
+  }
 
   function submit() {
     if (window.ZenvyroSettings && window.ZenvyroSettings.block("deposit")) return;
@@ -219,7 +234,7 @@ ${spr}`;
     if (txid.length < 16 || /\s/.test(txid)) return say("Enter the full transaction ID (TXID)");
     if (txList().some(t => t && t.kind === "deposit" && String(t.txid || "").toLowerCase() === txid.toLowerCase())) return say("This TXID was already submitted");
     window.ZenvyroTx.log({ id: newId(), kind: "deposit", sym: "TRX", amount: k.T, status: "pending", sub: n.coin + " (" + n.name + ")", txid, net: n.k, netName: n.name, sendCoin: n.coin, sendAmount: k.coinAmt, usdt: k.pTrx > 0 ? Math.round(k.T * k.pTrx * 100) / 100 : 0 });
-    $("dpAmt").value = ""; $("dpTx").value = ""; paintSend(); showAll = false; paintHist();
+    $("dpAmt").value = ""; $("dpTx").value = ""; saveDraft(true); paintSend(); showAll = false; paintHist();
     say("Deposit request sent. You will see it in Deposit History");
   }
 
@@ -227,13 +242,18 @@ ${spr}`;
     window.ZenvyroDeposit = { open, close };
     Object.assign(window, {
       zvDpToggle: () => $("dpOpts").classList.toggle("on"),
-      zvDpPick: k => { cur = k; $("dpOpts").classList.remove("on"); paintNet(); },
-      zvDpCalc: paintSend, zvDpSubmit: submit, zvDpAll: () => { showAll = !showAll; paintHist(); },
+      zvDpPick: k => { cur = k; $("dpOpts").classList.remove("on"); paintNet(); saveDraft(true); },
+      zvDpClose: close, zvDpSave: () => saveDraft(true),
+      zvDpCalc: () => { paintSend(); saveDraft(true); }, zvDpSubmit: submit, zvDpAll: () => { showAll = !showAll; paintHist(); },
       zvDpQ: () => say("The TXID (hash) is shown in your wallet or exchange after you send the coins"),
       zvDpCopy: () => { const a = cfgOf(cur).address; if (!a) return say("The deposit address is not set yet"); if (navigator.clipboard) navigator.clipboard.writeText(a).then(() => say("Address copied")).catch(() => say(a)); else say(a); },
       zvDpHelp: () => window.openModal("Deposit Help", '<div class="modal-list"><div><strong>1. Choose</strong><span>TRX, Solana or BNB</span></div><div><strong>2. Enter</strong><span>how many TRX to add</span></div><div><strong>3. Send</strong><span>the amount shown, to the address shown</span></div><div><strong>4. Paste</strong><span>the TXID and submit</span></div></div><div class="modal-note">An admin checks your transaction. After it is accepted, the TRX amount is added to your Wallet.</div>')
     });
     addEventListener("storage", e => { if (e.key === TXKEY || e.key === CFG_KEY) { if ($("zvDp")) { paintNet(); paintHist(); } } });
+    document.addEventListener("visibilitychange", () => { if (!document.hidden && $("zvDp")) { paintNet(); paintHist(); } });
+    addEventListener("pageshow", () => { if ($("zvDp")) { paintNet(); paintHist(); } });
+    const dr = loadDraft();
+    if (dr && dr.open) { let n = 0; const iv = setInterval(() => { n++; if (window.ZenvyroWallet && window.ZenvyroTx) { clearInterval(iv); open(dr.net, true); } else if (n > 25) clearInterval(iv); }, 300); }
     addEventListener("load", () => { const o = window.showSection; if (typeof o === "function") window.showSection = function () { close(); return o.apply(this, arguments); }; });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
