@@ -430,14 +430,27 @@ ${spriteCss}`;
     fresh.forEach(t => { if (t && t.kind === "transfer" && t.status === "cancelled" && !t.refunded && W() && W().credit(t.sym, +t.amount || 0, 0)) { t.refunded = true; n++; } });
     if (n) { txs.splice(0, txs.length, ...fresh); saveTx(); render(); say("A transfer was cancelled and refunded to your wallet"); }
   }
+  // A deposit approved by the admin (admin.html) is credited here, once. The admin page and this page share localStorage on this device (demo).
+  function applyDeposits() {
+    let fresh; try { fresh = JSON.parse(localStorage.getItem(TXKEY) || "[]"); } catch (e) { return; }
+    if (!Array.isArray(fresh) || !W()) return; let n = 0, tot = 0;
+    fresh.forEach(t => {
+      if (t && t.kind === "deposit" && t.status === "approved" && !t.credited) {
+        const amt = +t.credit || +t.amount || 0, usd = +t.creditUsdt || (t.sym === "USDT" ? amt : 0);
+        if (amt > 0 && W().credit(t.sym || "TRX", amt, usd)) { t.credited = true; t.status = "completed"; t.amount = amt; n++; tot += amt; }
+      }
+    });
+    if (n) { txs.splice(0, txs.length, ...fresh); saveTx(); render(); say("Deposit approved: " + (Math.round(tot * 1e6) / 1e6) + " TRX added to your Wallet"); }
+  }
   function init() {
+    setTimeout(applyDeposits, 600); addEventListener("storage", applyDeposits); document.addEventListener("visibilitychange", () => { if (!document.hidden) applyDeposits(); });
     setTimeout(applyRefunds, 400); addEventListener("storage", applyRefunds); document.addEventListener("visibilitychange", () => { if (!document.hidden) applyRefunds(); });
     Object.assign(window, {
       zvwClose: closeWallet,
       zvwEye: () => { hidden = !hidden; render(); },
       zvwAll: () => { showAll = !showAll; render(); },
       zvwAsset: assetDetail,
-      zvwDepositForm: depositForm, zvwDepositAddr: depositAddr, zvwDeposit: submitDeposit,
+      zvwDepositForm: s => (window.ZenvyroDeposit ? window.ZenvyroDeposit.open(s) : depositForm(s)), zvwDepositAddr: depositAddr, zvwDeposit: submitDeposit,
       zvwWithdrawForm: withdrawForm, zvwWdInfo: wdInfo, zvwWithdraw: submitWithdraw,
       zvwWdMax: () => { const sym = val("wdAsset"); $("wdAmt").value = maxWd(sym).toFixed(8); wdBreak(); }, zvwWdBreak: wdBreak,
       zvwTransferForm: transferForm, zvwTrInfo: trInfo, zvwTransfer: submitTransfer,

@@ -272,6 +272,7 @@ textarea{min-height:96px;resize:vertical}
 <script src="member-id.js"></script>
 <script src="nft-catalog.js"></script>
 <script src="admin-market.js"></script>
+<script src="admin-deposit.js?v=20261114r"></script>
 <script>
 (() => {
   "use strict";
@@ -593,8 +594,9 @@ textarea{min-height:96px;resize:vertical}
     log: () => ["Activity Logs", st.logs.length ? st.logs.map(l => `<div class="li"><div>${esc(l.t)}<small>${when(l.ts)}</small></div></div>`).join("") : '<div class="li">No activity yet</div>'],
     usr: () => ["Users", '<input class="in" id="uq" type="search" placeholder="Search by name or ID" autocomplete="off"><div id="ul" style="margin-top:6px">' + userRows("") + '</div><p class="note">Tap a user to ban, unban or send dollars. Sample users until the backend is connected.</p>'],
     txn: () => ["Transactions", [["Deposit", 100], ["Withdraw", 45], ["Exchange", 20], ["Deposit", 50], ["Withdraw", 15], ["Exchange", 8]].map((t, i) => `<div class="li"><div>${t[0]}<small>${when(Date.now() - i * 5400000)}</small></div><b>$${t[1]}.00</b></div>`).join("") + '<p class="note">Sample list. Real transactions appear after the backend is connected.</p>'],
-    menu: () => ["Menu", [["dash", "Dashboard"], ["usr", "Users"], ["txn", "Transactions"], ["set", "Settings"], ["rep", "Reports"], ["mkt", "Market Place"]].map(a => `<div class="li"><a href="#" data-go="${a[0]}">${a[1]}</a></div>`).join("") + '<div class="li"><a href="index.html">Back to Zenvyro app</a></div>'],
+    menu: () => ["Menu", [["dash", "Dashboard"], ["usr", "Users"], ["txn", "Transactions"], ["set", "Settings"], ["rep", "Reports"], ["mkt", "Market Place"], ["dep", "Deposits"]].map(a => `<div class="li"><a href="#" data-go="${a[0]}">${a[1]}</a></div>`).join("") + '<div class="li"><a href="index.html">Back to Zenvyro app</a></div>'],
     mkt: () => window.ZVAdminMarket ? window.ZVAdminMarket.page() : ["Market Place", '<div class="li">Market module not loaded</div>'],
+    dep: () => window.ZVAdminDeposit ? window.ZVAdminDeposit.page() : ["Deposits", '<div class="li">Deposit module not loaded</div>'],
     me: () => ["Admin Account", '<div class="li"><div>Administrator<small>Full access (demo)</small></div></div><div class="li"><a href="index.html">Back to Zenvyro app</a></div>']
   };
   function show(t, h, k) { $("#shT").textContent = t; $("#shB").innerHTML = h; $("#sheet").classList.add("on"); $("#sheet").dataset.k = k; }
