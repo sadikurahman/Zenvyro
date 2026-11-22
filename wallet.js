@@ -330,19 +330,27 @@ ${spriteCss}`;
   }
   const MIN_WITHDRAW_USD = 10; // minimum withdrawal per request (USD value). A server must enforce this too.
   const MIN_TRANSFER_USD = 5; // minimum transfer (USD value). A server must enforce this too.
-  async function submitWithdraw() {
-    if (window.ZenvyroSettings && window.ZenvyroSettings.block("withdraw")) return;
-    const sym = val("wdAsset"), a = asset(sym), addr = val("wdAddr"), amount = parseFloat(val("wdAmt"));
-    if (!/^[A-Za-z0-9:_-]{20,120}$/.test(addr)) return say("Enter a valid wallet address");
-    if (!(amount > 0)) return say("Enter a valid amount");
+  async function doWithdraw(sym, addr, amount) {
+    // returns "" when the request was created, "__blocked" when the admin switched withdrawals off, otherwise a message for the member
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("withdraw")) return "__blocked";
+    const a = asset(sym);
+    if (!a) return "Choose an asset";
+    if (!/^[A-Za-z0-9:_-]{20,120}$/.test(addr)) return "Enter a valid wallet address";
+    if (!(amount > 0)) return "Enter a valid amount";
     let px = sym === "USDT" ? 1 : (W() ? +W().prices()[sym] : 0);
     if (!(px > 0) && W()) { try { await W().ensurePrices(); } catch (e) {} px = +W().prices()[sym]; }
-    if (!(px > 0)) return say("Could not check the current price. Please try again.");
+    if (!(px > 0)) return "Could not check the current price. Please try again.";
     if (amount * px < MIN_WITHDRAW_USD - 1e-9)
-      return say("Minimum withdrawal is $" + MIN_WITHDRAW_USD + " (about " + +(MIN_WITHDRAW_USD / px).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + ")");
+      return "Minimum withdrawal is $" + MIN_WITHDRAW_USD + " (about " + +(MIN_WITHDRAW_USD / px).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + ")";
     const hold = holdOf(amount);
-    if (amount > availAmt(sym) + 1e-12) return say("Not enough available balance");
+    if (amount > availAmt(sym) + 1e-12) return "Not enough available balance";
     window.ZenvyroTx.log({ id: newId("WD"), kind: "withdraw", sym, amount, hold, holdIn: true, status: "pending", sub: sym + " (" + a.net + ")", addr });
+    return "";
+  }
+  async function submitWithdraw() {
+    const msg = await doWithdraw(val("wdAsset"), val("wdAddr"), parseFloat(val("wdAmt")));
+    if (msg === "__blocked") return;
+    if (msg) return say(msg);
     window.closeModal(); say("Withdraw request sent");
   }
 
@@ -365,21 +373,29 @@ ${spriteCss}`;
     const sym = val("trAsset"), a = asset(sym);
     $("trInfo").textContent = "Available: " + availAmt(sym).toFixed(a.dec > 6 ? 8 : 6) + " " + sym;
   }
-  async function submitTransfer() {
-    if (window.ZenvyroSettings && window.ZenvyroSettings.block("transfer")) return;
-    const sym = val("trAsset"), a = asset(sym), to = window.ZenvyroId.norm(val("trTo")), amount = parseFloat(val("trAmt"));
-    if (!to || !window.ZenvyroId.valid(to)) return say("Enter a valid recipient ID");
-    if (window.ZENVYRO_LOOKUP_ENDPOINT && !window.ZenvyroId.lastFound(to)) return say("Recipient ID not found");
-    if (to.toLowerCase() === MY_ID.toLowerCase()) return say("You can't transfer to your own ID");
-    if (!(amount > 0)) return say("Enter a valid amount");
-    if (amount > availAmt(sym) + 1e-12) return say("Not enough available balance");
+  async function doTransfer(sym, toRaw, amount) {
+    // returns "" when sent, "__blocked" (feature off) or "__cancel" (member said no) or a message for the member
+    if (window.ZenvyroSettings && window.ZenvyroSettings.block("transfer")) return "__blocked";
+    const a = asset(sym), to = window.ZenvyroId.norm(toRaw);
+    if (!a) return "Choose an asset";
+    if (!to || !window.ZenvyroId.valid(to)) return "Enter a valid recipient ID";
+    if (window.ZENVYRO_LOOKUP_ENDPOINT && !window.ZenvyroId.lastFound(to)) return "Recipient ID not found";
+    if (to.toLowerCase() === MY_ID.toLowerCase()) return "You can't transfer to your own ID";
+    if (!(amount > 0)) return "Enter a valid amount";
+    if (amount > availAmt(sym) + 1e-12) return "Not enough available balance";
     let px = sym === "USDT" ? 1 : (W() ? +W().prices()[sym] : 0);
     if (!(px > 0) && W()) { try { await W().ensurePrices(); } catch (e) {} px = +W().prices()[sym]; }
-    if (!(px > 0)) return say("Could not check the current price. Please try again.");
-    if (amount * px < MIN_TRANSFER_USD - 1e-9) return say("Minimum transfer is $" + MIN_TRANSFER_USD + " (about " + +(MIN_TRANSFER_USD / px).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + ")");
-    if (!window.confirm("Send " + amount + " " + sym + " to " + to + "?\n\nThis happens instantly. Zenvyro can reverse a transfer only in cases of error or fraud.")) return;
-    if (!W().debit(sym, amount)) return say("Transfer failed");
+    if (!(px > 0)) return "Could not check the current price. Please try again.";
+    if (amount * px < MIN_TRANSFER_USD - 1e-9) return "Minimum transfer is $" + MIN_TRANSFER_USD + " (about " + +(MIN_TRANSFER_USD / px).toFixed(a.dec > 6 ? 8 : 6) + " " + sym + ")";
+    if (!window.confirm("Send " + amount + " " + sym + " to " + to + "?\n\nThis happens instantly. Zenvyro can reverse a transfer only in cases of error or fraud.")) return "__cancel";
+    if (!W().debit(sym, amount)) return "Transfer failed";
     window.ZenvyroTx.log({ id: newId("TR"), kind: "transfer", dir: "out", sym, amount, status: "completed", sub: "To " + to });
+    return "";
+  }
+  async function submitTransfer() {
+    const msg = await doTransfer(val("trAsset"), val("trTo"), parseFloat(val("trAmt")));
+    if (msg === "__blocked" || msg === "__cancel") return;
+    if (msg) return say(msg);
     window.closeModal(); say("Transfer completed");
   }
 
@@ -451,15 +467,16 @@ ${spriteCss}`;
       zvwAll: () => { showAll = !showAll; render(); },
       zvwAsset: assetDetail,
       zvwDepositForm: s => (window.ZenvyroDeposit ? window.ZenvyroDeposit.open(s) : depositForm(s)), zvwDepositAddr: depositAddr, zvwDeposit: submitDeposit,
-      zvwWithdrawForm: withdrawForm, zvwWdInfo: wdInfo, zvwWithdraw: submitWithdraw,
+      zvwWithdrawForm: s => (window.ZenvyroWithdraw ? window.ZenvyroWithdraw.open(s) : withdrawForm(s)), zvwWdInfo: wdInfo, zvwWithdraw: submitWithdraw,
       zvwWdMax: () => { const sym = val("wdAsset"); $("wdAmt").value = maxWd(sym).toFixed(8); wdBreak(); }, zvwWdBreak: wdBreak,
-      zvwTransferForm: transferForm, zvwTrInfo: trInfo, zvwTransfer: submitTransfer,
+      zvwTransferForm: s => (window.ZenvyroTransfer ? window.ZenvyroTransfer.open(s) : transferForm(s)), zvwTrInfo: trInfo, zvwTransfer: submitTransfer,
       zvwCopy: () => {
         const el = document.querySelector("#dpAddr .ref-box");
         if (el && navigator.clipboard) navigator.clipboard.writeText(el.textContent).then(() => say("Address copied")).catch(() => say(el.textContent));
       }
     });
     window.ZenvyroWalletInfo = { avail: availAmt };
+    window.ZenvyroWalletOps = { assets: ASSETS, withdraw: doWithdraw, transfer: doTransfer, holdOf, holdPct: HOLD_PCT, zenyUsdt: ZENY_USDT, minWdUsd: MIN_WITHDRAW_USD, minTrUsd: MIN_TRANSFER_USD };
     window.ZenvyroWalletAdmin = {
       list: () => txs.filter(t => t.status === "pending" && (t.kind === "deposit" || t.kind === "withdraw")),
       approve: adminApprove, reject: adminReject
