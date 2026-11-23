@@ -268,7 +268,7 @@ textarea{min-height:96px;resize:vertical}
 <div class="toast" id="toast"></div>
 
 <script src="zenvyro-api.js"></script>
-<script src="site-settings.js"></script>
+<script src="site-settings.js?v=20261114u"></script>
 <script src="member-id.js"></script>
 <script src="nft-catalog.js"></script>
 <script src="admin-market.js"></script>
@@ -455,7 +455,7 @@ textarea{min-height:96px;resize:vertical}
   const SS = () => window.ZenvyroSettings;
   const dtl = ms => new Date(ms - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   const dur = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return Math.floor(s / 86400) + "d " + Math.floor(s % 86400 / 3600) + "h " + Math.floor(s % 3600 / 60) + "m"; };
-  const BX = [["income", "Total Income"], ["withdraw", "Total Withdraw"], ["normal", "Normal Users"], ["countries", "Covered Countries"]];
+  const BX = [["income", "Total Income"], ["withdraw", "Total Withdraw"], ["normal", "Total Users"], ["countries", "Covered Countries"]];
   const alt = ' style="background:#2a1a6a"';
   const phasePage = () => { const p = SS().phase(); return ["Phase 1 Timer",
     `<div class="li"><div>${p.paused ? "Paused" : "Running"}<small>Time left</small></div><b>${dur(p.left)}</b></div>

@@ -106,7 +106,7 @@
     if ($("coinBalance")) {
       $("coinBalance").textContent = bal.toFixed(6);
       const cap = $("coinBalance").parentElement.querySelector("small");
-      if (cap) cap.textContent = "≈ " + (bal * ZENY_TO_USDT).toFixed(2) + " USDT · reference only";
+      if (cap) cap.textContent = (bal * ZENY_TO_USDT).toFixed(2) + " USDT - reference only";
     }
     // Home: big balance in ZENY, small dollar equivalent beside it
     const hb = document.querySelector(".balance .balance-num");
@@ -116,7 +116,7 @@
     }
     const hg = document.querySelector(".balance .gain");
     if (hg) {
-      const g = "↗ " + (state.totalMined || 0).toFixed(6) + " ZENY <small>(Total mined)</small>";
+      const g = '<svg class="zh-up" viewBox="0 0 12 13" fill="#2ee87c" aria-hidden="true"><path d="M6 0l5.6 6.2H8V13H4V6.2H.4z"/></svg>' + (state.totalMined || 0).toFixed(6) + " ZENY <small>(Total mined)</small>";
       if (hg.dataset.zv !== g) { hg.dataset.zv = g; hg.innerHTML = g; }
     }
     if ($("cdCurrentBalance")) $("cdCurrentBalance").textContent = bal.toFixed(6);

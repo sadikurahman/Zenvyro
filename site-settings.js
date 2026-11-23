@@ -6,7 +6,7 @@
   "use strict";
   const AKEY = "zenvyro_admin_v2", SKEY = "zenvyro_site_v1", DAY = 864e5, START0 = Date.parse("2026-11-05T00:00:00+06:00");
   const FLAGS = { withdraw: ["wdraw", "Withdrawals"], deposit: ["dep", "Deposits"], exchange: ["exch", "Exchange"], transfer: ["trans", "Transfers"], mining: ["mine", "Mining"], purchase: ["buy", "Pack purchases"], market: ["nft", "NFT purchases"] };
-  const BOXES = { income: ["Total Income", "cdIncome"], withdraw: ["Total Withdraw", "cdWithdraw"], normal: ["Normal Users", "cdNormalUsers"], countries: ["Covered Countries", "cdCountries"] };
+  const BOXES = { income: ["Total Income", "cdIncome"], withdraw: ["Total Withdraw", "cdWithdraw"], normal: ["Total Users", "cdNormalUsers"], countries: ["Covered Countries", "cdCountries"] };
   const jget = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; } catch (e) { return d; } };
   const defaults = () => ({ phase: { show: true, start: START0, end: START0 + 120 * DAY, paused: false, left: 0 }, boxes: { income: { show: true, mode: "auto", value: 0, ts: 0 }, withdraw: { show: true, mode: "auto", value: 0, ts: 0 }, normal: { show: true, mode: "auto", value: 0, ts: 0 }, countries: { show: true, mode: "auto", value: 0, ts: 0 } } });
   let remote = null, live = null;
