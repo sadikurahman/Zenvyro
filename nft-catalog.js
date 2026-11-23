@@ -12,11 +12,11 @@
     mk("N009", "Royal Lion #009", "nft-lion.jpg", 240, ["Legendary", "Limited"], "Premium", 50, "trx", 1.5, 30),
     mk("N023", "Crypto Ape #023", "nft-ape.jpg", 315, ["Trending", "Limited"], "Popular", 30, "comm", 0.5, 60),
     mk("N017", "Space Explorer #017", "nft-astro.jpg", 200, ["Limited"], "New", null, "mining", 100, null)] });
-  // Badges are automatic: "New" for NEW_DAYS after the admin adds an NFT, "Hot" for the best seller (at least one sale). Hot wins if both apply.
+  // Badges are automatic: "New" for NEW_DAYS after the admin adds an NFT, "Hot" for the one clear best seller (a tie = nobody is Hot). Hot wins if both apply.
   const NEW_DAYS = 7;
   const autoBadge = (i, items, t) => {
-    const vis = items.filter(x => !x.hidden), top = Math.max(0, ...vis.map(x => +x.sold || 0));
-    if (top > 0 && (+i.sold || 0) === top) return "Hot";
+    const mine = +i.sold || 0, others = Math.max(0, ...items.filter(x => !x.hidden && x.id !== i.id).map(x => +x.sold || 0));
+    if (mine > 0 && mine > others) return "Hot";
     return i.created && t - i.created <= NEW_DAYS * DAY ? "New" : "";
   };
   function save(c) { try { localStorage.setItem(KEY, JSON.stringify(c)); } catch (e) { return false; } return true; }
@@ -31,6 +31,6 @@
   const saleEnd = i => i.saleDays ? i.saleStart + i.saleDays * DAY : null;
   const saleOpen = (i, t) => { const e = saleEnd(i); return !i.hidden && (!e || t <= e); };
   const left = i => i.stock == null ? Infinity : Math.max(0, i.stock - (i.sold || 0));
-  const benefitText = (bt, bv) => bt === "mining" ? "+" + bv + "% extra ZENY on every mining claim" : bt === "trx" ? bv + " TRX every day" : bv + "% of the price paid, in TRX every day";
+  const benefitText = (bt, bv) => bt === "mining" ? "+" + bv + "% extra ZNV on every mining claim" : bt === "trx" ? bv + " TRX every day" : bv + "% of the price paid, in TRX every day";
   window.ZenvyroNftCatalog = { KEY, DAY, OFF, slotOf: ts => Math.floor((ts - OFF) / DAY), BADGES, NEW_DAYS, autoBadge, get, save, discPct, priceNow, saleEnd, saleOpen, left, benefitText, r2 };
 })();

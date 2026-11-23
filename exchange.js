@@ -5,6 +5,7 @@
    Wallet balances and requests are in localStorage for now (demo). Real conversion/balances must happen on a backend. */
 (() => {
   "use strict";
+  const L = k => (k === "ZENY" ? "ZNV" : k);   // display name of the income coin; the internal key stays ZENY
 
   const ZENY_USDT = 3; // platform-set reference rate
   const FEES = [
@@ -136,7 +137,7 @@
     return reqs.slice(0, exShowAll ? 20 : 3).map(r => {
       const a = asset(r.asset), from = r.src || "ZENY", amt = +(r.amt || r.zeny);
       const st = r.status === "pending" ? '<span class="rs pe">Pending</span>' : r.status === "approved" ? `<span class="rs">${XSV.ok}${(+r.receive).toFixed(a.dec)} ${r.asset}</span>` : '<span class="rs rj">Rejected · refunded</span>';
-      return `<div class="xr"><span class="ti">${XSV.swap}</span><div class="md"><b>${amt.toFixed(6)} ${from} → ${r.asset}</b><small>${whenX(r.created)} · ${r.id}</small></div>${st}</div>`;
+      return `<div class="xr"><span class="ti">${XSV.swap}</span><div class="md"><b>${amt.toFixed(6)} ${L(from)} → ${r.asset}</b><small>${whenX(r.created)} · ${r.id}</small></div>${st}</div>`;
     }).join("");
   }
   function renderReqs() { const el = $("exReqs"); if (el) el.innerHTML = reqRows(); const va = $("exVA"); if (va) va.innerHTML = (exShowAll ? "Show Less " : "View All ") + XSV.arr; }
@@ -185,14 +186,14 @@
   function update() {
     if (!$("exAmount")) return;
     const c = calc(), bal = srcBal(), sp = src === "ZENY" ? ZENY_USDT : (prices.TRX || 0);
-    $("exAvail").textContent = bal.toFixed(6) + " " + src;
-    if ($("exAvailLbl")) $("exAvailLbl").textContent = "Exchange Wallet · " + src;
-    if ($("exFromLbl")) $("exFromLbl").textContent = "· " + src;
-    if ($("exHeld")) $("exHeld").textContent = heldZeny().toFixed(6) + " ZENY";
+    $("exAvail").textContent = bal.toFixed(6) + " " + L(src);
+    if ($("exAvailLbl")) $("exAvailLbl").textContent = "Exchange Wallet · " + L(src);
+    if ($("exFromLbl")) $("exFromLbl").textContent = "· " + L(src);
+    if ($("exHeld")) $("exHeld").textContent = heldZeny().toFixed(6) + " ZNV";
 
     let rate;
     if (!sp || !c.price) rate = priceState === "loading" ? "Loading price…" : "Live price unavailable — please try again later";
-    else rate = "1 " + src + " ≈ " + (sp / c.price).toFixed(c.a.dec) + " " + sel + " <em>(before fees)</em>";
+    else rate = "1 " + L(src) + " ≈ " + (sp / c.price).toFixed(c.a.dec) + " " + sel + " <em>(before fees)</em>";
     $("exRate").innerHTML = rate;
 
     const fr = (ic, l, v) => `<div class="fr"><i class="xs-${ic}"></i><span>${l}</span><b>${v}</b></div>`;
@@ -204,7 +205,7 @@
     $("exReceive").textContent = rt; $("exReceive").style.fontSize = u(rt.length > 15 ? 40 : rt.length > 12 ? 48 : 56);
 
     const over = c.amount > bal + 1e-12;
-    $("exErr").textContent = over ? "Not enough " + src + " balance" : "";
+    $("exErr").textContent = over ? "Not enough " + L(src) + " balance" : "";
     const ok = c.amount > 0 && !over && c.receive !== null && c.receive > 0;
     const btn = $("exConfirm");
     btn.disabled = !ok; btn.style.opacity = ok ? "1" : ".7";
@@ -328,13 +329,13 @@ ${spr}`;
   const TILE_ICON = { TRX: "trxt", USDT: "usdt", BTC: "btc", TON: "ton", BNB: "bnb", SOL: "sol" };
   function body() {
     const tiles = ASSETS.map(a => `<button id="exTile_${a.sym}" class="tl tt3" onclick="exSelect('${a.sym}')"><span class="ic"><i class="xs-${TILE_ICON[a.sym]}"></i></span><b>${a.sym}</b><small>${a.name}</small></button>`).join("");
-    const sb = k => `<button id="exSrc_${k}" class="tl fm" onclick="exSrc('${k}')"><span class="ic"><i class="xs-${k === "ZENY" ? "gem" : "trxb"}"></i></span><span class="tx"><b>${k}</b><small>${k === "ZENY" ? "Mining income" : "NFT and other income"}</small></span><span class="ck">${XSV.chk}</span></button>`;
+    const sb = k => `<button id="exSrc_${k}" class="tl fm" onclick="exSrc('${k}')"><span class="ic"><i class="xs-${k === "ZENY" ? "gem" : "trxb"}"></i></span><span class="tx"><b>${L(k)}</b><small>${k === "ZENY" ? "Mining income" : "NFT and other income"}</small></span><span class="ck">${XSV.chk}</span></button>`;
     return `
       <div class="hd"><i class="xs-xlogo"></i><div class="tt"><h2>Exchange</h2><p>Swap Your Assets Instantly ${XSV.bolt}</p></div><button class="exx" aria-label="Close" onclick="exClose()">${XSV.x}</button></div>
-      <div class="wr bd"><i class="xs-wallet"></i><b id="exAvailLbl">Exchange Wallet · ZENY</b><button class="pl" onclick="exCopy()"><span id="exAvail">0.000000 ZENY</span>${XSV.copy}</button></div>
+      <div class="wr bd"><i class="xs-wallet"></i><b id="exAvailLbl">Exchange Wallet · ZNV</b><button class="pl" onclick="exCopy()"><span id="exAvail">0.000000 ZNV</span>${XSV.copy}</button></div>
       <div class="lb">From</div>
       <div class="g2">${sb("ZENY")}${sb("TRX")}</div>
-      <div class="lb"><span>Amount <em id="exFromLbl">· ZENY</em></span></div>
+      <div class="lb"><span>Amount <em id="exFromLbl">· ZNV</em></span></div>
       <div class="af bd"><i class="xs-gems"></i><span class="sep"></span><input id="exAmount" type="number" inputmode="decimal" step="any" min="0" placeholder="0.000000" oninput="exUpdate()"><button class="mx" onclick="exMax()">Max</button></div>
       <div class="er" id="exErr"></div>
       <div class="lb">To <em>· Select asset</em></div>
@@ -344,7 +345,7 @@ ${spr}`;
       <div class="rc bd"><div class="l"><i>${XSV.chk}</i>You receive (estimated)</div><div id="exReceive">—</div><i class="xs-ring"></i></div>
       <button id="exConfirm" onclick="exConfirm()"><svg class="sw" viewBox="0 0 38 38" fill="none" stroke="#fff" stroke-width="3.200" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14h26M26 7l7 7-7 7M32 25H6M12 18l-7 7 7 7"/></svg>Exchange Now<svg class="cv" viewBox="0 0 14 24" fill="none" stroke="#fff" stroke-width="3.400" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l10 10L2 22"/></svg></button>
       <div class="rx bd"><div class="rh">${XSV.clock.replace("<svg", '<svg class="cl"')}<b>Recent Exchanges</b><button id="exVA" onclick="exAll()">View All ${XSV.arr}</button></div><div id="exReqs">${reqRows()}</div></div>
-      <div class="nt">Exchange is instant. A total ${TOTAL_FEE}% fee is taken and the result is added straight to your Wallet, where you can spend it, transfer it or withdraw it. Only your income (mining ZENY and TRX rewards) can be exchanged. Amounts shown here are estimates until you confirm.</div>`;
+      <div class="nt">Exchange is instant. A total ${TOTAL_FEE}% fee is taken and the result is added straight to your Wallet, where you can spend it, transfer it or withdraw it. Only your income (mining ZNV and TRX rewards) can be exchanged. Amounts shown here are estimates until you confirm.</div>`;
   }
 
   // ---- 2.6 s loading animation, then a success popup ----
@@ -364,7 +365,7 @@ ${spr}`;
       document.head.appendChild(st);
     }
     const ov = document.createElement("div"); ov.id = "exFx";
-    ov.innerHTML = '<div class="exfx-c"><div class="exfx-r"><i></i><i></i><i></i></div><b id="exFxT">Exchanging…</b><span>' + from + " → " + to + "</span></div>";
+    ov.innerHTML = '<div class="exfx-c"><div class="exfx-r"><i></i><i></i><i></i></div><b id="exFxT">Exchanging…</b><span>' + L(from) + " → " + to + "</span></div>";
     document.body.appendChild(ov);
     setTimeout(() => { const t = $("exFxT"); if (t) t.textContent = "Adding to your Wallet…"; }, 1300);
     setTimeout(() => { ov.remove(); done(); }, 2600);
@@ -372,7 +373,7 @@ ${spr}`;
   function exDone(r) {
     window.openModal("Exchange Successful", '<div style="text-align:center"><div class="ex-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.5l3 3 6-6.5"/></svg></div>' +
       '<b style="display:block;font-size:19px;margin:10px 0 12px">Added to your Wallet</b></div>' +
-      '<div class="modal-list"><div><strong>Exchanged</strong><span>' + r.amount.toFixed(6) + " " + r.from + "</span></div><div><strong>Received</strong><span>" + r.receive.toFixed(r.dec) + " " + r.to + "</span></div>" +
+      '<div class="modal-list"><div><strong>Exchanged</strong><span>' + r.amount.toFixed(6) + " " + L(r.from) + "</span></div><div><strong>Received</strong><span>" + r.receive.toFixed(r.dec) + " " + r.to + "</span></div>" +
       "<div><strong>Total fees (" + TOTAL_FEE + '%)</strong><span>' + r.fee.toFixed(2) + " USDT</span></div><div><strong>Reference</strong><span>" + r.id + "</span></div></div>" +
       '<button class="btn" style="width:100%;margin-top:12px" onclick="closeModal()">Done</button>');
   }
@@ -414,8 +415,8 @@ ${spr}`;
       const c = calc();
       if (window.ZenvyroSettings && window.ZenvyroSettings.block("exchange")) return;
       if (!(c.amount > 0) || c.receive === null || c.receive <= 0) return;
-      if (c.amount > srcBal() + 1e-12) { say("Not enough " + src + " balance"); return; }
-      const msg = "Exchange " + c.amount.toFixed(6) + " " + src + " → " + c.receive.toFixed(c.a.dec) + " " + sel +
+      if (c.amount > srcBal() + 1e-12) { say("Not enough " + L(src) + " balance"); return; }
+      const msg = "Exchange " + c.amount.toFixed(6) + " " + L(src) + " → " + c.receive.toFixed(c.a.dec) + " " + sel +
                   "\nTotal fees: " + TOTAL_FEE + "%\nThe result is added to your Wallet at once.\n\nContinue?";
       if (!window.confirm(msg)) return;
       const from = src, to = sel;
@@ -426,7 +427,7 @@ ${spr}`;
       credit(to, c.receive, c.net);
       reqs.unshift({ id, src: from, amt: c.amount, zeny: from === "ZENY" ? c.amount : 0, asset: to, status: "approved", estimate: c.receive, receive: c.receive, rate: c.price, created: Date.now(), decided: Date.now() });
       saveReqs();
-      if (window.ZenvyroTx) window.ZenvyroTx.log({ id, kind: "exchange", sym: to, amount: c.receive, status: "completed", sub: from + " → " + to });
+      if (window.ZenvyroTx) window.ZenvyroTx.log({ id, kind: "exchange", sym: to, amount: c.receive, status: "completed", sub: L(from) + " → " + to });
       const am = $("exAmount"); if (am) am.value = "";
       renderReqs(); update();
       exFx(from, to, () => { busy = false; exDone({ id, from, to, amount: c.amount, receive: c.receive, dec: c.a.dec, fee: c.gross - c.net }); });

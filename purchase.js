@@ -29,7 +29,7 @@
   let pack = "", busy = false;
 
   const DEMO_NOTE = () => API().mode === "demo" ? '<div class="pu-warn">Demo mode: payments are not live yet. Do not send real funds.</div>' : "";
-  const head = () => `<div class="pu-head"><span class="pu-ic">${IC.crown}</span><div><b>${pack} Pack</b><small>${API().PACKS[pack]} TRX &middot; ${RATE[pack]} ZENY / hour</small></div></div>`;
+  const head = () => `<div class="pu-head"><span class="pu-ic">${IC.crown}</span><div><b>${pack} Pack</b><small>${API().PACKS[pack]} TRX &middot; ${RATE[pack]} ZNV / hour</small></div></div>`;
   const backBtn = to => `<button type="button" class="pu-back" data-pu="${to}">${IC.back}Back</button>`;
 
   const availTrx = () => { try { const I = window.ZenvyroWalletInfo; return I ? I.avail("TRX") : (window.ZenvyroWallet.balances().TRX || { amount: 0 }).amount; } catch (e) { return 0; } };

@@ -5,7 +5,7 @@
 (() => {
   "use strict";
 
-  const RATES = {            // ZENY / hour
+  const RATES = {            // ZNV / hour
     Free: 0.001587,
     Standard: 0.002222,
     Silver: 0.006945,
@@ -111,16 +111,16 @@
     // Home: big balance in ZENY, small dollar equivalent beside it
     const hb = document.querySelector(".balance .balance-num");
     if (hb) {
-      const h = bal.toFixed(6) + " <span>ZENY</span> <small style=\"font-size:15px;color:#b8c1ff;font-weight:500;letter-spacing:0\">≈ $" + (bal * ZENY_TO_USDT).toFixed(2) + "</small>";
+      const h = bal.toFixed(6) + " <span>ZNV</span> <small style=\"font-size:15px;color:#b8c1ff;font-weight:500;letter-spacing:0\">≈ $" + (bal * ZENY_TO_USDT).toFixed(2) + "</small>";
       if (hb.dataset.zv !== h) { hb.dataset.zv = h; hb.innerHTML = h; }
     }
     const hg = document.querySelector(".balance .gain");
     if (hg) {
-      const g = '<svg class="zh-up" viewBox="0 0 12 13" fill="#2ee87c" aria-hidden="true"><path d="M6 0l5.6 6.2H8V13H4V6.2H.4z"/></svg>' + (state.totalMined || 0).toFixed(6) + " ZENY <small>(Total mined)</small>";
+      const g = '<svg class="zh-up" viewBox="0 0 12 13" fill="#2ee87c" aria-hidden="true"><path d="M6 0l5.6 6.2H8V13H4V6.2H.4z"/></svg>' + (state.totalMined || 0).toFixed(6) + " ZNV <small>(Total mined)</small>";
       if (hg.dataset.zv !== g) { hg.dataset.zv = g; hg.innerHTML = g; }
     }
     if ($("cdCurrentBalance")) $("cdCurrentBalance").textContent = bal.toFixed(6);
-    if ($("walletZeny")) $("walletZeny").textContent = bal.toFixed(6) + " ZENY";
+    if ($("walletZeny")) $("walletZeny").textContent = bal.toFixed(6) + " ZNV";
   }
 
 
@@ -392,7 +392,7 @@
     state.pausedRemaining = null;
     try { if (window.ZenvyroNft) window.ZenvyroNft.onMiningClaim(reward); } catch (e) {}   // mining NFTs earn a share of this claim
     save(); render(); playStartAnimation();
-    say("+" + reward.toFixed(6) + " ZENY added");
+    say("+" + reward.toFixed(6) + " ZNV added");
   }
 
   // Tap on the coin: start -> pause -> resume (from the same time) -> claim

@@ -268,7 +268,7 @@ textarea{min-height:96px;resize:vertical}
 <div class="toast" id="toast"></div>
 
 <script src="zenvyro-api.js"></script>
-<script src="site-settings.js?v=20261114u"></script>
+<script src="site-settings.js?v=20261114v"></script>
 <script src="member-id.js"></script>
 <script src="nft-catalog.js"></script>
 <script src="admin-market.js"></script>
@@ -396,7 +396,7 @@ textarea{min-height:96px;resize:vertical}
   const pRow = p => `<div class="li" style="align-items:flex-start"><div style="min-width:0"><b>${esc(p.pack)} Pack · ${p.trx} TRX</b><small>${esc(p.user)} · ${esc((AP().ASSETS.find(a => a.id === p.asset) || {}).asset || p.asset)} · ${when(p.createdAt)}</small><small class="mono" style="word-break:break-all;color:#d9d4ff">${esc(p.txid)}</small><button class="sm" style="margin-top:6px;padding:4px 10px" data-copytext="${esc(p.txid)}">Copy TXID</button></div><div style="display:grid;gap:6px;justify-items:end"><span class="tag ${p.status === "approved" ? "ok" : p.status === "rejected" ? "bad" : ""}" ${p.status === "pending" ? 'style="background:#5a4a1a;color:#e5c16c"' : ""}>${p.status}</span>${p.status === "pending" ? `<button class="sm ap" data-pok="${p.id}">Approve</button><button class="sm red" data-pno="${p.id}">Reject</button>` : ""}</div></div>`;
   async function openMem() {
     const c = await AP().adminCounts(); let h = memTabs(c);
-    if (memTab === "packs") h += PACKS.map(p => `<div class="li"><div>${p[0]} Pack<small>${p[2].toFixed(6)} ZENY / hour</small></div><b>$${p[1]}</b></div>`).join("") + '<p class="note">Pack prices and rates are read-only here.</p>';
+    if (memTab === "packs") h += PACKS.map(p => `<div class="li"><div>${p[0]} Pack<small>${p[2].toFixed(6)} ZNV / hour</small></div><b>$${p[1]}</b></div>`).join("") + '<p class="note">Pack prices and rates are read-only here.</p>';
     else if (memTab === "vouch") {
       const v = await AP().adminVouchers(), cnt = k => v.filter(x => k === "all" || x.status === k).length, list = v.filter(x => vFilter === "all" || x.status === vFilter).slice(0, 100);
       h += `<p class="sub" style="margin-top:2px">Generate vouchers</p><select class="in" id="vPack">${Object.entries(AP().PACKS).map(([n, u]) => `<option value="${n}"${n === vPackSel ? " selected" : ""}>${n} Pack ($${u})</option>`).join("")}</select>

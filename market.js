@@ -153,13 +153,13 @@
   let root = null;
   const dleft = (ts, t) => { const d = Math.max(1, Math.ceil((ts - t) / DAY)); return d + (d === 1 ? " day" : " days"); };
   const durText = d => d ? d + " days" : "Permanent";
-  const benefitFor = (i, p) => i.btype === "mining" ? "+" + fmt(i.bval, 2) + "% extra ZENY on every mining claim" : i.btype === "trx" ? fmt(i.bval, 6) + " TRX every day" : fmt(i.bval, 2) + "% of the price = " + fmt(r6(p * i.bval / 100), 6) + " TRX every day";
+  const benefitFor = (i, p) => i.btype === "mining" ? "+" + fmt(i.bval, 2) + "% extra ZNV on every mining claim" : i.btype === "trx" ? fmt(i.bval, 6) + " TRX every day" : fmt(i.bval, 2) + "% of the price = " + fmt(r6(p * i.bval / 100), 6) + " TRX every day";
   const mstate = (i, a, t) => a.some(h => h.id === i.id && active(h, t)) ? "owned" : C().left(i) <= 0 ? "sold" : !C().saleOpen(i, t) ? "closed" : "buy";
   const BI = { hot: "flame", new: "spark" };
   const statOf = (h, t) => h.exp == null ? ["Permanent", "pm", "inf"] : active(h, t) ? [dleft(h.exp, t) + " left", (h.exp - t) / DAY <= 3 ? "lo" : "ok", "clock"] : ["Expired", "ex", "clock"];
   const statChip = (h, t, top) => { const x = statOf(h, t); return `<span class="zm-st ${x[1]} sp">${ic(x[2])}${x[0]}</span>`; };
-  const holdInfo = h => h.bt === "mining" ? "+" + fmt(h.bv, 2) + "% extra ZENY on every mining claim" : h.bt === "trx" ? fmt(h.daily, 6) + " TRX every day" : fmt(h.bv, 2) + "% of " + fmt(h.paid) + " TRX = " + fmt(h.daily, 6) + " TRX every day";
-  const benefitShort = (i, p) => i.btype === "mining" ? "+" + fmt(i.bval, 2) + "% ZENY per claim" : i.btype === "trx" ? fmt(i.bval, 6) + " TRX / day" : fmt(r6(p * i.bval / 100), 6) + " TRX / day";
+  const holdInfo = h => h.bt === "mining" ? "+" + fmt(h.bv, 2) + "% extra ZNV on every mining claim" : h.bt === "trx" ? fmt(h.daily, 6) + " TRX every day" : fmt(h.bv, 2) + "% of " + fmt(h.paid) + " TRX = " + fmt(h.daily, 6) + " TRX every day";
+  const benefitShort = (i, p) => i.btype === "mining" ? "+" + fmt(i.bval, 2) + "% ZNV per claim" : i.btype === "trx" ? fmt(i.bval, 6) + " TRX / day" : fmt(r6(p * i.bval / 100), 6) + " TRX / day";
   const cardHtml = (i, s, t, h, ab) => {
     const pct = C().discPct(i, t), p = C().priceNow(i, t), lf = C().left(i), se = C().saleEnd(i), b = ab ? [ab, ab.toLowerCase()] : null;
     const lab = s === "owned" ? "Owned" : s === "sold" ? "Sold Out" : s === "closed" ? "Closed" : "Buy NFT";
@@ -181,7 +181,7 @@
   };
   function myDetail(hid) {
     const h = settle().find(x => x.hid === hid); if (!h) return;
-    const t = Date.now(), mining = h.bt === "mining", pend = mining ? h.pendZeny : h.pendTrx, unit = mining ? "ZENY" : "TRX", none = !(pend > 0);
+    const t = Date.now(), mining = h.bt === "mining", pend = mining ? h.pendZeny : h.pendTrx, unit = mining ? "ZNV" : "TRX", none = !(pend > 0);
     const why = active(h, t) ? (mining ? "Grows with your mining claims" : "Next reward at 10 PM") : "Nothing to claim";
     window.openModal("NFT Details", `<div class="zm-bm"><img src="${esc(h.img)}" alt=""><div><b>${esc(h.name)}</b></div></div>
       <div class="modal-list"><div><strong>Benefit</strong><span>${esc(holdInfo(h))}</span></div><div><strong>Time left</strong><span>${statOf(h, t)[0]}</span></div>
@@ -194,7 +194,7 @@
       const a = settle().slice().sort((x, y) => (active(y, t) - active(x, t)) || y.ts - x.ts);
       if (!a.length) return '<div class="zm-empty">You do not hold any NFT yet. Buy one to see it here.</div>';
       const tr = a.reduce((s, h) => s + h.pendTrx, 0), zn = a.reduce((s, h) => s + h.pendZeny, 0);
-      return `<div class="zm-all"><span>Ready: <strong>${fmt(tr, 6)} TRX</strong> &middot; <strong>${fmt(zn, 8)} ZENY</strong><br><small>A new day starts at 10 PM.</small></span><button class="zm-cl" ${tr > 0 || zn > 0 ? "" : "disabled"} onclick="zvNftClaimAll()">Claim all</button></div>` + a.map(h => myCard(h, t)).join("");
+      return `<div class="zm-all"><span>Ready: <strong>${fmt(tr, 6)} TRX</strong> &middot; <strong>${fmt(zn, 8)} ZNV</strong><br><small>A new day starts at 10 PM.</small></span><button class="zm-cl" ${tr > 0 || zn > 0 ? "" : "disabled"} onclick="zvNftClaimAll()">Claim all</button></div>` + a.map(h => myCard(h, t)).join("");
     }
     const own = load(), all = C().get().items, list = all.filter(i => !i.hidden && (S.tab === "All NFTs" || i.cats.includes(S.tab)) && (!q || i.name.toLowerCase().includes(q)));
     return list.length ? list.map(i => { const st = mstate(i, own, t); return cardHtml(i, st, t, st === "owned" ? own.find(x => x.id === i.id && active(x, t)) : null, C().autoBadge(i, all, t)); }).join("") : '<div class="zm-empty">No NFT found.</div>';
@@ -290,7 +290,7 @@
     if (h.bt === "mining") {
       const n = h.pendZeny; if (!(n > 0)) return;
       if (!M || !M.addZeny) return say("Mining is not ready");
-      M.addZeny(n); h.pendZeny = 0; store(a); say("+" + fmt(n, 8) + " ZENY added");
+      M.addZeny(n); h.pendZeny = 0; store(a); say("+" + fmt(n, 8) + " ZNV added");
     } else {
       const n = h.pendTrx; if (!(n > 0)) return;
       if (!E || !E.addTrx(n)) return say("Claim failed");
@@ -306,7 +306,7 @@
     if (tr > 0 && !(E && E.addTrx(tr))) return say("Claim failed");
     if (zn > 0) M.addZeny(zn);
     a.forEach(h => { h.pendTrx = 0; h.pendZeny = 0; }); store(a);
-    say("Added to your Exchange Wallet: " + (tr > 0 ? fmt(tr, 6) + " TRX" : "") + (tr > 0 && zn > 0 ? " and " : "") + (zn > 0 ? fmt(zn, 8) + " ZENY" : ""));
+    say("Added to your Exchange Wallet: " + (tr > 0 ? fmt(tr, 6) + " TRX" : "") + (tr > 0 && zn > 0 ? " and " : "") + (zn > 0 ? fmt(zn, 8) + " ZNV" : ""));
     refresh();
   }
 
@@ -327,14 +327,14 @@
     const ms = new Date(); ms.setDate(1); ms.setHours(0, 0, 0, 0);
     const used = wds.filter(t => t.status !== "rejected" && (+t.ts || 0) >= ms.getTime()).length;
     const lim = LVL() ? LVL().wd() : 0, unl = lim === Infinity;
-    return `<div class="zs-hero"><small>Mining Speed</small><div class="big">${total.toFixed(6)} <i>ZENY / hour</i></div>
+    return `<div class="zs-hero"><small>Mining Speed</small><div class="big">${total.toFixed(6)} <i>ZNV / hour</i></div>
       <span class="zs-chip">${ic("bolt")}${boost ? "+" + boost + "% Level " + L.lvl + " boost" : "Level " + L.lvl + " · no boost yet"}</span><div class="zm-note" style="margin-top:8px">Base rate ${base.toFixed(6)} (${esc(tier)} Pack). The real reward is calculated by the server.</div></div>
       <div class="zs-g">
         <div class="zs-c">${ic("gem")}<small>NFT Holdings</small><b>${count}</b><em>${fmt(value)} TRX total</em></div>
-        <div class="zs-c fz">${ic("snow")}<small>Frozen Balance</small><b>${fmt(pend, 6)} TRX</b><em>${fmt(held, 6)} ZENY on hold</em></div>
+        <div class="zs-c fz">${ic("snow")}<small>Frozen Balance</small><b>${fmt(pend, 6)} TRX</b><em>${fmt(held, 6)} ZNV on hold</em></div>
         <div class="zs-c">${ic("out")}<small>Total Withdrawal</small><b>${fmt(done, 6)} TRX</b><em>Withdrawn so far</em></div>
         <div class="zs-c av">${ic("wallet")}<small>Available Withdrawal</small><b>${fmt(avail, 6)} TRX</b><em>${L.lvl < 1 ? "Unlocks at Level 1" : "You receive 70% of each withdrawal"}</em></div>
-        <div class="zs-c hold">${ic("gem")}<small>Hold Token for Airdrop</small><b>${fmt(hZ, 6)} ZENY</b><em>${hOthers ? esc(hOthers) + " (older holds) &middot; " : ""}${AH.pct}% of each withdrawal is held as ZENY. Airdrop details coming soon.</em></div></div>
+        <div class="zs-c hold">${ic("gem")}<small>Hold Token for Airdrop</small><b>${fmt(hZ, 6)} ZNV</b><em>${hOthers ? esc(hOthers) + " (older holds) &middot; " : ""}${AH.pct}% of each withdrawal is held as ZNV. Airdrop details coming soon.</em></div></div>
       <div class="zs-w"><div class="r"><span>Withdrawals this month</span><b>${lim === 0 ? "Locked (Level 1 needed)" : used + " / " + (unl ? "Unlimited" : lim)}</b></div>${unl ? "" : `<div class="zs-tr"><i style="width:${lim ? Math.min(100, used / lim * 100) : 0}%"></i></div>`}</div>
       ${nfts.length ? `<div class="zm-note">Your NFTs: ${nfts.map(i => esc(i.name)).join(", ")}</div>` : ""}`;
   }

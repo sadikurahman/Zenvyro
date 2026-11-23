@@ -1,6 +1,6 @@
 /* Zenvyro — Withdrawal screen (full-screen sheet #zvWd), built same-to-same from the member's mockup.
    Logic is unchanged and lives in wallet.js (ZenvyroWalletOps.withdraw): the amount is locked as a request, an admin accepts or rejects,
-   the member receives 70% and 30% goes to Airdrop Hold as ZENY, minimum $10 value.
+   the member receives 70% and 30% goes to Airdrop Hold as ZNV, minimum $10 value.
    Sensitive form: the sheet is never closed by the app going to the background, and the typed values (asset, address, amount) are kept in
    sessionStorage for 30 minutes, so if the phone reloads the page after a long minimise the sheet opens again with the same values.
    Demo: requests and approvals live in this browser (localStorage). A server must hold them in the real system. */
@@ -131,10 +131,10 @@ ${spr}`;
   function breakdown() {
     const a = asset(cur), d = dp(a), l1 = $("wdW1"), l2 = $("wdW2"); if (!l1) return;
     const pct = ops().holdPct, amt = parseFloat($("wdAmt").value);
-    l1.innerHTML = `${pct}% of every withdrawal goes to Airdrop Hold as <b class="y">ZENY</b>.`;
+    l1.innerHTML = `${pct}% of every withdrawal goes to Airdrop Hold as <b class="y">ZNV</b>.`;
     if (!(amt > 0)) { l2.innerHTML = `You receive the other <b class="y">${100 - pct}%</b>.`; return; }
     const h = ops().holdOf(amt), px = cur === "USDT" ? 1 : (W() ? +W().prices()[cur] : 0), z = px > 0 ? h * px / ops().zenyUsdt : 0;
-    l2.innerHTML = `You receive <b class="y">${(amt - h).toFixed(d)} ${a.sym}</b>` + (z > 0 ? ` · Hold ≈ ${z.toFixed(4)} ZENY` : "");
+    l2.innerHTML = `You receive <b class="y">${(amt - h).toFixed(d)} ${a.sym}</b>` + (z > 0 ? ` · Hold ≈ ${z.toFixed(4)} ZNV` : "");
   }
   function paint() {
     if (!$("wdSel")) return;

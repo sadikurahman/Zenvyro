@@ -56,7 +56,7 @@
     return slot;
   }
   const nextSlot = now => latestSlot(now) + DAY_MS;
-  const hasPending = () => claim.pendingIncome > 0; // Income Commission only (ZENY); Purchase Bonus goes to the Exchange Wallet (TRX)
+  const hasPending = () => claim.pendingIncome > 0; // Income Commission only (ZNV); Purchase Bonus goes to the Exchange Wallet (TRX)
   // claimable when something is pending and a new 10 PM has passed since the last claim
   const canClaim = () => hasPending() && claim.lastSlot < latestSlot(Date.now());
   const hms = ms => {
@@ -87,7 +87,7 @@
     claim.pendingIncome = 0;
     claim.lastSlot = latestSlot(Date.now());
     saveClaim();
-    say("+" + inc.toFixed(6) + " ZENY added to your Exchange balance");
+    say("+" + inc.toFixed(6) + " ZNV added to your Exchange balance");
     refreshModal();
   }
 
@@ -140,7 +140,7 @@
     if (!data.history.length) return '<div><strong>No referrals yet</strong><span>No commission yet</span></div>';
     return data.history.map(h => {
       const isBonus = h.type === "bonus";
-      const amt = (+h.amount || 0).toFixed(isBonus ? 2 : 6) + (isBonus ? " TRX" : " ZENY");
+      const amt = (+h.amount || 0).toFixed(isBonus ? 2 : 6) + (isBonus ? " TRX" : " ZNV");
       return `<div><strong>${isBonus ? "Purchase Bonus · Credited to Exchange Wallet" : "Income Commission"}<br><small style="color:#aeb9ff;font-weight:500">${esc(h.from || "User")} · ${esc(h.date || "")}</small></strong><span>+${amt}</span></div>`;
     }).join("");
   }
@@ -161,9 +161,9 @@
       <div class="modal-list">
         <div><strong>Total Referrals</strong><span>${data.referrals}</span></div>
         <div><strong>Premium Members</strong><span>${premium.length}</span></div>
-        <div><strong>Income Commission</strong><span>${data.incomeEarned.toFixed(6)} ZENY</span></div>
+        <div><strong>Income Commission</strong><span>${data.incomeEarned.toFixed(6)} ZNV</span></div>
         <div><strong>Purchase Bonus (to Wallet)</strong><span>${data.bonusEarned.toFixed(2)} TRX</span></div>
-        <div><strong>Pending (to claim)</strong><span>${claim.pendingIncome.toFixed(6)} ZENY</span></div>
+        <div><strong>Pending (to claim)</strong><span>${claim.pendingIncome.toFixed(6)} ZNV</span></div>
       </div>
       <button class="btn" id="refClaimBtn" style="width:100%;margin-top:12px" onclick="claimReferral()">🎁 &nbsp; Claim Referral Income</button>
       <div class="modal-note" id="refClaimInfo" style="margin-top:8px"></div>
@@ -182,7 +182,7 @@
       <div class="modal-list" id="refPremium">${userRows(premium, "No one has purchased Premium yet")}</div>
       <label class="modal-label">Commission history</label>
       <div class="modal-list" id="refHistory">${historyHtml()}</div>
-      <div class="modal-note">Referral Income Commission can be claimed every night at 10 PM (Bangladesh time) and is added to your Exchange balance as ZENY; if you don't claim, it keeps accumulating. Purchase Bonus is credited straight to your Wallet once, on the referee's first pack purchase. Referral earnings are not guaranteed, and nothing is credited for real until a backend is connected.</div>`;
+      <div class="modal-note">Referral Income Commission can be claimed every night at 10 PM (Bangladesh time) and is added to your Exchange balance as ZNV; if you don't claim, it keeps accumulating. Purchase Bonus is credited straight to your Wallet once, on the referee's first pack purchase. Referral earnings are not guaranteed, and nothing is credited for real until a backend is connected.</div>`;
   }
 
   // Account page — Profile, Membership and Refer option

@@ -230,7 +230,7 @@
           <div class="pt"><button class="zv-lvb" onclick="zvaLevel()" aria-label="Level progress">${ic("star")}<span>Level <b>${window.ZenvyroLevel ? window.ZenvyroLevel.get().lvl : 0}</b></span></button><button class="prem" onclick="zvaPack()" aria-label="Membership benefits">${ic("crown")}<span>${esc(tier)} Pack</span><span class="ch2">${ic("chev")}</span></button></div></div>
         <div class="stats">
           <button class="stat" onclick="zvaRefer()"><span class="si">${ic("users")}</span><span><small>Referral</small><b>${refs}</b></span><span class="ch">${ic("chev")}</span></button>
-          <button class="stat" onclick="showSection('mining')"><span class="si">${ic("pick")}</span><span><small>Total Mining</small><b>${(+st.totalMined || 0).toFixed(3)}<i>ZENY</i></b></span><span class="ch">${ic("chev")}</span></button>
+          <button class="stat" onclick="showSection('mining')"><span class="si">${ic("pick")}</span><span><small>Total Mining</small><b>${(+st.totalMined || 0).toFixed(3)}<i>ZNV</i></b></span><span class="ch">${ic("chev")}</span></button>
           <button class="stat" onclick="showSection('wallet')"><span class="si">${ic("wallet")}</span><span><small>Wallet Balance</small><b>${Number(trx).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<i>TRX</i></b></span><span class="ch">${ic("chev")}</span></button>
           <button class="stat" onclick="toast('Account Active')"><span class="si">${ic("shieldCheck")}</span><span><small>Account Status</small><b class="grn">Active</b></span><span class="ch">${ic("chev")}</span></button>
         </div></div>
@@ -273,7 +273,7 @@
     const st = M() || { tier: "Free" };
     const tier = PACKS[st.tier] ? st.tier : "Free", pk = PACKS[tier];
     window.openModal(tier + " Pack",
-      `<div class="modal-list"><div><strong>Mining rate</strong><span>${pk.rate.toFixed(6)} ZENY / hour</span></div><div><strong>Per day (24 h)</strong><span>${(pk.rate * 24).toFixed(4)} ZENY</span></div></div>
+      `<div class="modal-list"><div><strong>Mining rate</strong><span>${pk.rate.toFixed(6)} ZNV / hour</span></div><div><strong>Per day (24 h)</strong><span>${(pk.rate * 24).toFixed(4)} ZNV</span></div></div>
       <ul class="zv-ben">${pk.ben.map(b => `<li>${ic("check")}<span>${b}</span></li>`).join("")}</ul>
       <button class="btn" style="width:100%;margin-top:14px" onclick="showSection('membership')">${tier === "Platinum" ? "View Plans" : "Upgrade Membership"}</button>
       <div class="modal-note">Benefits are display settings and are not guaranteed earnings.</div>`);
@@ -357,9 +357,9 @@
 
   function faq() {
     const q = [
-      ["How does mining work?", "Tap Start Mining to begin a 2-hour session. When the 2 hours end, tap Claim Reward to add two hours of ZENY for your pack to your balance."],
-      ["When do I get referral income?", "Referral Income Commission can be claimed every night at 10 PM (Bangladesh time) and is added to your Exchange balance as ZENY. Purchase Bonus goes to your Exchange Wallet."],
-      ["How does Exchange work?", "Exchange your income (mining ZENY or TRX rewards) into another asset. It is instant: after a total 10% fee the result is added to your Wallet, where you can spend, transfer or withdraw it."],
+      ["How does mining work?", "Tap Start Mining to begin a 2-hour session. When the 2 hours end, tap Claim Reward to add two hours of ZNV for your pack to your balance."],
+      ["When do I get referral income?", "Referral Income Commission can be claimed every night at 10 PM (Bangladesh time) and is added to your Exchange balance as ZNV. Purchase Bonus goes to your Exchange Wallet."],
+      ["How does Exchange work?", "Exchange your income (mining ZNV or TRX rewards) into another asset. It is instant: after a total 10% fee the result is added to your Wallet, where you can spend, transfer or withdraw it."],
       ["How do Deposit and Withdraw work?", "Both are requests that an admin verifies and then accepts or rejects. When you request a withdrawal, that amount is locked."],
       ["Can a Transfer be reversed?", "No. User-to-user transfers are instant, so double-check the recipient's ID before sending."],
       ["Are earnings guaranteed?", "No. Rewards and commissions follow platform rules and are not guaranteed income."]

@@ -1,5 +1,5 @@
 /* Zenvyro Home data layer (sections 1, 2 and 3 of the new Home).
-   Real values already come from the app: Account Balance, Total mined, ZENY Coin (mining.js), Total Referrals (referral.js), pack/membership (mining.js),
+   Real values already come from the app: Account Balance, Total mined, ZNV Coin (mining.js), Total Referrals (referral.js), pack/membership (mining.js),
    Covered Countries (countries.js) and the network boxes in Admin > Home Boxes (site-settings.js).
    Everything else below is DEMO data, written in one place (DEMO). When the backend (Supabase) is connected, nothing on the page has to change:
      - set window.ZENVYRO_HOME_ENDPOINT to a JSON URL (same keys as DEMO, any subset; polled every 60 s), or
@@ -22,7 +22,7 @@
     referralUsdt: 0,
     notifications: [{ title: "Welcome to Zenvyro", text: "Your Free pack is active. Start mining from the Mining Overview and invite friends from Invite.", date: "Today" }],
     news: [{ title: "Welcome to Zenvyro", text: "Mining, the NFT Marketplace, Referral and Leaderboard are running in demo mode while the backend is being connected.", date: "Today" }],
-    activity: [{ title: "Mining Reward", sub: "Daily mining reward received", amt: "+0.0000 ZENY", when: "Today, just now" }],
+    activity: [{ title: "Mining Reward", sub: "Daily mining reward received", amt: "+0.0000 ZNV", when: "Today, just now" }],
     network: { income: 18425.5, withdraw: 6240, users: 12840, goal: 30000000 }
   };
   const EMPTY = { rate: 3, reach: { months: 0, target: 10 }, referralUsdt: 0, notifications: [], news: [], activity: [], network: { income: 0, withdraw: 0, users: 0, goal: 30000000 } };
@@ -50,11 +50,11 @@
   function renderGoal() {
     const goal = +(D.network && D.network.goal) || 0, el = $("cdCurrentBalance"), bal = el ? parseFloat(String(el.textContent).replace(/,/g, "")) || 0 : 0;
     const pct = goal > 0 ? Math.max(0, Math.min(100, bal / goal * 100)) : 0;
-    put("cdGoalTxt", N(goal, 0)); put("cdGoalPercent", pct.toFixed(2) + "% reached"); put("cdRemaining", N(Math.max(0, goal - bal), 6) + " ZENY");
+    put("cdGoalTxt", N(goal, 0)); put("cdGoalPercent", pct.toFixed(2) + "% reached"); put("cdRemaining", N(Math.max(0, goal - bal), 6) + " ZNV");
     const bar = $("cdGoalBar"); if (bar) { const w = pct + "%"; if (bar.style.width !== w) bar.style.width = w; }
   }
   function renderStats() {
-    put("zhRate", "1 ZENY = " + N(D.rate, 6) + " USDT");
+    put("zhRate", "1 ZNV = " + N(D.rate, 6) + " USDT");
     const r = D.reach || {}, mo = +r.months || 0;
     put("zhReach", mo === 1 ? "1 Month" : N(mo, 1) + " Months"); put("zhReachSub", "To reach $" + N(r.target, 2));
     const st = M(), tier = (st && st.tier) || "Free";

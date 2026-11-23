@@ -5,7 +5,7 @@
   const $ = s => document.querySelector(s), DAY = C.DAY;
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const toast = m => { const t = $("#toast"); if (!t) return; t.textContent = m; t.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2600); };
-  const HINT = { mining: "% of the member's own mining claim, paid as extra ZENY", trx: "TRX paid every day (new day = 10 PM Bangladesh time)", comm: "% of the TRX price paid, paid every day as TRX" };
+  const HINT = { mining: "% of the member's own mining claim, paid as extra ZNV", trx: "TRX paid every day (new day = 10 PM Bangladesh time)", comm: "% of the TRX price paid, paid every day as TRX" };
   let cat = null, editId = null, imgData = null;
   const paint = (t, h) => { $("#shT").textContent = t; $("#shB").innerHTML = h; $("#sheet").dataset.k = "mkt"; };
   const status = (i, t) => i.hidden ? ["Hidden", "bad"] : C.left(i) <= 0 ? ["Sold out", "bad"] : !C.saleOpen(i, t) ? ["Sale ended", "bad"] : ["Live", "ok"];
@@ -50,7 +50,7 @@
 <p class="sub">Stock (how many can be sold${id ? "; sold so far " + i.sold : ""})</p>${num("mkStock", i.stock, "e.g. 100", "1")}<label class="li"><span>Unlimited stock</span><input type="checkbox" id="mkUnl" ${i.stock == null ? "checked" : ""}></label>
 <p class="sub">Sale open for (days, empty = unlimited)</p>${num("mkSale", i.saleDays, "empty = always for sale", "1")}${sLeft !== null ? `<p class="note">${sLeft} day(s) left. Changing this number restarts the count from today.</p>` : ""}
 <p class="sub">Active period after purchase (days)</p>${num("mkDur", i.durDays, "e.g. 30", "1")}<label class="li"><span>Permanent (lifetime benefit)</span><input type="checkbox" id="mkPerm" ${i.durDays == null ? "checked" : ""}></label>
-<p class="sub">Benefit</p><select class="in" id="mkType">${[["mining", "Mining speed (extra ZENY)"], ["trx", "Fixed TRX per day"], ["comm", "Commission rate (% of price, TRX per day)"]].map(b => `<option value="${b[0]}" ${i.btype === b[0] ? "selected" : ""}>${b[1]}</option>`).join("")}</select>
+<p class="sub">Benefit</p><select class="in" id="mkType">${[["mining", "Mining speed (extra ZNV)"], ["trx", "Fixed TRX per day"], ["comm", "Commission rate (% of price, TRX per day)"]].map(b => `<option value="${b[0]}" ${i.btype === b[0] ? "selected" : ""}>${b[1]}</option>`).join("")}</select>
 <p class="sub" id="mkHint">${HINT[i.btype]}</p>${num("mkVal", i.bval, "value")}
 <label class="li"><span>Hide from the marketplace</span><input type="checkbox" id="mkHide" ${i.hidden ? "checked" : ""}></label>
 <button class="pr" data-mk="save">Save NFT</button>`;

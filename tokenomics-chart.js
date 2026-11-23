@@ -29,7 +29,7 @@
       s.setAttribute("stroke", d.c);
       s.setAttribute("transform", `rotate(${acc * 3.6 - 90} 130 130)`);
       s.setAttribute("tabindex", "0"); s.setAttribute("role", "img");
-      s.setAttribute("aria-label", `${d.name}: ${d.pct}%, ${fmt(d.amt)} ZENY`);
+      s.setAttribute("aria-label", `${d.name}: ${d.pct}%, ${fmt(d.amt)} ZNV`);
       s.style.setProperty("--c", d.c); s.style.setProperty("--g", d.c + "88");
       s.style.strokeDasharray = `0 ${C}`;
       s.dataset.len = len; s.dataset.i = i;
@@ -39,7 +39,7 @@
       const r = document.createElement("button");
       r.type = "button"; r.className = "tk-row"; r.dataset.i = i;
       r.style.setProperty("--c", d.c); r.style.setProperty("--g", d.c + "66");
-      r.innerHTML = `<i></i><div><b>${d.name}</b><small>${fmt(d.amt)} ZENY</small></div><strong>${d.pct}%</strong>`;
+      r.innerHTML = `<i></i><div><b>${d.name}</b><small>${fmt(d.amt)} ZNV</small></div><strong>${d.pct}%</strong>`;
       leg.appendChild(r); rows.push(r);
     });
 
@@ -47,8 +47,8 @@
       slices.forEach((s, k) => s.classList.toggle("on", k === i));
       rows.forEach((r, k) => r.classList.toggle("on", k === i));
       box.classList.toggle("has", i >= 0);
-      if (i < 0) { lbl.textContent = "TOTAL SUPPLY"; big.textContent = fmt(TOTAL); big.className = "sm"; sub.textContent = "ZENY"; }
-      else { const d = DATA[i]; lbl.textContent = d.short; big.textContent = d.pct + "%"; big.className = ""; sub.textContent = fmt(d.amt) + " ZENY"; }
+      if (i < 0) { lbl.textContent = "TOTAL SUPPLY"; big.textContent = fmt(TOTAL); big.className = "sm"; sub.textContent = "ZNV"; }
+      else { const d = DATA[i]; lbl.textContent = d.short; big.textContent = d.pct + "%"; big.className = ""; sub.textContent = fmt(d.amt) + " ZNV"; }
     }
     set(-1);
 

@@ -239,7 +239,7 @@ ${spriteCss}`;
           <div class="wa"><i></i>Wallet Active</div></div>
         <div class="two">
           <div class="xc bx" role="button" tabindex="0" onclick="showSection('exchange')"><i class="s-swap"></i><span class="a">Exchange</span><span class="chv">${SV.chv.replace("currentColor", "#fff")}</span>
-            <span class="b">Wallet · tap to exchange</span><span class="c">${mask(zb.toFixed(6))} <em>ZENY</em></span><span class="d">${SV.chart}${mask(te.toFixed(6))} TRX · income</span></div>
+            <span class="b">Wallet · tap to exchange</span><span class="c">${mask(zb.toFixed(6))} <em>ZNV</em></span><span class="d">${SV.chart}${mask(te.toFixed(6))} TRX · income</span></div>
           <div class="ac bx" role="button" tabindex="0" onclick="zvwWithdrawForm()"><i class="s-gem"></i><span class="a">Available Withdrawal ${SV.chv.replace("currentColor", "#fff")}</span>
             <span class="c">${mask("$ " + D(avail, 2))}</span><span class="d">${availBtc !== null ? mask("≈ " + availBtc.toFixed(4) + " BTC") : "&nbsp;"}</span></div></div>
         <div class="acts">
@@ -247,7 +247,7 @@ ${spriteCss}`;
           <button class="wd bx" onclick="zvwWithdrawForm()"><i class="ai s-wd"></i><b>Withdraw</b><small>Cash Out</small></button>
           <button class="trf bx" onclick="zvwTransferForm()"><i class="ai s-tr"></i><b>Transfer</b><small>Move Funds</small></button></div>
         <div class="air bx" role="button" tabindex="0" onclick="toast('Airdrop details coming soon')"><i class="s-gift"></i>
-          <span class="a">Airdrop Hold ${SV.lock}</span><span class="c">${mask(hz.toFixed(6))} <em>ZENY</em></span><span class="d">${HOLD_PCT}% of every withdrawal is kept here as ZENY</span><span class="chv">${SV.chv.replace("currentColor", "#fff")}</span></div>
+          <span class="a">Airdrop Hold ${SV.lock}</span><span class="c">${mask(hz.toFixed(6))} <em>ZNV</em></span><span class="d">${HOLD_PCT}% of every withdrawal is kept here as ZNV</span><span class="chv">${SV.chv.replace("currentColor", "#fff")}</span></div>
         <div class="mc bx"><span class="ib">${SV.bars}</span><h3>My Assets</h3>
           <div class="tv"><small>Total Value ${eyeBtn}</small><b>${mask("$" + D(total, 2))}</b></div>
           <div class="rows">${assets}</div></div>
@@ -313,7 +313,7 @@ ${spriteCss}`;
       <div class="modal-note" id="wdBreak" style="margin-top:8px"></div>
       <button class="btn alt" style="width:100%;margin-top:8px;padding:10px" onclick="zvwWdMax()">Max</button>
       <button class="btn" style="width:100%;margin-top:12px" onclick="zvwWithdraw()">Submit Withdraw Request</button>
-      <div class="modal-note">When you send a request, the amount is locked. If an admin accepts, you receive 70% and the other 30% goes to your Airdrop Hold as ZENY; if rejected, the lock is released. Double-check the address and network: funds sent to a wrong address cannot be recovered.</div>`);
+      <div class="modal-note">When you send a request, the amount is locked. If an admin accepts, you receive 70% and the other 30% goes to your Airdrop Hold as ZNV; if rejected, the lock is released. Double-check the address and network: funds sent to a wrong address cannot be recovered.</div>`);
     wdInfo();
   }
   function wdInfo() {
@@ -324,9 +324,9 @@ ${spriteCss}`;
   function wdBreak() {
     const el = $("wdBreak"); if (!el) return;
     const sym = val("wdAsset"), a = asset(sym), amt = parseFloat(val("wdAmt")), d = a.dec > 6 ? 8 : 6;
-    if (!(amt > 0)) { el.textContent = HOLD_PCT + "% of every withdrawal goes to Airdrop Hold as ZENY. You receive the other " + (100 - HOLD_PCT) + "%."; return; }
+    if (!(amt > 0)) { el.textContent = HOLD_PCT + "% of every withdrawal goes to Airdrop Hold as ZNV. You receive the other " + (100 - HOLD_PCT) + "%."; return; }
     const h = holdOf(amt), px = sym === "USDT" ? 1 : (W() ? +W().prices()[sym] : 0), z = px > 0 ? h * px / ZENY_USDT : null;
-    el.textContent = "You receive " + (amt - h).toFixed(d) + " " + sym + " · Airdrop Hold " + h.toFixed(d) + " " + sym + (z !== null ? " = " + z.toFixed(6) + " ZENY (shown in your Wallet)" : " (converted to ZENY)");
+    el.textContent = "You receive " + (amt - h).toFixed(d) + " " + sym + " · Airdrop Hold " + h.toFixed(d) + " " + sym + (z !== null ? " = " + z.toFixed(6) + " ZNV (shown in your Wallet)" : " (converted to ZNV)");
   }
   const MIN_WITHDRAW_USD = 10; // minimum withdrawal per request (USD value). A server must enforce this too.
   const MIN_TRANSFER_USD = 5; // minimum transfer (USD value). A server must enforce this too.
@@ -421,7 +421,7 @@ ${spriteCss}`;
       W().credit(t.sym, t.amount, v);
     } else if (t.kind === "withdraw") {
       const h = +t.hold || 0;
-      if (t.holdIn) {   // current rule: the 30% is part of the requested amount; the member gets the rest, the 30% becomes ZENY in Airdrop Hold
+      if (t.holdIn) {   // current rule: the 30% is part of the requested amount; the member gets the rest, the 30% becomes ZNV in Airdrop Hold
         const px = t.sym === "USDT" ? 1 : (+priceUsdt > 0 ? +priceUsdt : +(W().prices()[t.sym] || 0));
         if (h > 0 && !(px > 0)) return false;
         if (!W().debit(t.sym, t.amount)) return false;
@@ -496,7 +496,7 @@ ${spriteCss}`;
         return r;
       };
     }
-    setInterval(render, 5000); // reflect Mining/ZENY and other changes
+    setInterval(render, 5000); // reflect Mining/ZNV and other changes
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
