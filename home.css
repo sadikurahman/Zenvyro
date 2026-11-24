@@ -5,7 +5,7 @@
 body .app{max-width:560px;margin:0 auto;padding:calc(12 * var(--u)) calc(14 * var(--u)) calc(40 * var(--u))}
 
 /* ---------- art pieces (one WebP sprite) ---------- */
-.zi{display:block;flex:none;background-image:url(home-art.webp?v=20261114v);background-repeat:no-repeat;pointer-events:none}
+.zi{display:block;flex:none;background-image:url(home-art.webp?v=20261114w);background-repeat:no-repeat;pointer-events:none}
 .zi-hero{width:calc(173.5 * var(--u));height:calc(126.5 * var(--u));background-position:calc(-0 * var(--u)) calc(-0 * var(--u));background-size:calc(300 * var(--u)) calc(374 * var(--u))}
 .zi-token{width:calc(140.5 * var(--u));height:calc(77 * var(--u));background-position:calc(-0 * var(--u)) calc(-127.5 * var(--u));background-size:calc(300 * var(--u)) calc(374 * var(--u))}
 .zi-crown{width:calc(74 * var(--u));height:calc(75.5 * var(--u));background-position:calc(-141.5 * var(--u)) calc(-127.5 * var(--u));background-size:calc(300 * var(--u)) calc(374 * var(--u))}

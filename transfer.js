@@ -8,6 +8,7 @@
   "use strict";
   const DKEY = "zenvyro_tr_draft_v1", TTL = 30 * 60 * 1000, OY = 80, DY = 102;
   const ART = {"W":480,"H":258,"p":{"hero":[0,0,178,172],"layers":[180,0,64,62],"trx":[246,0,94,86],"plane":[342,0,66,60],"person":[410,0,60,60],"db":[0,174,58,58],"dollar":[60,174,70,68],"warn":[132,174,94,84],"shield":[228,174,70,84],"sol":[300,174,68,60],"bnb":[370,174,66,66]},"o":{"hero":[66,140],"layers":[62,338],"trx":[92,408],"plane":[62,612],"person":[86,696],"db":[64,802],"dollar":[84,884],"warn":[90,1030],"shield":[86,1340],"sol":[0,0],"bnb":[0,0]}}, AV = "20261114s";
+  (window.ZV_ART = window.ZV_ART || []).push("transfer-art.webp?v=" + AV);
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const r2 = n => Math.round(n * 100) / 100;

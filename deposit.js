@@ -20,6 +20,7 @@
   const newId = () => "DP" + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1296).toString(36).toUpperCase();
   const u = n => `calc(${n} * var(--u))`;
   const ART = {"W":480,"H":250,"p":{"hero":[0,0,184,140],"layers":[186,0,52,52],"trx":[240,0,66,68],"link":[308,0,48,50],"coins":[358,0,52,56],"shield":[412,0,46,50],"plane":[0,142,62,64],"empty":[64,142,220,108],"sol":[286,142,68,60],"bnb":[356,142,66,66]}}, AV = "20261114r";
+  (window.ZV_ART = window.ZV_ART || []).push("deposit-art.webp?v=" + AV);
   const SV = {
     x: '<svg viewBox="0 0 32 32" fill="none" stroke="#fff" stroke-width="4.200" stroke-linecap="round"><path d="M5 5l22 22M27 5L5 27"/></svg>',
     chvd: '<svg viewBox="0 0 24 14" fill="none" stroke="#fff" stroke-width="3.400" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2l9 9 9-9"/></svg>',

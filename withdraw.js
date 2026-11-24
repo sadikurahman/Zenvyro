@@ -8,6 +8,7 @@
   "use strict";
   const DKEY = "zenvyro_wd_draft_v1", TTL = 30 * 60 * 1000;
   const ART = {"W":480,"H":250,"p":{"hero":[0,0,176,156],"layers":[178,0,68,64],"trx":[248,0,90,94],"wallet":[340,0,64,54],"coins":[406,0,64,58],"warn":[0,158,80,76],"shield":[82,158,80,92],"sol":[164,158,68,60],"bnb":[234,158,66,66]},"o":{"hero":[60,60],"layers":[66,250],"trx":[108,318],"wallet":[66,578],"coins":[66,758],"warn":[90,1064],"shield":[84,1344],"sol":[0,0],"bnb":[0,0]}}, AV = "20261114s";
+  (window.ZV_ART = window.ZV_ART || []).push("withdraw-art.webp?v=" + AV);
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const r2 = n => Math.round(n * 100) / 100;

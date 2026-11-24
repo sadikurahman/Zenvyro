@@ -70,7 +70,8 @@
     if (box.dataset.h !== h) { box.dataset.h = h; box.innerHTML = h; }
   }
   function renderDots() {
-    const dot = $("zhBellDot"); if (dot) dot.classList.toggle("on", (D.notifications || []).length > lget(SEEN));
+    const dot = $("zhBellDot"), real = window.ZenvyroNotify ? window.ZenvyroNotify.unread() : 0;
+    if (dot) dot.classList.toggle("on", real > 0 || (D.notifications || []).length > lget(SEEN));
     const nd = $("zvhNewsDot"); if (nd) nd.style.display = (Array.isArray(window.ZENVYRO_NEWS) ? window.ZENVYRO_NEWS.length : 0) > lget(NEWS_SEEN) ? "block" : "none";
   }
   function renderName() {
@@ -87,10 +88,12 @@
   function listHtml(rows) {
     return '<div class="modal-list">' + rows.map(x => `<div style="display:block"><strong style="display:block">${esc(x.title)}</strong><span style="display:block;margin-top:4px;line-height:1.5">${esc(x.text || x.sub || "")}</span>${x.date || x.when ? `<small style="color:#8f8bd0">${esc(x.date || x.when)}${x.amt ? " · " + esc(x.amt) : ""}</small>` : ""}</div>`).join("") + "</div>";
   }
+  const fdt = ts => new Date(ts).toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false });
   function bell() {
-    const n = D.notifications || [];
+    const NF = window.ZenvyroNotify, real = (NF ? NF.list() : []).slice(0, 30).map(x => ({ title: x.title + (x.read ? "" : " · New"), text: x.text, date: fdt(x.ts) }));
+    const n = real.concat(D.notifications || []);
     if (typeof window.openModal === "function") window.openModal("Notifications", n.length ? listHtml(n) : '<div class="modal-note">No new notifications.</div>');
-    lset(SEEN, n.length); renderDots();
+    lset(SEEN, (D.notifications || []).length); if (NF) NF.markAllRead(); renderDots();
   }
   function actAll() {
     const a = D.activity || [];
@@ -111,6 +114,7 @@
   function start() {
     Object.assign(window, { zvhBell: bell, zvhActAll: actAll });
     window.ZenvyroHome = { data: () => D, set, refresh: pull };
+    addEventListener("zv-notify", renderDots);
     render(); setTimeout(render, 700); setTimeout(render, 2000);
     setInterval(() => { if (!document.hidden) { renderStats(); renderName(); } }, 2000);
     const cb = $("cdCurrentBalance"); if (cb && window.MutationObserver) new MutationObserver(renderGoal).observe(cb, { childList: true, characterData: true, subtree: true });

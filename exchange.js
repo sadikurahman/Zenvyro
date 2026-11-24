@@ -217,6 +217,7 @@
   // ---- Exchange screen: every size is design-pixels x --u (scales exactly on any phone) ----
   const u = n => `calc(${n} * var(--u))`;
   const XART = {"W":700,"H":328,"p":{"xlogo":[0,0,106,120],"wallet":[108,0,70,68],"gem":[180,0,80,82],"gems":[262,0,58,62],"trxb":[322,0,94,100],"trxt":[418,0,72,80],"usdt":[492,0,80,80],"btc":[574,0,80,80],"ton":[0,122,66,66],"bnb":[68,122,66,66],"sol":[136,122,68,60],"swapr":[206,122,60,64],"calc":[268,122,46,46],"f1":[316,122,50,52],"f2":[368,122,50,50],"f3":[420,122,50,50],"f4":[472,122,50,48],"f5":[524,122,50,52],"ring":[0,190,250,138]}}, XAV = "20261114q";
+  (window.ZV_ART = window.ZV_ART || []).push("exchange-art.webp?v=" + XAV);
   const XSV = {
     x: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg>',
     bolt: '<svg viewBox="0 0 20 28"><path d="M12 1L2 16h7l-2 11 11-16h-7z" fill="#ffc83d"/></svg>',

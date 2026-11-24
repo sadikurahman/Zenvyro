@@ -30,7 +30,7 @@
   function loadTx() {
     try {
       const a = JSON.parse(localStorage.getItem(TXKEY) || "[]");
-      return Array.isArray(a) ? a.filter(t => t && t.id && t.kind && asset(t.sym) && ["pending", "completed", "rejected"].includes(t.status)) : [];
+      return Array.isArray(a) ? a.filter(t => t && t.id && t.kind && asset(t.sym) && typeof t.status === "string") : [];
     } catch (e) { return []; }
   }
   let txs = loadTx();
@@ -38,8 +38,8 @@
   const newId = p => p + Date.now().toString(36).toUpperCase() + Math.floor(Math.random() * 1296).toString(36).toUpperCase();
 
   window.ZenvyroTx = {
-    log(t) { txs.unshift(Object.assign({ ts: Date.now() }, t)); saveTx(); render(); },
-    update(id, patch) { const t = txs.find(x => x.id === id); if (t) { Object.assign(t, patch); saveTx(); render(); } }
+    log(t) { txs = loadTx(); txs.unshift(Object.assign({ ts: Date.now() }, t)); saveTx(); render(); },
+    update(id, patch) { txs = loadTx(); const t = txs.find(x => x.id === id); if (t) { Object.assign(t, patch); saveTx(); render(); } }
   };
 
   // Airdrop Hold: 30% of every withdrawal is NOT paid out. The member receives 70% of the requested amount; when the withdrawal
@@ -50,7 +50,7 @@
   const saveHolds = () => { try { localStorage.setItem(HKEY, JSON.stringify(holds)); } catch (e) {} };
   window.ZenvyroAirdropHold = { get: () => Object.assign({}, holds), pct: HOLD_PCT };
   const holdOf = amt => Math.round(amt * HOLD_PCT / 100 * 1e8) / 1e8;
-  const locked = sym => txs.filter(t => t.kind === "withdraw" && t.status === "pending" && t.sym === sym).reduce((a, t) => a + +t.amount + (t.holdIn ? 0 : (+t.hold || 0)), 0);
+  const locked = sym => txs.filter(t => t.kind === "withdraw" && ["pending", "accepted", "confirmed"].includes(t.status) && t.sym === sym).reduce((a, t) => a + +t.amount + (t.holdIn ? 0 : (+t.hold || 0)), 0);
   const availAmt = sym => Math.max(0, (bals()[sym] ? bals()[sym].amount : 0) - locked(sym));
   const maxWd = sym => availAmt(sym);
   function availUsdt() {
@@ -63,6 +63,7 @@
   // ---- CSS (only for #zvWallet). Every size is design-pixels x --u, so the page scales exactly like the design on any phone width ----
   const u = n => `calc(${n} * var(--u))`;
   const ART = {"W":820,"H":568,"p":{"hero":[0,0,460,376],"gift":[462,0,256,148],"zlogo":[720,0,82,82],"bell":[0,378,80,80],"user":[82,378,80,80],"swap":[164,378,98,98],"gem":[264,378,98,98],"dep":[364,378,80,80],"wd":[446,378,80,80],"tr":[528,378,80,80],"trx":[610,378,90,90],"usdt":[702,378,90,90],"btc":[0,478,90,90],"ton":[92,478,90,90],"bnb":[184,478,90,90],"sol":[276,478,90,90]}}, AV = "20261114p";
+  (window.ZV_ART = window.ZV_ART || []).push("wallet-art.webp?v=" + AV);
   const spriteCss = Object.keys(ART.p).map(k => { const q = ART.p[k]; return `#zvWallet .s-${k}{display:block;flex-shrink:0;width:${u(q[2])};height:${u(q[3])};background:url(wallet-art.webp?v=${AV}) no-repeat;background-size:${u(ART.W)} ${u(ART.H)};background-position:calc(${-q[0]} * var(--u)) calc(${-q[1]} * var(--u))}`; }).join("\n");
   const css = `
 #zvWallet{--u:calc(min(100vw,var(--maxw,520px))/852);position:fixed;inset:0;z-index:4;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:none;padding:calc(${u(40)} + env(safe-area-inset-top,0px)) 0 calc(130px + env(safe-area-inset-bottom,0px));color:#fff;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -167,13 +168,15 @@ background:radial-gradient(ellipse ${u(320)} ${u(230)} at 0 26%,#2a0a8a99,transp
 #zvWallet .st{display:inline-block;font-size:${u(19)};line-height:${u(26)};padding:0 ${u(12)};border-radius:${u(13)};border:1px solid;font-weight:600}
 #zvWallet .st.pending{color:#ffc24a;border-color:#a8791b;background:#2d2208}
 #zvWallet .st.rejected{color:#ff7a90;border-color:#a8283f;background:#2d0c14}
+#zvWallet .st.accepted{color:#6ab8ff;border-color:#2a68a8;background:#08203a}
+#zvWallet .st.done{color:#4ef0b0;border-color:#1b8a64;background:#082d22}
 #zvWallet .pos{color:#6dffb0}#zvWallet .neg{color:#ffa33a}
 #zvWallet .empty{margin:0 ${u(22)};padding:${u(30)} ${u(8)};color:#b8b3e8;border-top:1px solid #ffffff14;font-size:${u(26)}}
 ${spriteCss}`;
   const style = document.createElement("style"); style.textContent = css; document.head.appendChild(style);
 
   // ---- Page ----
-  let hidden = false, showAll = false, root = null;
+  let hidden = false, showAll = false, root = null, lastHtml = "";
   const mask = t => (hidden ? "••••" : t);
 
   // up to 8/6 decimals, trailing zeros trimmed (at least 2 places)
@@ -202,10 +205,11 @@ ${spriteCss}`;
     const title = { deposit: "Deposit", withdraw: "Withdraw", exchange: "Exchange", transfer: "Transfer" }[t.kind] || t.kind;
     const out = t.kind === "withdraw" || (t.kind === "transfer" && t.dir === "out");
     const date = new Date(t.ts).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-    const chip = t.status === "completed" ? "" : `<span class="st ${t.status}">${{ pending: "Pending", rejected: "Rejected" }[t.status]}</span>`;
+    const STN = { pending: ["Pending", "pending"], accepted: ["Accepted", "accepted"], confirmed: ["Completed", "done"], rejected: ["Rejected", "rejected"], approved: ["Approved", "accepted"], cancelled: ["Cancelled", "rejected"] };
+    const chip = t.status === "completed" ? (t.kind === "withdraw" ? '<span class="st done">Completed</span>' : "") : (STN[t.status] ? `<span class="st ${STN[t.status][1]}">${STN[t.status][0]}</span>` : "");
     return `<div class="tx"><span class="ti" style="background:${ic[1]}">${ic[0]}</span>
       <div class="mid"><b>${title}${chip}</b><small>${esc(t.sub || a.sym)}</small></div>
-      <div class="rt"><b class="${t.status === "pending" || out ? "neg" : "pos"}">${out ? "-" : "+"} ${fmtAmt(t.amount, a)} ${a.sym}</b><small>${date}</small></div></div>`;
+      <div class="rt"><b class="${t.status === "pending" || t.status === "accepted" || out ? "neg" : "pos"}">${out ? "-" : "+"} ${fmtAmt(t.amount, a)} ${a.sym}</b><small>${date}</small></div></div>`;
   }
 
   function render() {
@@ -225,10 +229,10 @@ ${spriteCss}`;
     }).join("");
     const list = (showAll ? txs.slice(0, 30) : txs.slice(0, 3));
     const eyeBtn = `<button class="eye" aria-label="Show or hide balances" onclick="zvwEye()">${hidden ? SV.eyeoff : SV.eye}</button>`;
-    root.innerHTML = `<div class="in">
+    const html = `<div class="in">
       <div class="h0"><button class="bgr" aria-label="Menu" onclick="toast('Menu coming soon')">${SV.burger}</button><span class="dv"></span><i class="s-zlogo"></i>
         <div class="wm">ZENVYRO</div><div class="tg">Your Crypto Future</div>
-        <button class="hb" style="left:${u(650)}" aria-label="Notifications" onclick="toast('No new notifications')"><i class="s-bell"></i></button>
+        <button class="hb" style="left:${u(650)}" aria-label="Notifications" onclick="window.zvhBell ? zvhBell() : toast('No new notifications')"><i class="s-bell"></i></button>
         <button class="hb" style="left:${u(745)}" aria-label="Account" onclick="showSection('account')"><i class="s-user"></i></button></div>
       <div class="pg">
         <div class="hero bx"><i class="s-hero"></i>
@@ -255,6 +259,8 @@ ${spriteCss}`;
           <a class="va" onclick="zvwAll()">${showAll ? "Show Less" : "View All"} ${SV.chv}</a>
           ${list.length ? list.map(txRow).join("") : '<div class="empty">No transactions yet</div>'}</div>
       </div></div>`;
+    if (html === lastHtml && root.firstChild) return;   // same picture as before: keep the page as it is
+    lastHtml = html; root.innerHTML = html;
   }
 
   const navBtn = () => Array.from(document.querySelectorAll(".nav button")).find(b => /Wallet/.test(b.textContent));
@@ -412,31 +418,52 @@ ${spriteCss}`;
   }
 
   // ---- Admin (demo test hooks) ----
+  // Finishing a withdrawal: the locked amount leaves the balance and the 30% becomes ZNV in Airdrop Hold. Used when the admin confirms.
+  function finalizeWithdraw(t, priceUsdt) {
+    const h = +t.hold || 0;
+    if (t.holdIn) {   // current rule: the 30% is part of the requested amount; the member gets the rest, the 30% becomes ZNV in Airdrop Hold
+      const px = t.sym === "USDT" ? 1 : (+priceUsdt > 0 ? +priceUsdt : +(W().prices()[t.sym] || 0));
+      if (h > 0 && !(px > 0)) return false;
+      if (!W().debit(t.sym, t.amount)) return false;
+      if (h > 0) { const z = Math.round(h * px / ZENY_USDT * 1e8) / 1e8; holds.ZENY = Math.round(((+holds.ZENY || 0) + z) * 1e8) / 1e8; saveHolds(); t.holdZeny = z; }
+    } else {          // request made under the earlier rule (extra 30% on top)
+      if (!W().debit(t.sym, t.amount + h)) return false;
+      if (h > 0) { holds[t.sym] = Math.round(((+holds[t.sym] || 0) + h) * 1e8) / 1e8; saveHolds(); }
+    }
+    t.status = "completed"; t.completedAt = Date.now();
+    return true;
+  }
   function adminApprove(id, priceUsdt) {
-    const t = txs.find(x => x.id === id && x.status === "pending");
+    txs = loadTx();
+    const t = txs.find(x => x.id === id && (x.status === "pending" || (x.kind === "withdraw" && x.status === "accepted")));
     if (!t || !W()) return false;
     if (t.kind === "deposit") {
       const v = t.sym === "USDT" ? t.amount : t.amount * +priceUsdt;
       if (!(v > 0)) return false;
       W().credit(t.sym, t.amount, v);
+      t.status = "completed";
     } else if (t.kind === "withdraw") {
-      const h = +t.hold || 0;
-      if (t.holdIn) {   // current rule: the 30% is part of the requested amount; the member gets the rest, the 30% becomes ZNV in Airdrop Hold
-        const px = t.sym === "USDT" ? 1 : (+priceUsdt > 0 ? +priceUsdt : +(W().prices()[t.sym] || 0));
-        if (h > 0 && !(px > 0)) return false;
-        if (!W().debit(t.sym, t.amount)) return false;
-        if (h > 0) { const z = Math.round(h * px / ZENY_USDT * 1e8) / 1e8; holds.ZENY = Math.round(((+holds.ZENY || 0) + z) * 1e8) / 1e8; saveHolds(); t.holdZeny = z; }
-      } else {          // request made under the earlier rule (extra 30% on top)
-        if (!W().debit(t.sym, t.amount + h)) return false;
-        if (h > 0) { holds[t.sym] = Math.round(((+holds[t.sym] || 0) + h) * 1e8) / 1e8; saveHolds(); }
-      }
+      if (!finalizeWithdraw(t, priceUsdt)) return false;
     } else return false;
-    t.status = "completed"; saveTx(); render(); return true;
+    saveTx(); render(); return true;
   }
   function adminReject(id) {
-    const t = txs.find(x => x.id === id && x.status === "pending" && (x.kind === "deposit" || x.kind === "withdraw"));
+    txs = loadTx();
+    const t = txs.find(x => x.id === id && (x.kind === "deposit" || x.kind === "withdraw") && (x.status === "pending" || (x.kind === "withdraw" && x.status === "accepted")));
     if (!t) return false;
     t.status = "rejected"; saveTx(); render(); return true; // a withdraw's lock is released automatically
+  }
+  // The admin page (admin-withdraw.js) moves a request: pending -> accepted -> confirmed, or rejected. The amount stays locked until "confirmed";
+  // here the member app then finishes it (balance, Airdrop Hold) and the member sees "Completed". Demo: both pages share this browser's localStorage.
+  function applyWithdrawals(retry) {
+    if (!W()) return;
+    const fresh = loadTx(); let n = 0, wait = false;
+    fresh.forEach(t => { if (t.kind === "withdraw" && t.status === "confirmed") { if (finalizeWithdraw(t)) n++; else wait = true; } });
+    const same = JSON.stringify(fresh) === JSON.stringify(txs);
+    txs = fresh;
+    if (n) { saveTx(); say(n > 1 ? n + " withdrawals completed" : "Your withdrawal is completed"); }
+    if (n || !same) render();
+    if (wait && (retry || 0) < 3 && W().ensurePrices) W().ensurePrices().then(() => setTimeout(() => applyWithdrawals((retry || 0) + 1), 1200)).catch(() => {});
   }
 
   // A transfer cancelled by the admin is returned to the sender here.
@@ -460,6 +487,7 @@ ${spriteCss}`;
   }
   function init() {
     setTimeout(applyDeposits, 600); addEventListener("storage", applyDeposits); document.addEventListener("visibilitychange", () => { if (!document.hidden) applyDeposits(); });
+    setTimeout(applyWithdrawals, 700); addEventListener("storage", () => applyWithdrawals()); document.addEventListener("visibilitychange", () => { if (!document.hidden) applyWithdrawals(); });
     setTimeout(applyRefunds, 400); addEventListener("storage", applyRefunds); document.addEventListener("visibilitychange", () => { if (!document.hidden) applyRefunds(); });
     Object.assign(window, {
       zvwClose: closeWallet,
@@ -478,7 +506,7 @@ ${spriteCss}`;
     window.ZenvyroWalletInfo = { avail: availAmt };
     window.ZenvyroWalletOps = { assets: ASSETS, withdraw: doWithdraw, transfer: doTransfer, holdOf, holdPct: HOLD_PCT, zenyUsdt: ZENY_USDT, minWdUsd: MIN_WITHDRAW_USD, minTrUsd: MIN_TRANSFER_USD };
     window.ZenvyroWalletAdmin = {
-      list: () => txs.filter(t => t.status === "pending" && (t.kind === "deposit" || t.kind === "withdraw")),
+      list: () => txs.filter(t => (t.status === "pending" || (t.kind === "withdraw" && t.status === "accepted")) && (t.kind === "deposit" || t.kind === "withdraw")),
       approve: adminApprove, reject: adminReject
     };
 

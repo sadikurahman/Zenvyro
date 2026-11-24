@@ -318,7 +318,7 @@
     const value = nfts.reduce((t, i) => t + (+i.paid || 0), 0) + packVal;
     const boost = LVL() ? LVL().boost() : 0, base = RATE[tier] || RATE.Free, total = base * (1 + boost / 100);
     const tx = jget(TXKEY, []), wds = Array.isArray(tx) ? tx.filter(t => t && t.kind === "withdraw" && t.sym === "TRX") : [];
-    const pend = wds.filter(t => t.status === "pending").reduce((a, t) => a + (+t.amount || 0) + (t.holdIn ? 0 : (+t.hold || 0)), 0);
+    const pend = wds.filter(t => ["pending", "accepted", "confirmed"].includes(t.status)).reduce((a, t) => a + (+t.amount || 0) + (t.holdIn ? 0 : (+t.hold || 0)), 0);
     const done = wds.filter(t => t.status === "completed").reduce((a, t) => a + (+t.amount || 0), 0);
     let held = 0; try { held = window.ZenvyroExchange.requests().filter(r => r.status === "pending").reduce((a, r) => a + (+r.zeny || 0), 0); } catch (e) {}
     const AH = window.ZenvyroAirdropHold || { get: () => ({}), pct: 30 }, holds = AH.get(), hZ = +holds.ZENY || 0;

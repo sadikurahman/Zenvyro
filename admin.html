@@ -268,11 +268,12 @@ textarea{min-height:96px;resize:vertical}
 <div class="toast" id="toast"></div>
 
 <script src="zenvyro-api.js"></script>
-<script src="site-settings.js?v=20261114v"></script>
+<script src="site-settings.js?v=20261114w"></script>
 <script src="member-id.js"></script>
 <script src="nft-catalog.js"></script>
 <script src="admin-market.js"></script>
-<script src="admin-deposit.js?v=20261114r"></script>
+<script src="admin-deposit.js?v=20261114w"></script>
+<script src="admin-withdraw.js?v=20261114w"></script>
 <script>
 (() => {
   "use strict";
@@ -296,6 +297,7 @@ textarea{min-height:96px;resize:vertical}
   if (!Array.isArray(st.users) || !st.users.length) st.users = seedUsers();
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
   const log = t => { st.logs.unshift({ t, ts: Date.now() }); st.logs = st.logs.slice(0, 60); save(); };
+  window.ZVAdminLog = log;
   const fmt = { n: v => Math.round(v).toLocaleString("en-US"), m: v => "$" + Math.round(v).toLocaleString("en-US"),
     m2: v => "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) };
   const when = ts => new Date(ts).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false });
@@ -359,14 +361,17 @@ textarea{min-height:96px;resize:vertical}
   }
 
   /* ---- pending requests ---- */
+  const pc = k => (k === "wd" && window.ZVAdminWithdraw ? window.ZVAdminWithdraw.count() : st.pend[k]);   // Withdrawal Requests: the real number
+  window.ZVAdminRenderReq = () => renderReq();
   function renderReq() {
-    $("#rq").innerHTML = ROWS.map(r => `<div class="rq"><div class="bx ${r[3]}"><svg viewBox="0 0 24 24"><use href="#${r[2]}"/></svg></div><span class="n">${r[1]}</span><span class="bd ${st.pend[r[0]] ? "" : "z"}">${st.pend[r[0]]}</span><button class="sm" data-view="${r[0]}">View</button><button class="sm ap" data-appr="${r[0]}" ${st.pend[r[0]] ? "" : "disabled"}>Approve</button></div>`).join("");
+    $("#rq").innerHTML = ROWS.map(r => `<div class="rq"><div class="bx ${r[3]}"><svg viewBox="0 0 24 24"><use href="#${r[2]}"/></svg></div><span class="n">${r[1]}</span><span class="bd ${pc(r[0]) ? "" : "z"}">${pc(r[0])}</span><button class="sm" data-view="${r[0]}">View</button><button class="sm ap" data-appr="${r[0]}" ${pc(r[0]) ? "" : "disabled"}>${r[0] === "wd" ? "Review" : "Approve"}</button></div>`).join("");
   }
   function approve(t) {
     if (!st.pend[t]) return toast("No pending requests");
     st.pend[t]--; const r = ROWS.find(x => x[0] === t); log(r[4] + " request approved"); save(); renderReq(); toast(r[4] + " request approved");
   }
   function reqItems(t) {
+    if (t === "wd" && window.ZVAdminWithdraw) return window.ZVAdminWithdraw.mini();
     const n = Math.min(st.pend[t], 12), r = ROWS.find(x => x[0] === t), seed = { wd: 37, dep: 53, ex: 71 }[t];
     return Array.from({ length: n }, (_, i) => { const id = "ZV-" + (10000 + (seed * (i + 3) * 97) % 89999), amt = 10 + (seed * (i + 5)) % 190;
       return `<div class="li"><div>${id}<small>${r[4]} · $${amt}.00</small></div><button class="sm ap" data-appr2="${t}">Approve</button></div>`; }).join("") || '<div class="li">No pending requests</div>';
@@ -586,7 +591,7 @@ textarea{min-height:96px;resize:vertical}
 
   const PAGES = {
     phase: phasePage, boxes: boxesPage, trf: trfPage, refs: refsPage, refView: viewPage, promo: promoPage, rflags: flagsPage,
-    req: () => ["Pending Requests", ROWS.map(r => `<div class="li" style="font-weight:700">${r[1]}<span class="bd ${st.pend[r[0]] ? "" : "z"}">${st.pend[r[0]]}</span></div>` + reqItems(r[0])).join("")],
+    req: () => ["Pending Requests", ROWS.map(r => `<div class="li" style="font-weight:700">${r[1]}<span class="bd ${pc(r[0]) ? "" : "z"}">${pc(r[0])}</span></div>` + reqItems(r[0])).join("")],
     rep: () => ["Membership Report", `<div class="li"><div>Today's Sales<small>Demo figure</small></div><b>${fmt.m2(data.today)}</b></div><div class="li"><div>This Month<small>Demo figure</small></div><b>${fmt.m2(data.month)}</b></div>` + PACKS.slice(1).map((p, i) => `<div class="li"><div>${p[0]} Pack<small>$${p[1]} · ${[420, 260, 140, 60][i]} active members</small></div><b>$${(p[1] * [420, 260, 140, 60][i]).toLocaleString("en-US")}</b></div>`).join("")],
     ann: () => ["Send Announcement", '<textarea id="annT" maxlength="300" placeholder="Write your announcement"></textarea><button class="pr" id="annS">Send Announcement</button><p class="note">Saved on this device only. Connect the backend to deliver it to users.</p>'],
     mem: () => ["Manage Membership", ""],
@@ -594,8 +599,9 @@ textarea{min-height:96px;resize:vertical}
     log: () => ["Activity Logs", st.logs.length ? st.logs.map(l => `<div class="li"><div>${esc(l.t)}<small>${when(l.ts)}</small></div></div>`).join("") : '<div class="li">No activity yet</div>'],
     usr: () => ["Users", '<input class="in" id="uq" type="search" placeholder="Search by name or ID" autocomplete="off"><div id="ul" style="margin-top:6px">' + userRows("") + '</div><p class="note">Tap a user to ban, unban or send dollars. Sample users until the backend is connected.</p>'],
     txn: () => ["Transactions", [["Deposit", 100], ["Withdraw", 45], ["Exchange", 20], ["Deposit", 50], ["Withdraw", 15], ["Exchange", 8]].map((t, i) => `<div class="li"><div>${t[0]}<small>${when(Date.now() - i * 5400000)}</small></div><b>$${t[1]}.00</b></div>`).join("") + '<p class="note">Sample list. Real transactions appear after the backend is connected.</p>'],
-    menu: () => ["Menu", [["dash", "Dashboard"], ["usr", "Users"], ["txn", "Transactions"], ["set", "Settings"], ["rep", "Reports"], ["mkt", "Market Place"], ["dep", "Deposits"]].map(a => `<div class="li"><a href="#" data-go="${a[0]}">${a[1]}</a></div>`).join("") + '<div class="li"><a href="index.html">Back to Zenvyro app</a></div>'],
+    menu: () => ["Menu", [["dash", "Dashboard"], ["usr", "Users"], ["txn", "Transactions"], ["set", "Settings"], ["rep", "Reports"], ["mkt", "Market Place"], ["dep", "Deposits"], ["wd", "Withdrawals"]].map(a => `<div class="li"><a href="#" data-go="${a[0]}">${a[1]}</a></div>`).join("") + '<div class="li"><a href="index.html">Back to Zenvyro app</a></div>'],
     mkt: () => window.ZVAdminMarket ? window.ZVAdminMarket.page() : ["Market Place", '<div class="li">Market module not loaded</div>'],
+    wd: () => window.ZVAdminWithdraw ? window.ZVAdminWithdraw.page() : ["Withdrawals", '<div class="li">Withdrawal module not loaded</div>'],
     dep: () => window.ZVAdminDeposit ? window.ZVAdminDeposit.page() : ["Deposits", '<div class="li">Deposit module not loaded</div>'],
     me: () => ["Admin Account", '<div class="li"><div>Administrator<small>Full access (demo)</small></div></div><div class="li"><a href="index.html">Back to Zenvyro app</a></div>']
   };
@@ -612,6 +618,7 @@ textarea{min-height:96px;resize:vertical}
     const q = a => e.target.closest(a);
     let b;
     if (adminClick(e)) return;
+    if ((b = q('[data-view="wd"],[data-appr="wd"],[data-appr2="wd"]'))) { open("wd"); return; }   // Withdrawal Requests open the real panel
     if ((b = q("[data-appr]"))) approve(b.dataset.appr);
     else if ((b = q("[data-view]"))) { const r = ROWS.find(x => x[0] === b.dataset.view); show(r[1], reqItems(r[0]), "v" + r[0]); }
     else if ((b = q("[data-appr2]"))) { const t = b.dataset.appr2; approve(t); if ($("#sheet").dataset.k === "req") open("req"); else $("#shB").innerHTML = reqItems(t); }
