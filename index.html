@@ -12,7 +12,7 @@
 </style>  <link rel="stylesheet" href="cooldown-style.css">
 <link rel="stylesheet" href="phase-footer.css">
 <link rel="stylesheet" href="purchase.css">
-<link rel="stylesheet" href="home.css?v=20261114w">
+<link rel="stylesheet" href="home.css?v=20261114x">
 </head>
 <body><div class="app">
 <header class="top zh-top">
@@ -103,7 +103,7 @@
 
 
 </div>
-<nav class="bottom"><div class="nav"><button class="active" onclick="navActive(this)"><span class="ni">⌂</span>Home</button><button onclick="showSection('mining');navActive(this)"><span class="ni">⚒</span>Mining</button><button onclick="showSection('exchange');navActive(this)"><span class="ni">⇄</span>Exchange</button><button onclick="showSection('wallet');navActive(this)"><span class="ni">▱</span>Wallet</button><button onclick="showSection('account');navActive(this)"><span class="ni">♙</span>Account</button></div></nav><div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-head"><h2 id="modalTitle">Membership</h2><button class="close-modal" onclick="closeModal()" aria-label="Close">×</button></div><div id="modalBody"></div></section></div><div class="toast" id="toast" role="status"></div>
+<nav class="bottom"><div class="nav"><button class="active" onclick="navActive(this)"><span class="ni">⌂</span>Home</button><button onclick="showSection('tasks');navActive(this)"><span class="ni"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="display:block" aria-hidden="true"><rect x="4" y="3.5" width="16" height="17" rx="3"/><path d="M8.5 9l1.6 1.6L13 7.7M8.5 15h7M8.5 12.2h3"/></svg></span>Tasks</button><button onclick="showSection('exchange');navActive(this)"><span class="ni">⇄</span>Exchange</button><button onclick="showSection('wallet');navActive(this)"><span class="ni">▱</span>Wallet</button><button onclick="showSection('account');navActive(this)"><span class="ni">♙</span>Account</button></div></nav><div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-head"><h2 id="modalTitle">Membership</h2><button class="close-modal" onclick="closeModal()" aria-label="Close">×</button></div><div id="modalBody"></div></section></div><div class="toast" id="toast" role="status"></div>
 <script>let active=false,secs=0,coins=0,timer;function toast(t){let e=document.getElementById('toast');e.textContent=t;e.classList.add('show');clearTimeout(timer);timer=setTimeout(()=>e.classList.remove('show'),2300)}function toggleMining(){active=!active;document.getElementById('startBtn').innerHTML=active?'Ⅱ &nbsp; Pause Mining':'▶ &nbsp; Start Mining';toast(active?'Mining session started':'Mining session paused')}function fmt(s){return [Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(n=>String(n).padStart(2,'0')).join(':')}setInterval(()=>{if(!active)return;secs++;coins+=.000012;document.getElementById('time').textContent=fmt(secs);document.getElementById('reward').textContent=coins.toFixed(4);document.getElementById('coinBalance').textContent=coins.toFixed(4);document.getElementById('power').innerHTML='12.48 <em>GH/s</em>';document.getElementById('hash').innerHTML='12.48 <em>GH/s</em>';let p=Math.min(100,secs/86400*100);document.getElementById('progressText').textContent=Math.floor(p)+'%';document.getElementById('progressBar').style.width=p+'%'},1000);function navActive(el){document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));el.classList.add('active')}
 function closeModal(){document.getElementById('modalBackdrop').classList.remove('open')}
 function openModal(title,body){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=body;document.getElementById('modalBackdrop').classList.add('open')}
@@ -126,30 +126,31 @@ function showSection(name){
 function selectPack(name,price){closeModal();toast(name==='Free Pack'?'Free Pack selected':`${name} selected (${price}). Payment is not connected.`)}
 function walletAction(action){toast(action+' is not available until payment integration is configured')}
 function copyReferral(){const code='ZENV-NEW-MEMBER';if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>toast('Referral code copied')).catch(()=>toast('Referral code: '+code))}else{toast('Referral code: '+code)}}
-</script>  <script src="countries.js?v=20261114w" defer></script>
-<script src="member-id.js?v=20261114w" defer></script>
-<script src="site-settings.js?v=20261114w" defer></script>
-<script src="legal.js?v=20261114w" defer></script>
-<script src="auth.js?v=20261114w" defer></script>
-<script src="cooldown.js?v=20261114w" defer></script>
-<script src="phase-footer.js?v=20261114w" defer></script>
-<script src="zenvyro-api.js?v=20261114w" defer></script>
-<script src="purchase.js?v=20261114w" defer></script>
-<script src="mining.js?v=20261114w" defer></script>
-<script src="referral.js?v=20261114w" defer></script>
-<script src="exchange.js?v=20261114w" defer></script>
-<script src="wallet.js?v=20261114w" defer></script>
-<script src="deposit.js?v=20261114w" defer></script>
-<script src="withdraw.js?v=20261114w" defer></script>
-<script src="transfer.js?v=20261114w" defer></script>
-<script src="notify.js?v=20261114w" defer></script>
-<script src="home.js?v=20261114w" defer></script>
-<script src="warm.js?v=20261114w" defer></script>
-<script src="account.js?v=20261114w" defer></script>
-<script src="levels.js?v=20261114w" defer></script>
-<script src="nft-catalog.js?v=20261114w" defer></script>
-<script src="market.js?v=20261114w" defer></script>
-<script src="leaderboard.js?v=20261114w" defer></script>
+</script>  <script src="countries.js?v=20261114x" defer></script>
+<script src="member-id.js?v=20261114x" defer></script>
+<script src="site-settings.js?v=20261114x" defer></script>
+<script src="legal.js?v=20261114x" defer></script>
+<script src="auth.js?v=20261114x" defer></script>
+<script src="cooldown.js?v=20261114x" defer></script>
+<script src="phase-footer.js?v=20261114x" defer></script>
+<script src="zenvyro-api.js?v=20261114x" defer></script>
+<script src="purchase.js?v=20261114x" defer></script>
+<script src="mining.js?v=20261114x" defer></script>
+<script src="referral.js?v=20261114x" defer></script>
+<script src="exchange.js?v=20261114x" defer></script>
+<script src="wallet.js?v=20261114x" defer></script>
+<script src="deposit.js?v=20261114x" defer></script>
+<script src="withdraw.js?v=20261114x" defer></script>
+<script src="transfer.js?v=20261114x" defer></script>
+<script src="notify.js?v=20261114x" defer></script>
+<script src="tasks.js?v=20261114x" defer></script>
+<script src="home.js?v=20261114x" defer></script>
+<script src="warm.js?v=20261114x" defer></script>
+<script src="account.js?v=20261114x" defer></script>
+<script src="levels.js?v=20261114x" defer></script>
+<script src="nft-catalog.js?v=20261114x" defer></script>
+<script src="market.js?v=20261114x" defer></script>
+<script src="leaderboard.js?v=20261114x" defer></script>
 <script>
 /* Home quick buttons: Update News, Community, Invite, Leaderboard (no backend -> nothing is invented) */
 (function(){

@@ -268,12 +268,12 @@ textarea{min-height:96px;resize:vertical}
 <div class="toast" id="toast"></div>
 
 <script src="zenvyro-api.js"></script>
-<script src="site-settings.js?v=20261114w"></script>
+<script src="site-settings.js?v=20261114x"></script>
 <script src="member-id.js"></script>
 <script src="nft-catalog.js"></script>
 <script src="admin-market.js"></script>
-<script src="admin-deposit.js?v=20261114w"></script>
-<script src="admin-withdraw.js?v=20261114w"></script>
+<script src="admin-deposit.js?v=20261114x"></script>
+<script src="admin-withdraw.js?v=20261114x"></script>
 <script>
 (() => {
   "use strict";
@@ -361,10 +361,10 @@ textarea{min-height:96px;resize:vertical}
   }
 
   /* ---- pending requests ---- */
-  const pc = k => (k === "wd" && window.ZVAdminWithdraw ? window.ZVAdminWithdraw.count() : st.pend[k]);   // Withdrawal Requests: the real number
+  const pc = k => (k === "wd" && window.ZVAdminWithdraw ? window.ZVAdminWithdraw.count() : k === "dep" && window.ZVAdminDeposit ? window.ZVAdminDeposit.count() : st.pend[k]);   // Withdrawal and Deposit Requests: the real numbers
   window.ZVAdminRenderReq = () => renderReq();
   function renderReq() {
-    $("#rq").innerHTML = ROWS.map(r => `<div class="rq"><div class="bx ${r[3]}"><svg viewBox="0 0 24 24"><use href="#${r[2]}"/></svg></div><span class="n">${r[1]}</span><span class="bd ${pc(r[0]) ? "" : "z"}">${pc(r[0])}</span><button class="sm" data-view="${r[0]}">View</button><button class="sm ap" data-appr="${r[0]}" ${pc(r[0]) ? "" : "disabled"}>${r[0] === "wd" ? "Review" : "Approve"}</button></div>`).join("");
+    $("#rq").innerHTML = ROWS.map(r => `<div class="rq"><div class="bx ${r[3]}"><svg viewBox="0 0 24 24"><use href="#${r[2]}"/></svg></div><span class="n">${r[1]}</span><span class="bd ${pc(r[0]) ? "" : "z"}">${pc(r[0])}</span><button class="sm" data-view="${r[0]}">View</button><button class="sm ap" data-appr="${r[0]}" ${pc(r[0]) ? "" : "disabled"}>${r[0] === "wd" || r[0] === "dep" ? "Review" : "Approve"}</button></div>`).join("");
   }
   function approve(t) {
     if (!st.pend[t]) return toast("No pending requests");
@@ -372,6 +372,7 @@ textarea{min-height:96px;resize:vertical}
   }
   function reqItems(t) {
     if (t === "wd" && window.ZVAdminWithdraw) return window.ZVAdminWithdraw.mini();
+    if (t === "dep" && window.ZVAdminDeposit) return window.ZVAdminDeposit.mini();
     const n = Math.min(st.pend[t], 12), r = ROWS.find(x => x[0] === t), seed = { wd: 37, dep: 53, ex: 71 }[t];
     return Array.from({ length: n }, (_, i) => { const id = "ZV-" + (10000 + (seed * (i + 3) * 97) % 89999), amt = 10 + (seed * (i + 5)) % 190;
       return `<div class="li"><div>${id}<small>${r[4]} · $${amt}.00</small></div><button class="sm ap" data-appr2="${t}">Approve</button></div>`; }).join("") || '<div class="li">No pending requests</div>';
@@ -618,7 +619,7 @@ textarea{min-height:96px;resize:vertical}
     const q = a => e.target.closest(a);
     let b;
     if (adminClick(e)) return;
-    if ((b = q('[data-view="wd"],[data-appr="wd"],[data-appr2="wd"]'))) { open("wd"); return; }   // Withdrawal Requests open the real panel
+    if ((b = q('[data-view="wd"],[data-appr="wd"],[data-appr2="wd"],[data-view="dep"],[data-appr="dep"],[data-appr2="dep"]'))) { open(b.dataset.view || b.dataset.appr || b.dataset.appr2); return; }   // Withdrawal and Deposit Requests open the real panels
     if ((b = q("[data-appr]"))) approve(b.dataset.appr);
     else if ((b = q("[data-view]"))) { const r = ROWS.find(x => x[0] === b.dataset.view); show(r[1], reqItems(r[0]), "v" + r[0]); }
     else if ((b = q("[data-appr2]"))) { const t = b.dataset.appr2; approve(t); if ($("#sheet").dataset.k === "req") open("req"); else $("#shB").innerHTML = reqItems(t); }

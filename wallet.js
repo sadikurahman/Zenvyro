@@ -205,8 +205,8 @@ ${spriteCss}`;
     const title = { deposit: "Deposit", withdraw: "Withdraw", exchange: "Exchange", transfer: "Transfer" }[t.kind] || t.kind;
     const out = t.kind === "withdraw" || (t.kind === "transfer" && t.dir === "out");
     const date = new Date(t.ts).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-    const STN = { pending: ["Pending", "pending"], accepted: ["Accepted", "accepted"], confirmed: ["Completed", "done"], rejected: ["Rejected", "rejected"], approved: ["Approved", "accepted"], cancelled: ["Cancelled", "rejected"] };
-    const chip = t.status === "completed" ? (t.kind === "withdraw" ? '<span class="st done">Completed</span>' : "") : (STN[t.status] ? `<span class="st ${STN[t.status][1]}">${STN[t.status][0]}</span>` : "");
+    const STN = { pending: ["Pending", "pending"], accepted: ["Accepted", "accepted"], confirmed: ["Completed", "done"], rejected: ["Rejected", "rejected"], approved: ["Completed", "done"], cancelled: ["Cancelled", "rejected"] };
+    const chip = t.status === "completed" ? (t.kind === "withdraw" || t.kind === "deposit" ? '<span class="st done">Completed</span>' : "") : (STN[t.status] ? `<span class="st ${STN[t.status][1]}">${STN[t.status][0]}</span>` : "");
     return `<div class="tx"><span class="ti" style="background:${ic[1]}">${ic[0]}</span>
       <div class="mid"><b>${title}${chip}</b><small>${esc(t.sub || a.sym)}</small></div>
       <div class="rt"><b class="${t.status === "pending" || t.status === "accepted" || out ? "neg" : "pos"}">${out ? "-" : "+"} ${fmtAmt(t.amount, a)} ${a.sym}</b><small>${date}</small></div></div>`;

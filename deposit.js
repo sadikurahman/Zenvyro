@@ -127,7 +127,7 @@ background:radial-gradient(ellipse ${u(560)} ${u(360)} at 100% 0,#4a1fb0aa,trans
 #zvDp .hr .md b{display:block;font-size:${u(26)};line-height:${u(32)};font-weight:700}
 #zvDp .hr .md small{display:block;font-size:${u(20)};line-height:${u(28)};color:#a89ce8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #zvDp .hr .rs{font-size:${u(22)};font-weight:700;white-space:nowrap;margin-left:${u(10)};color:#7dff9a}
-#zvDp .hr .rs.pe{color:#ffc24a}#zvDp .hr .rs.rj{color:#ff7a90}
+#zvDp .hr .rs.pe{color:#ffc24a}#zvDp .hr .rs.ac{color:#6ab8ff}#zvDp .hr .rs.rj{color:#ff7a90}
 #zvDp .nt{margin:${u(24)} ${u(20)} 0;font-size:${u(21)};line-height:${u(30)};color:#8f86c8}
 ${spr}`;
     document.head.appendChild(st);
@@ -192,7 +192,7 @@ ${spr}`;
     $("dpNote").innerHTML = (n.k === "TRX" ? "Send only <b>TRX</b> to this address." : `Send only <b>${n.coin}</b> on the ${esc(n.name)} network to this address.`) + "<br>Sending other assets may result in permanent loss of funds.";
     paintSend();
   }
-  function statusOf(t) { return t.status === "pending" ? ["Pending", "pe"] : t.status === "rejected" ? ["Rejected", "rj"] : ["Completed", ""]; }
+  function statusOf(t) { return t.status === "pending" ? ["Pending", "pe"] : t.status === "accepted" ? ["Accepted", "ac"] : t.status === "rejected" ? ["Rejected", "rj"] : ["Completed", ""]; }
   function paintHist() {
     const el = $("dpHist"); if (!el) return;
     const list = txList().filter(t => t && t.kind === "deposit").sort((a, b) => (b.ts || 0) - (a.ts || 0));

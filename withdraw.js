@@ -79,6 +79,36 @@ background:radial-gradient(ellipse ${u(700)} ${u(500)} at 100% 0,#3a14a0aa,trans
 #zvWd .nt{left:${u(62)};top:${u(1322)};width:${u(902)};height:${u(146)};border-radius:${u(34)};background:linear-gradient(90deg,#140346,#110340);--bd:linear-gradient(135deg,#6a3ae0,#2a1590 50%,#5a2ed0)}
 #zvWd .zt{position:fixed;left:50%;bottom:calc(36px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:88vw;background:#211747;border:1px solid #6e42cc;color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;line-height:1.4;text-align:center;z-index:20;display:none}
 #zvWd .zt.show{display:block}
+#zvWd .wo{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:0 ${u(30)};background:rgba(5,1,24,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:woIn .25s ease both}
+#zvWd .wo-c{width:min(100%,${u(420)});text-align:center;color:#fff}
+#zvWd .wo-orb{position:relative;width:${u(150)};height:${u(150)};margin:0 auto ${u(26)};display:grid;place-items:center}
+#zvWd .wo-orb i{position:absolute;inset:0;border-radius:50%;border:${u(3)} solid transparent;border-top-color:#b46bff;border-right-color:#6a3ce8;animation:woSpin 1.1s linear infinite}
+#zvWd .wo-orb i:nth-child(2){inset:${u(16)};border-top-color:#ff7ad8;border-right-color:transparent;border-left-color:#7a4aff;animation-duration:1.6s;animation-direction:reverse}
+#zvWd .wo-orb i:nth-child(3){inset:${u(32)};border:0;background:radial-gradient(circle,#7a3cff55,transparent 70%);animation:woPulse 1.2s ease-in-out infinite}
+#zvWd .wo-orb b{position:relative;display:grid;place-items:center;width:${u(64)};height:${u(64)};border-radius:50%;background:linear-gradient(135deg,#e03ffc,#6a2cf8 60%,#4e82fc);box-shadow:0 0 ${u(30)} #8a3dffaa;animation:woFloat 1.6s ease-in-out infinite}
+#zvWd .wo-orb b svg{width:${u(30)};height:${u(29)}}
+#zvWd .wo h3{margin:0;font-size:${u(22)};font-weight:800;letter-spacing:-.2px}
+#zvWd .wo p{margin:${u(10)} auto 0;max-width:${u(320)};font-size:max(13px,${u(14)});line-height:1.45;color:#cfc8ee}
+#zvWd .wo-bar{width:${u(220)};height:${u(6)};margin:${u(22)} auto 0;border-radius:99px;background:#1c1260;overflow:hidden}
+#zvWd .wo-bar i{display:block;height:100%;width:100%;border-radius:99px;background:linear-gradient(90deg,#8d42ff,#e060f8);transform-origin:left;animation:woBar 2.5s cubic-bezier(.4,0,.2,1) both}
+#zvWd .wo-ok{padding:${u(26)} ${u(20)} ${u(20)};border-radius:${u(26)};background:linear-gradient(160deg,#1a0a68,#0a0232 70%);border:1px solid #7a4ae8;box-shadow:0 0 ${u(40)} #7a3cff66;animation:woPop .45s cubic-bezier(.2,1.2,.3,1) both}
+#zvWd .wo-chk{width:${u(92)};height:${u(92)};display:block;margin:0 auto ${u(14)}}
+#zvWd .wo-chk circle{fill:#0d5a44;stroke:#2ee8a8;stroke-width:3;stroke-dasharray:226;stroke-dashoffset:226;animation:woDraw .6s ease forwards}
+#zvWd .wo-chk path{fill:none;stroke:#fff;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:60;stroke-dashoffset:60;animation:woDraw .45s .5s ease forwards}
+#zvWd .wo-rows{margin:${u(16)} 0 ${u(14)};border-radius:${u(16)};background:#0a0436;border:1px solid #3a2a88;text-align:left}
+#zvWd .wo-rows div{display:flex;justify-content:space-between;gap:12px;padding:${u(11)} ${u(14)};font-size:max(12px,${u(13)})}
+#zvWd .wo-rows div+div{border-top:1px solid #2a1f66}
+#zvWd .wo-rows span{color:#b7a7f0}#zvWd .wo-rows b{font-weight:700;text-align:right}
+#zvWd .wo-rows .pd{color:#ffc24a}
+#zvWd .wo-btn{width:100%;height:${u(48)};border:0;border-radius:99px;background:linear-gradient(90deg,#e03ffc,#8c20fb 50%,#4e82fc);color:#fff;font-size:max(15px,${u(16)});font-weight:700;box-shadow:0 0 ${u(24)} #8a3dff77}
+@keyframes woIn{from{opacity:0}to{opacity:1}}
+@keyframes woSpin{to{transform:rotate(360deg)}}
+@keyframes woPulse{0%,100%{transform:scale(.8);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+@keyframes woFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes woBar{from{transform:scaleX(.04)}to{transform:scaleX(1)}}
+@keyframes woDraw{to{stroke-dashoffset:0}}
+@keyframes woPop{from{opacity:0;transform:scale(.88) translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#zvWd .wo-orb i,#zvWd .wo-orb b,#zvWd .wo-orb i:nth-child(3){animation:none}}
 ${spr}`;
     document.head.appendChild(st);
   }
@@ -163,20 +193,50 @@ ${spr}`;
   }
   function close() {
     const ov = $("zvWd"); if (!ov) return;
+    if ($("wdOv")) { clearInterval($("wdOv")._iv); }
     const v = getVals(); ov.remove();
     if (v.addr || v.amt) saveDraft(false); else clearDraft();
   }
 
+  /* ---- submit animation (2 to 3 seconds) and the success popup ---- */
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  let ovAt = 0;
+  function showBusy() {
+    const root = $("zvWd"); if (!root || $("wdOv")) return;
+    const d = document.createElement("div"); d.id = "wdOv"; d.className = "wo";
+    d.innerHTML = `<div class="wo-c"><div class="wo-orb"><i></i><i></i><i></i><b>${SV.up}</b></div><h3>Submitting request</h3><p id="wdBusyTx">Checking your balance…</p><div class="wo-bar"><i></i></div></div>`;
+    root.appendChild(d); ovAt = Date.now();
+    const steps = ["Checking your balance…", "Locking your amount…", "Sending to review…"]; let i = 0;
+    d._iv = setInterval(() => { i = Math.min(steps.length - 1, i + 1); const p = $("wdBusyTx"); if (p) p.textContent = steps[i]; }, 850);
+  }
+  function hideOv() { const d = $("wdOv"); if (d) { clearInterval(d._iv); d.remove(); } }
+  function showDone(sym, amt) {
+    const d = $("wdOv"); if (!d) return; clearInterval(d._iv);
+    const a = asset(sym), n = dp(a), h = ops().holdOf(amt), rc = amt - h;
+    d.innerHTML = `<div class="wo-c wo-ok"><svg class="wo-chk" viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="36"/><path d="M24 41l11 11 21-24"/></svg><h3>Request submitted</h3>
+      <p>Your withdrawal is now <b>Pending</b>. We will tell you when it is accepted and when it is completed.</p>
+      <div class="wo-rows"><div><span>Amount</span><b>${amt.toFixed(n)} ${a.sym}</b></div><div><span>You receive (${100 - ops().holdPct}%)</span><b>${rc.toFixed(n)} ${a.sym}</b></div><div><span>Airdrop Hold (${ops().holdPct}%)</span><b>as ZNV</b></div><div><span>Status</span><b class="pd">Pending</b></div></div>
+      <button class="wo-btn" onclick="zvWdDone()">Done</button></div>`;
+  }
+  function done() { const a = $("wdAddr"), m = $("wdAmt"); if (a) a.value = ""; if (m) m.value = ""; const ov = $("zvWd"); if (ov) ov.remove(); clearDraft(); }
+
   async function submit() {
     if (busy || !$("zvWd")) return;
-    const v = getVals(), btn = $("wdSubmit"); busy = true; btn.disabled = true;
+    const v = getVals(), btn = $("wdSubmit"), sym = cur, amt = parseFloat(v.amt);
+    busy = true; btn.disabled = true;
+    const calm = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches), MIN = calm ? 900 : 2600;
+    const tm = setTimeout(showBusy, 140);   // a quick "invalid address / amount" answer shows no animation at all
     try {
-      const msg = await ops().withdraw(cur, v.addr.trim(), parseFloat(v.amt));
-      if (msg === "__blocked") return;
-      if (msg) { say(msg); return; }
-      clearDraft(); const ov = $("zvWd"); if (ov) ov.remove();
-      if (typeof window.toast === "function") window.toast("Withdraw request sent");
-    } catch (e) { say("Something went wrong. Please try again."); }
+      const msg = await ops().withdraw(sym, v.addr.trim(), amt);
+      clearTimeout(tm);
+      if (msg === "__blocked") { hideOv(); return; }
+      if (msg) { hideOv(); say(msg); return; }
+      if (!$("wdOv")) showBusy();
+      clearDraft();                                   // the request is in: a reload must not bring the form back
+      { const fa = $("wdAddr"), fm = $("wdAmt"); if (fa) fa.value = ""; if (fm) fm.value = ""; }
+      await sleep(Math.max(0, MIN - (Date.now() - ovAt)));
+      showDone(sym, amt);
+    } catch (e) { clearTimeout(tm); hideOv(); say("Something went wrong. Please try again."); }
     finally { busy = false; const b = $("wdSubmit"); if (b) b.disabled = false; }
   }
 
@@ -190,7 +250,7 @@ ${spr}`;
       zvWdIn: () => { breakdown(); saveDraft(true); },
       zvWdMax: () => { const a = asset(cur), av = window.ZenvyroWalletInfo.avail(cur); $("wdAmt").value = av > 0 ? av.toFixed(dp(a)) : ""; breakdown(); saveDraft(true); },
       zvWdScan: () => say("QR scanning is coming soon. Paste the address instead."),
-      zvWdSubmit: submit
+      zvWdSubmit: submit, zvWdDone: done
     });
     addEventListener("storage", () => { if ($("zvWd")) paint(); });
     document.addEventListener("visibilitychange", () => { if (!document.hidden && $("zvWd")) paint(); });

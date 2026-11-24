@@ -2,7 +2,7 @@
    The member app (wallet.js) adds the TRX to the member's Wallet once a request is set to "approved". */
 (() => {
   "use strict";
-  const CFG = "zenvyro_deposit_cfg_v1", TX = "zenvyro_tx_v1";
+  const CFG = "zenvyro_deposit_cfg_v1", TX = "zenvyro_tx_v1", NK = "zenvyro_notifs_v1";
   const NETS = [["TRX", "TRX", "TRON"], ["SOL", "SOL", "Solana"], ["BNB", "BNB", "BNB Chain"]];
   const $ = s => document.querySelector(s);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -17,18 +17,24 @@
 
   function reqHtml() {
     const all = jg(TX, []).filter(t => t && t.kind === "deposit").sort((a, b) => (b.ts || 0) - (a.ts || 0));
-    const pend = all.filter(t => t.status === "pending"), done = all.filter(t => t.status !== "pending").slice(0, 10);
+    const pend = all.filter(t => t.status === "pending"), acc = all.filter(t => t.status === "accepted"), done = all.filter(t => t.status !== "pending" && t.status !== "accepted").slice(0, 10);
     const row = (t, act) => {
       const via = t.net ? `${esc(t.netName || t.net)} · sent ${num(t.sendAmount)} ${esc(t.sendCoin || "")}` : esc(t.sub || "");
-      const st = t.status === "rejected" ? ["Rejected", "bad"] : t.status === "pending" ? ["Pending", ""] : ["Approved", "ok"];
+      const st = t.status === "rejected" ? ["Rejected", "bad"] : t.status === "pending" ? ["Pending", ""] : t.status === "accepted" ? ["Accepted", "ok"] : ["Completed", "ok"];
+      const btn = act === "p" ? `<div class="bg" style="grid-template-columns:1fr 1fr;margin-top:8px"><button class="sm ap" data-dp="acc" data-id="${esc(t.id)}">Accept</button><button class="sm red" data-dp="no" data-id="${esc(t.id)}">Reject</button></div>`
+        : act === "a" ? `<div class="bg" style="grid-template-columns:1fr 1fr;margin-top:8px"><button class="sm ap" data-dp="ok" data-id="${esc(t.id)}">Confirm (Completed)</button><button class="sm red" data-dp="no" data-id="${esc(t.id)}">Reject</button></div>` : "";
       return `<div class="li" style="display:block"><div><b>+${num(t.credit || t.amount)} ${esc(t.sym || "TRX")}</b> <span class="tag ${st[1]}">${st[0]}</span><small>${via}<br>${when(t.ts || Date.now())} · ${esc(t.id)}</small>` +
-        `<small style="word-break:break-all;color:#cfc4ff">TXID: ${esc(t.txid || "—")}</small></div>` +
-        (act ? `<div class="bg" style="grid-template-columns:1fr 1fr;margin-top:8px"><button class="sm ap" data-dp="ok" data-id="${esc(t.id)}">Approve</button><button class="sm red" data-dp="no" data-id="${esc(t.id)}">Reject</button></div>` : "") + "</div>";
+        `<small style="word-break:break-all;color:#cfc4ff">TXID: ${esc(t.txid || "—")}</small></div>${btn}</div>`;
     };
-    return head() + `<p class="sub">Pending (${pend.length})</p>` + (pend.length ? pend.map(t => row(t, true)).join("") : '<div class="li">No pending deposit requests</div>') +
-      (done.length ? '<p class="sub">Recent decisions</p>' + done.map(t => row(t, false)).join("") : "") +
-      '<p class="note">Check the TXID on the blockchain before you approve. Approve adds the TRX to the member\'s Wallet (you can change the amount). Requests and decisions are saved on this device for now. They reach real members once the backend is connected.</p>';
+    return head() + `<p class="sub">Pending (${pend.length})</p>` + (pend.length ? pend.map(t => row(t, "p")).join("") : '<div class="li">No pending deposit requests</div>') +
+      `<p class="sub">Accepted, waiting for your confirmation (${acc.length})</p>` + (acc.length ? acc.map(t => row(t, "a")).join("") : '<div class="li">None</div>') +
+      (done.length ? '<p class="sub">Recent decisions</p>' + done.map(t => row(t, "")).join("") : "") +
+      '<p class="note">Check the TXID on the blockchain. Accept shows "Accepted" to the member. When the coins have really arrived, press Confirm: you can change the amount, the member sees "Completed", the TRX is added to the Wallet and a notification message is sent. Requests and decisions are saved on this device for now. They reach real members once the backend is connected.</p>';
   }
+  const dcount = () => jg(TX, []).filter(t => t && t.kind === "deposit" && (t.status === "pending" || t.status === "accepted")).length;
+  const dmini = () => { const o = jg(TX, []).filter(t => t && t.kind === "deposit" && (t.status === "pending" || t.status === "accepted")).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 8);
+    return o.length ? o.map(t => `<div class="li"><div>${esc(t.id)}<small>Deposit · ${num(t.amount)} ${esc(t.sym || "TRX")} · ${t.status === "accepted" ? "Accepted" : "Pending"}</small></div><button class="sm ap" data-appr2="dep">Open</button></div>`).join("") : '<div class="li">No pending requests</div>'; };
+  const notice = (t, amt) => { const n = jg(NK, []); n.unshift({ id: "N" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ts: Date.now(), read: false, kind: "deposit", ref: t.id, title: "Deposit completed", text: "Your deposit " + t.id + " is completed. " + num(amt) + " " + (t.sym || "TRX") + " was added to your Wallet." }); try { localStorage.setItem(NK, JSON.stringify(n.slice(0, 100))); } catch (e) {} };
 
   function setHtml() {
     const c = jg(CFG, {});
@@ -63,24 +69,38 @@
     }; im.onerror = () => toast("Could not read that image"); im.src = r.result; };
     r.readAsDataURL(file);
   }
-  function decide(id, ok) {
-    const list = jg(TX, []), t = list.find(x => x && x.id === id && x.kind === "deposit" && x.status === "pending"); if (!t) return toast("Already decided");
-    if (ok) {
+  function decide(id, act) {
+    const list = jg(TX, []), t = list.find(x => x && x.id === id && x.kind === "deposit"); if (!t) return toast("Request not found");
+    let amt = 0;
+    if (act === "acc") {
+      if (t.status !== "pending") return toast("Already decided");
+      if (!confirm("Accept this deposit request?\nThe member will see Accepted.")) return;
+      t.status = "accepted"; t.acceptedAt = Date.now();
+    } else if (act === "ok") {
+      if (t.status !== "accepted") return toast("Accept it first");
       const v = prompt("TRX to add to the member's Wallet", num(t.amount)); if (v === null) return;
-      const amt = parseFloat(v); if (!(amt > 0) || amt > 1e9) return toast("Enter a valid amount");
-      t.credit = amt; t.creditUsdt = t.usdt && t.amount > 0 ? Math.round(t.usdt * amt / t.amount * 100) / 100 : 0; t.status = "approved";
-    } else { if (!confirm("Reject this deposit request?")) return; t.status = "rejected"; }
+      amt = parseFloat(v); if (!(amt > 0) || amt > 1e9) return toast("Enter a valid amount");
+      t.credit = amt; t.creditUsdt = t.usdt && t.amount > 0 ? Math.round(t.usdt * amt / t.amount * 100) / 100 : 0; t.status = "approved"; t.confirmedAt = Date.now();
+    } else {
+      if (t.status !== "pending" && t.status !== "accepted") return toast("Already decided");
+      if (!confirm("Reject this deposit request?")) return; t.status = "rejected";
+    }
     t.reviewed = Date.now();
     try { localStorage.setItem(TX, JSON.stringify(list)); } catch (e) { return toast("Could not save"); }
-    toast(ok ? "Approved. The TRX is added when the member opens the app" : "Rejected"); paint("Deposits", reqHtml());
+    if (act === "ok") notice(t, amt);   // the message reaches the member at the same moment
+    if (typeof window.ZVAdminLog === "function") window.ZVAdminLog("Deposit " + (act === "acc" ? "accepted" : act === "ok" ? "confirmed" : "rejected") + ": " + t.id);
+    toast(act === "acc" ? "Accepted. The member sees Accepted" : act === "ok" ? "Confirmed. The TRX is added when the member opens the app, and a message was sent" : "Rejected"); paint("Deposits", reqHtml());
+    if (typeof window.ZVAdminRenderReq === "function") window.ZVAdminRenderReq();
   }
 
   document.addEventListener("click", e => {
     const b = e.target.closest("[data-dp]"); if (!b) return; const a = b.dataset.dp;
     if (a === "tab") { if (tab === "set") { const c = readInputs(); try { localStorage.setItem(CFG, JSON.stringify(c)); } catch (x) {} } tab = b.dataset.t; paint("Deposits", page()[1]); }
-    else if (a === "save") save(); else if (a === "ok") decide(b.dataset.id, true); else if (a === "no") decide(b.dataset.id, false);
+    else if (a === "save") save(); else if (a === "acc" || a === "ok" || a === "no") decide(b.dataset.id, a);
     else if (a === "rmqr") { qrTmp[b.dataset.net] = ""; const c = readInputs(); try { localStorage.setItem(CFG, JSON.stringify(c)); } catch (x) {} paint("Deposits", setHtml()); toast("QR removed. Press Save to keep this"); }
   });
   document.addEventListener("change", e => { const t = e.target; if (t.id && t.id.startsWith("dpQ_") && t.files[0]) pick(t.files[0], t.dataset.net); });
-  window.ZVAdminDeposit = { page };
+  addEventListener("load", () => { if (typeof window.ZVAdminRenderReq === "function") window.ZVAdminRenderReq(); });
+  addEventListener("storage", e => { if (e.key === TX) { if (typeof window.ZVAdminRenderReq === "function") window.ZVAdminRenderReq(); const sh = $("#sheet"); if (sh && sh.classList.contains("on") && sh.dataset.k === "dep" && tab === "req") paint("Deposits", reqHtml()); } });
+  window.ZVAdminDeposit = { page, count: dcount, mini: dmini };
 })();
